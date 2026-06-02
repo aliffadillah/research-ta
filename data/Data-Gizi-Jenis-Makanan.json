@@ -1,0 +1,392 @@
+[
+  {
+    "Nama Jenis Makanan": "Acar Timun Wortel",
+    "Kandungan Gizi": {
+      "Energi": "38 kkal",
+      "Lemak": "0,3 g",
+      "Protein": "0,6 g",
+      "Karbohidrat": "9 g",
+      "Serat": "0,6 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Anggur",
+    "Kandungan Gizi": {
+      "Energi": "30 kkal",
+      "Lemak": "0,2 g",
+      "Protein": "0,5 g",
+      "Karbohidrat": "6,8 g",
+      "Serat": "1,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Apel",
+    "Kandungan Gizi": {
+      "Energi": "58 kkal",
+      "Lemak": "0,3 g",
+      "Protein": "0,4 g",
+      "Karbohidrat": "14,9 g",
+      "Serat": "2,6 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Ayam Goreng",
+    "Kandungan Gizi": {
+      "Energi": "245 kkal",
+      "Lemak": "33,1 g",
+      "Protein": "11,4 g",
+      "Karbohidrat": "0,3 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Ayam Serundeng",
+    "Kandungan Gizi": {
+      "Energi": "245 kkal",
+      "Lemak": "33,1 g",
+      "Protein": "11,4 g",
+      "Karbohidrat": "0,3 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Bakso Saus BBQ",
+    "Kandungan Gizi": {
+      "Energi": "114 kkal",
+      "Lemak": "3,0 g",
+      "Protein": "5,3 g",
+      "Karbohidrat": "16,4 g",
+      "Serat": "0,1 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Capcay",
+    "Kandungan Gizi": {
+      "Energi": "97 kkal",
+      "Lemak": "6,30 g",
+      "Protein": "5,80 g",
+      "Karbohidrat": "4,20 g",
+      "Serat": "0,60 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Chicken Katsu",
+    "Kandungan Gizi": {
+      "Energi": "358 kkal",
+      "Lemak": "16 g",
+      "Protein": "36 g",
+      "Karbohidrat": "14 g",
+      "Serat": "0,6 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Fla Susu",
+    "Kandungan Gizi": {
+      "Energi": "61 kkal",
+      "Lemak": "3,3 g",
+      "Protein": "3,2 g",
+      "Karbohidrat": "4,3 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Gudeg",
+    "Kandungan Gizi": {
+      "Energi": "160 kkal",
+      "Lemak": "9,2 g",
+      "Protein": "3,3 g",
+      "Karbohidrat": "16,0 g",
+      "Serat": "2,3 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Jagung",
+    "Kandungan Gizi": {
+      "Energi": "142 kkal",
+      "Lemak": "0,70 g",
+      "Protein": "5 g",
+      "Karbohidrat": "30,30 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Jeruk",
+    "Kandungan Gizi": {
+      "Energi": "45 kkal",
+      "Lemak": "0,20 g",
+      "Protein": "0,90 g",
+      "Karbohidrat": "11,20 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Kacang Merah",
+    "Kandungan Gizi": {
+      "Energi": "158 kkal",
+      "Lemak": "0.90 g",
+      "Protein": "10.30 g",
+      "Karbohidrat": "28,20 g",
+      "Serat": "2,60 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Keju",
+    "Kandungan Gizi": {
+      "Energi": "326 kkal",
+      "Lemak": "20,30 g",
+      "Protein": "22,80 g",
+      "Karbohidrat": "13,10 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Kelengkeng",
+    "Kandungan Gizi": {
+      "Energi": "60 kkal",
+      "Lemak": "0,1 g",
+      "Protein": "1,0 g",
+      "Karbohidrat": "15 g",
+      "Serat": "1,1 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Ketimun dan Selada",
+    "Kandungan Gizi": {
+      "Energi": "26 kkal",
+      "Lemak": "0,4 g",
+      "Protein": "1,4 g",
+      "Karbohidrat": "4,3 g",
+      "Serat": "2,1 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Kwetiaw",
+    "Kandungan Gizi": {
+      "Energi": "163 kkal",
+      "Lemak": "0,3 g",
+      "Protein": "2,5 g",
+      "Karbohidrat": "37,5 g",
+      "Serat": "0,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Lele Crispy",
+    "Kandungan Gizi": {
+      "Energi": "372 kkal",
+      "Lemak": "6,3 g",
+      "Protein": "7,8 g",
+      "Karbohidrat": "3,5 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Lontong",
+    "Kandungan Gizi": {
+      "Energi": "216 kkal",
+      "Lemak": "0,5 g",
+      "Protein": "4,5 g",
+      "Karbohidrat": "48 g",
+      "Serat": "0,6 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Mie",
+    "Kandungan Gizi": {
+      "Energi": "102 kkal",
+      "Lemak": "3,9 g",
+      "Protein": "6,2 g",
+      "Karbohidrat": "10,5 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Nasi",
+    "Kandungan Gizi": {
+      "Energi": "180 kkal",
+      "Lemak": "0.30 g",
+      "Protein": "3 g",
+      "Karbohidrat": "39.80 g",
+      "Serat": "0,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Nasi Daun Jeruk",
+    "Kandungan Gizi": {
+      "Energi": "180 kkal",
+      "Lemak": "0.30 g",
+      "Protein": "3 g",
+      "Karbohidrat": "39.80 g",
+      "Serat": "0,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Pepes Tahu",
+    "Kandungan Gizi": {
+      "Energi": "76 kkal",
+      "Lemak": "1,8 g",
+      "Protein": "5,2 g",
+      "Karbohidrat": "10,6 g",
+      "Serat": "2,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Pisang",
+    "Kandungan Gizi": {
+      "Energi": "127 kkal",
+      "Lemak": "0,2 g",
+      "Protein": "1,4 g",
+      "Karbohidrat": "21,0 g",
+      "Serat": "g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Pisang Lampung",
+    "Kandungan Gizi": {
+      "Energi": "99 kkal",
+      "Lemak": "0,2 g",
+      "Protein": "1,3 g",
+      "Karbohidrat": "25,6 g",
+      "Serat": "4,3 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Rolade Asam Manis",
+    "Kandungan Gizi": {
+      "Energi": "406 kkal",
+      "Lemak": "23 g",
+      "Protein": "30 g",
+      "Karbohidrat": "16 g",
+      "Serat": "0,3 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Roti",
+    "Kandungan Gizi": {
+      "Energi": "248 kkal",
+      "Lemak": "1,2 g",
+      "Protein": "0,8 g",
+      "Karbohidrat": "50,0 g",
+      "Serat": "9,1 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Salad Buah",
+    "Kandungan Gizi": {
+      "Energi": "244 kkal",
+      "Lemak": "15,5 g",
+      "Protein": "1,3 g",
+      "Karbohidrat": "29 g",
+      "Serat": "3,5 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Sawi",
+    "Kandungan Gizi": {
+      "Energi": "28 kkal",
+      "Lemak": "0,3 g",
+      "Protein": "2,3 g",
+      "Karbohidrat": "4,0 g",
+      "Serat": "2,5 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Sayur Isi Pepaya",
+    "Kandungan Gizi": {
+      "Energi": "49 kkal",
+      "Lemak": "0,3 g",
+      "Protein": "1,7 g",
+      "Karbohidrat": "9,8 g",
+      "Serat": "2,7 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Semur Ayam Kecap",
+    "Kandungan Gizi": {
+      "Energi": "336 kkal",
+      "Lemak": "20 g",
+      "Protein": "26,5 g",
+      "Karbohidrat": "10 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Tahu",
+    "Kandungan Gizi": {
+      "Energi": "115 kkal",
+      "Lemak": "8,5 g",
+      "Protein": "9,7 g",
+      "Karbohidrat": "2,5 g",
+      "Serat": "0,1 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Tahu Crispy",
+    "Kandungan Gizi": {
+      "Energi": "115 kkal",
+      "Lemak": "8,5 g",
+      "Protein": "9,7 g",
+      "Karbohidrat": "2,5 g",
+      "Serat": "0,1 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Telur",
+    "Kandungan Gizi": {
+      "Energi": "251 kkal",
+      "Lemak": "19,4 g",
+      "Protein": "16,3 g",
+      "Karbohidrat": "1,4 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Telur Semur",
+    "Kandungan Gizi": {
+      "Energi": "251 kkal",
+      "Lemak": "19,4 g",
+      "Protein": "16,3 g",
+      "Karbohidrat": "1,4 g",
+      "Serat": "0 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Tempe Goreng",
+    "Kandungan Gizi": {
+      "Energi": "350 kkal",
+      "Lemak": "26,6 g",
+      "Protein": "24,5 g",
+      "Karbohidrat": "10,4 g",
+      "Serat": "4,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Tempe Sagu",
+    "Kandungan Gizi": {
+      "Energi": "350 kkal",
+      "Lemak": "26,6 g",
+      "Protein": "24,5 g",
+      "Karbohidrat": "10,4 g",
+      "Serat": "4,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Tumis Keciwis",
+    "Kandungan Gizi": {
+      "Energi": "66 kkal",
+      "Lemak": "5,2 g",
+      "Protein": "1,7 g",
+      "Karbohidrat": "3,6 g",
+      "Serat": "1,2 g"
+    }
+  },
+  {
+    "Nama Jenis Makanan": "Tumis Koll Wortel",
+    "Kandungan Gizi": {
+      "Energi": "92 kkal",
+      "Lemak": "5,5 g",
+      "Protein": "1,9 g",
+      "Karbohidrat": "9,3 g",
+      "Serat": "1,7 g"
+    }
+  }
+]

@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  dailyGoal     Json?     // { calories: number, protein: number, carbs: number, fat: number, fiber: number }
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  detections    Detection[]
+  dailyLogs     DailyLog[]
+
+  @@map("users")
+}
+
+model Food {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  calories      Float
+  protein       Float
+  carbs         Float
+  fat           Float
+  fiber         Float
+  portionSize   Float     @default(100)
+  portionUnit   String    @default("g")
+  category      String?
+  imageUrl      String?
+  createdAt     DateTime  @default(now())
+
+  detections    Detection[]
+
+  @@map("foods")
+}
+
+model Detection {
+  id             String    @id @default(cuid())
+  imageUrl       String
+  confidence     Float
+  predictedClass String?   // Class name from ML model
+  mlPrediction   Json?    // Full prediction from model
+  portionSize    Float     @default(100)
+  portionUnit    String    @default("g")
+  detectedAt     DateTime  @default(now())
+
+  userId         String
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  foodId         String?
+  food           Food?     @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  dailyLogId     String?
+  dailyLog       DailyLog? @relation(fields: [dailyLogId], references: [id], onDelete: SetNull)
+
+  @@map("detections")
+}
+
+model DailyLog {
+  id            String       @id @default(cuid())
+  date          DateTime     @db.Date
+  createdAt     DateTime     @default(now())
+
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  detections    Detection[]
+
+  @@unique([userId, date])
+  @@map("daily_logs")
+}
+
+model MenuRecommendation {
+  id              String   @id @default(cuid())
+  name            String    @unique
+  description     String?
+  tanggal         String    // Tanggal menu
+
+  // Porsi Besar
+  caloriesBesar   Float
+  proteinBesar    Float
+  carbsBesar      Float
+  fatBesar        Float
+  fiberBesar      Float
+
+  // Porsi Kecil
+  caloriesKecil   Float
+  proteinKecil    Float
+  carbsKecil      Float
+  fatKecil        Float
+  fiberKecil      Float
+
+  imageUrl        String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("menu_recommendations")
+}
+
+model NutritionStandard {
+  id              String   @id @default(cuid())
+  gender          String   // "bayi_anak", "laki_laki", "perempuan"
+  ageGroup        String   // "0-5 Bulan", "6-11 Bulan", "1-3 Tahun", etc.
+  bodyWeight      Float    // kg
+  bodyHeight      Float    // cm
+  energy          Float    // kcal
+  fat             Float    // g
+  protein         Float    // g
+  carbs           Float    // g
+  fiber           Float    // g
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([gender, ageGroup])
+  @@map("nutrition_standards")
+}

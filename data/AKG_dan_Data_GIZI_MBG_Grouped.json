@@ -1,0 +1,138 @@
+{
+    "Bayi/Anak": [
+        {
+            "Kelompok Umur": "0-5 Bulan",
+            "Berat Badan (Kg)": 6.0,
+            "Tinggi Badan (cm)": 60.0,
+            "Energi": 550.0,
+            "Lemak": 31.0,
+            "Protein": 9.0,
+            "Karbohidrat": 59.0,
+            "Serat": 0.0
+        },
+        {
+            "Kelompok Umur": "6-11 Bulan",
+            "Berat Badan (Kg)": 9.0,
+            "Tinggi Badan (cm)": 72.0,
+            "Energi": 800.0,
+            "Lemak": 35.0,
+            "Protein": 15.0,
+            "Karbohidrat": 105.0,
+            "Serat": 11.0
+        },
+        {
+            "Kelompok Umur": "1-3 Tahun",
+            "Berat Badan (Kg)": 13.0,
+            "Tinggi Badan (cm)": 92.0,
+            "Energi": 1350.0,
+            "Lemak": 45.0,
+            "Protein": 20.0,
+            "Karbohidrat": 215.0,
+            "Serat": 19.0
+        },
+        {
+            "Kelompok Umur": "4-6 Tahun",
+            "Berat Badan (Kg)": 19.0,
+            "Tinggi Badan (cm)": 113.0,
+            "Energi": 1400.0,
+            "Lemak": 50.0,
+            "Protein": 25.0,
+            "Karbohidrat": 220.0,
+            "Serat": 20.0
+        },
+        {
+            "Kelompok Umur": "7-9 Tahun",
+            "Berat Badan (Kg)": 27.0,
+            "Tinggi Badan (cm)": 130.0,
+            "Energi": 1650.0,
+            "Lemak": 55.0,
+            "Protein": 40.0,
+            "Karbohidrat": 250.0,
+            "Serat": 23.0
+        }
+    ],
+    "Laki-Laki": [
+        {
+            "Kelompok Umur": "10-12 Tahun",
+            "Berat Badan (Kg)": 36.0,
+            "Tinggi Badan (cm)": 145.0,
+            "Energi": 2000.0,
+            "Lemak": 65.0,
+            "Protein": 50.0,
+            "Karbohidrat": 300.0,
+            "Serat": 28.0
+        },
+        {
+            "Kelompok Umur": "13-15 Tahun",
+            "Berat Badan (Kg)": 50.0,
+            "Tinggi Badan (cm)": 163.0,
+            "Energi": 2400.0,
+            "Lemak": 80.0,
+            "Protein": 70.0,
+            "Karbohidrat": 350.0,
+            "Serat": 34.0
+        },
+        {
+            "Kelompok Umur": "16-18 Tahun",
+            "Berat Badan (Kg)": 60.0,
+            "Tinggi Badan (cm)": 168.0,
+            "Energi": 2650.0,
+            "Lemak": 85.0,
+            "Protein": 75.0,
+            "Karbohidrat": 400.0,
+            "Serat": 37.0
+        }
+    ],
+    "Perempuan": [
+        {
+            "Kelompok Umur": "10-12 Tahun",
+            "Berat Badan (Kg)": 38.0,
+            "Tinggi Badan (cm)": 147.0,
+            "Energi": 1900.0,
+            "Lemak": 65.0,
+            "Protein": 55.0,
+            "Karbohidrat": 280.0,
+            "Serat": 27.0
+        },
+        {
+            "Kelompok Umur": "13-15 Tahun",
+            "Berat Badan (Kg)": 48.0,
+            "Tinggi Badan (cm)": 156.0,
+            "Energi": 2050.0,
+            "Lemak": 70.0,
+            "Protein": 65.0,
+            "Karbohidrat": 300.0,
+            "Serat": 29.0
+        },
+        {
+            "Kelompok Umur": "16-18 Tahun",
+            "Berat Badan (Kg)": 52.0,
+            "Tinggi Badan (cm)": 159.0,
+            "Energi": 2100.0,
+            "Lemak": 70.0,
+            "Protein": 65.0,
+            "Karbohidrat": 300.0,
+            "Serat": 29.0
+        },
+        {
+            "Kelompok Umur": "19-29 Tahun",
+            "Berat Badan (Kg)": 55.0,
+            "Tinggi Badan (cm)": 159.0,
+            "Energi": 2250.0,
+            "Lemak": 65.0,
+            "Protein": 60.0,
+            "Karbohidrat": 360.0,
+            "Serat": 32.0
+        },
+        {
+            "Kelompok Umur": "30-49 Tahun",
+            "Berat Badan (Kg)": 56.0,
+            "Tinggi Badan (cm)": 158.0,
+            "Energi": 2150.0,
+            "Lemak": 60.0,
+            "Protein": 60.0,
+            "Karbohidrat": 340.0,
+            "Serat": 30.0
+        }
+    ]
+}
