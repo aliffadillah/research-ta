@@ -92,3 +92,6 @@ uploads/
 # Cache
 .cache/
 .eslintcache
+
+
+PLAN.md

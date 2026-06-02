@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   Apple,
+  Brain,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils/helpers";
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/dashboard/detect", icon: Camera, label: "Deteksi" },
   { href: "/dashboard/history", icon: History, label: "Riwayat" },
   { href: "/dashboard/menu-harian", icon: Utensils, label: "Menu Harian" },
+  { href: "/dashboard/nutrisi-harian", icon: Brain, label: "Nutrisi Harian" },
   { href: "/dashboard/foods", icon: Apple, label: "Daftar Makanan" },
   { href: "/dashboard/referensi-akg", icon: BookOpen, label: "Referensi AKG" },
 ];
