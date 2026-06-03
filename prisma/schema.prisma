@@ -139,8 +139,11 @@ model DailyNutrition {
   fiberKecil  Float                    // Serat Kecil
   energyKecil Float                    // Energi Kecil (kkal)
 
+  isPredicted  Boolean @default(false)   // Track apakah data ini hasil prediksi
+  syncedAt     DateTime?                  // Timestamp sync terakhir untuk data predicted
+
   createdAt    DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt    DateTime @updatedAt
 
   @@unique([date])
   @@map("daily_nutritions")

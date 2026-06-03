@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   Brain,
-  Flame,
   Calendar,
   Plus,
   Pencil,
@@ -11,9 +10,13 @@ import {
   X,
   Loader2,
   Upload,
-  RefreshCw,
   TrendingUp,
   TrendingDown,
+  Zap,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 
 interface DailyNutrition {
@@ -29,7 +32,24 @@ interface DailyNutrition {
   fatKecil: number;
   fiberKecil: number;
   energyKecil: number;
+  isPredicted?: boolean;
+  syncedAt?: string;
   createdAt: string;
+}
+
+interface SyncStatus {
+  lastDate: string | null;
+  totalRecords: number;
+  actualDataCount: number;
+  predictedDataCount: number;
+  needsSync: boolean;
+}
+
+interface PopupMessage {
+  show: boolean;
+  type: "success" | "error" | "info" | "confirm";
+  message: string;
+  onConfirm?: () => void;
 }
 
 const emptyForm = {
@@ -46,17 +66,121 @@ const emptyForm = {
   energyKecil: 0,
 };
 
+// Popup Component
+function Popup({ popup, onClose }: { popup: PopupMessage; onClose: () => void }) {
+  if (!popup.show) return null;
+
+  const icons = {
+    success: <CheckCircle className="w-12 h-12 text-green-500" />,
+    error: <AlertCircle className="w-12 h-12 text-red-500" />,
+    info: <Info className="w-12 h-12 text-blue-500" />,
+    confirm: <AlertCircle className="w-12 h-12 text-yellow-500" />,
+  };
+
+  const borderColors = {
+    success: "border-green-500",
+    error: "border-red-500",
+    info: "border-blue-500",
+    confirm: "border-yellow-500",
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+      <div className={`bg-white rounded-2xl p-6 w-full max-w-md mx-4 border-t-4 ${borderColors[popup.type]}`}>
+        <div className="flex flex-col items-center text-center">
+          {icons[popup.type]}
+          <p className="mt-4 text-lg font-medium text-gray-800 whitespace-pre-line">
+            {popup.message}
+          </p>
+
+          <div className="flex gap-3 mt-6">
+            {popup.type === "confirm" ? (
+              <>
+                <button
+                  onClick={() => {
+                    popup.onConfirm?.();
+                    onClose();
+                  }}
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                >
+                  Ya, Lanjutkan
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Batal
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              >
+                OK
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function NutrisiHarianPage() {
   const [nutritions, setNutritions] = useState<DailyNutrition[]>([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [popup, setPopup] = useState<PopupMessage>({ show: false, type: "info", message: "" });
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  // Update current time every second
+  useEffect(() => {
+    const updateTime = () => {
+      // Dapatkan tanggal hari ini berdasarkan UTC
+      const now = new Date();
+      // Hitung offset UTC ke WIB (7 jam)
+      const utcHours = now.getUTCHours();
+      const wibHours = utcHours + 7;
+
+      // Jika melewati tengah hari WIB (>= 24), kurangi 24 dan tambah tanggal
+      const wibDate = new Date(now);
+      if (wibHours >= 24) {
+        wibDate.setUTCDate(wibDate.getUTCDate() + 1);
+        wibDate.setUTCHours(wibHours - 24);
+      } else {
+        wibDate.setUTCHours(wibHours);
+      }
+
+      // Format manual
+      const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                     "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+      const weekday = days[wibDate.getUTCDay()];
+      const day = wibDate.getUTCDate();
+      const month = months[wibDate.getUTCMonth()];
+      const year = wibDate.getUTCFullYear();
+      const hours = String(wibDate.getUTCHours()).padStart(2, "0");
+      const minutes = String(wibDate.getUTCMinutes()).padStart(2, "0");
+      const seconds = String(wibDate.getUTCSeconds()).padStart(2, "0");
+
+      setCurrentTime(`${weekday}, ${day} ${month} ${year} pukul ${hours}.${minutes}.${seconds} (WIB)`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchNutritions();
+    fetchSyncStatus();
   }, []);
 
   const fetchNutritions = async () => {
@@ -73,32 +197,125 @@ export default function NutrisiHarianPage() {
     }
   };
 
-  const handleImportJSON = async () => {
-    if (!confirm("Import data dari file JSON? Data yang sudah ada akan diupdate.")) {
-      return;
-    }
-
-    setImporting(true);
+  const fetchSyncStatus = async () => {
     try {
-      const res = await fetch("/api/daily-nutritions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "import" }),
-      });
-
+      const res = await fetch("/api/lstm-predict");
       if (res.ok) {
-        const result = await res.json();
-        alert(result.message);
-        fetchNutritions();
-      } else {
-        alert("Gagal import data");
+        const data = await res.json();
+        setSyncStatus(data);
       }
     } catch (error) {
-      console.error("Import error:", error);
-      alert("Gagal import data");
-    } finally {
-      setImporting(false);
+      console.error("Failed to fetch sync status:", error);
     }
+  };
+
+  const handleImportJSON = async () => {
+    setPopup({
+      show: true,
+      type: "confirm",
+      message: "Import data dari file JSON?\nData yang sudah ada akan diupdate.",
+      onConfirm: async () => {
+        setImporting(true);
+        try {
+          const res = await fetch("/api/daily-nutritions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "import" }),
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            setPopup({
+              show: true,
+              type: "success",
+              message: result.message || "Data berhasil diimport!",
+            });
+            fetchNutritions();
+            fetchSyncStatus();
+          } else {
+            setPopup({
+              show: true,
+              type: "error",
+              message: "Gagal import data",
+            });
+          }
+        } catch (error) {
+          console.error("Import error:", error);
+          setPopup({
+            show: true,
+            type: "error",
+            message: "Gagal import data.\nPastikan Flask API berjalan di port 5000.",
+          });
+        } finally {
+          setImporting(false);
+        }
+      },
+    });
+  };
+
+  const handleSync = async () => {
+    setPopup({
+      show: true,
+      type: "confirm",
+      message: "Prediksi data dari tanggal terakhir hingga saat ini?\nAkan diprediksi bertahap hari per hari.",
+      onConfirm: async () => {
+        setSyncing(true);
+        try {
+          const res = await fetch("/api/lstm-predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "sync" }),
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            if (result.success) {
+              if (result.synced === 0) {
+                // Tampilkan info debug jika ada
+                const debugInfo = result.debug
+                  ? `\n\n[Debug Info]\nLast Date: ${new Date(result.debug.lastDate).toLocaleDateString("id-ID")}\nNext Date: ${new Date(result.debug.nextDate).toLocaleDateString("id-ID")}\nToday: ${new Date(result.debug.today).toLocaleDateString("id-ID")}\nReason: ${result.debug.reason}`
+                  : "";
+                setPopup({
+                  show: true,
+                  type: "info",
+                  message: "Data sudah up-to-date. Tidak ada data baru untuk diprediksi." + debugInfo,
+                });
+              } else {
+                setPopup({
+                  show: true,
+                  type: "success",
+                  message: result.message || `Berhasil memprediksi ${result.synced} hari!`,
+                });
+              }
+              fetchNutritions();
+              fetchSyncStatus();
+            } else {
+              setPopup({
+                show: true,
+                type: "error",
+                message: result.error || result.message || "Gagal sync data",
+              });
+            }
+          } else {
+            const errorData = await res.json();
+            setPopup({
+              show: true,
+              type: "error",
+              message: errorData.error || "Gagal sync data.\nPastikan Flask API berjalan di port 5000.",
+            });
+          }
+        } catch (error) {
+          console.error("Sync error:", error);
+          setPopup({
+            show: true,
+            type: "error",
+            message: "Gagal sync data.\nPastikan Flask API berjalan di port 5000.",
+          });
+        } finally {
+          setSyncing(false);
+        }
+      },
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,6 +338,7 @@ export default function NutrisiHarianPage() {
         setEditingId(null);
         setForm(emptyForm);
         fetchNutritions();
+        fetchSyncStatus();
       }
     } catch (error) {
       console.error("Save error:", error);
@@ -152,7 +370,10 @@ export default function NutrisiHarianPage() {
 
     try {
       const res = await fetch(`/api/daily-nutritions?id=${id}`, { method: "DELETE" });
-      if (res.ok) fetchNutritions();
+      if (res.ok) {
+        fetchNutritions();
+        fetchSyncStatus();
+      }
     } catch (error) {
       console.error("Delete error:", error);
     }
@@ -173,6 +394,15 @@ export default function NutrisiHarianPage() {
     });
   };
 
+  const formatDateShort = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   // Statistics
   const stats = {
     total: nutritions.length,
@@ -186,8 +416,12 @@ export default function NutrisiHarianPage() {
         : 0,
     dateRange:
       nutritions.length > 0
-        ? `${formatDate(nutritions[0].date)} - ${formatDate(nutritions[nutritions.length - 1].date)}`
+        ? `${formatDateShort(nutritions[0].date)} - ${formatDateShort(nutritions[nutritions.length - 1].date)}`
         : "-",
+    lastSync: syncStatus?.lastDate
+      ? formatDateShort(syncStatus.lastDate)
+      : "Belum ada data",
+    predicted: syncStatus?.predictedDataCount || 0,
   };
 
   if (loading) {
@@ -204,9 +438,10 @@ export default function NutrisiHarianPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-display mb-2">Nutrisi Harian</h1>
-          <p className="text-text-muted">
-            Data nutrisi harian MBG untuk prediksi LSTM
-          </p>
+          <div className="flex items-center gap-2 text-sm text-text-muted">
+            <Clock className="w-4 h-4" />
+            <span>{currentTime} (WIB)</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -221,7 +456,19 @@ export default function NutrisiHarianPage() {
             )}
             Import JSON
           </button>
-          <button onClick={openNewModal} className="btn-primary flex items-center gap-2">
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="btn-primary flex items-center gap-2"
+          >
+            {syncing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Zap className="w-5 h-5" />
+            )}
+            Sync Sekarang
+          </button>
+          <button onClick={openNewModal} className="btn-secondary flex items-center gap-2">
             <Plus className="w-5 h-5" />
             Tambah Manual
           </button>
@@ -229,7 +476,7 @@ export default function NutrisiHarianPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="card">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -270,7 +517,22 @@ export default function NutrisiHarianPage() {
             </div>
             <div>
               <span className="text-text-muted text-sm">Rentang Tanggal</span>
-              <p className="text-sm font-medium truncate">{stats.dateRange}</p>
+              <p className="text-sm font-medium truncate max-w-[180px]">{stats.dateRange}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+              {syncStatus?.needsSync ? (
+                <Clock className="w-5 h-5 text-cyan-600" />
+              ) : (
+                <CheckCircle className="w-5 h-5 text-cyan-600" />
+              )}
+            </div>
+            <div>
+              <span className="text-text-muted text-sm">Terakhir Data</span>
+              <p className="text-sm font-medium truncate max-w-[180px]">{stats.lastSync}</p>
             </div>
           </div>
         </div>
@@ -278,7 +540,14 @@ export default function NutrisiHarianPage() {
 
       {/* Table */}
       <div className="card-static overflow-x-auto">
-        <h3 className="text-lg font-semibold mb-6">Daftar Data Nutrisi Harian ({nutritions.length})</h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold">Daftar Data Nutrisi Harian ({nutritions.length})</h3>
+          {stats.predicted > 0 && (
+            <span className="text-sm text-text-muted bg-cyan-50 px-3 py-1 rounded-full">
+              {stats.predicted} data hasil prediksi LSTM
+            </span>
+          )}
+        </div>
 
         {nutritions.length === 0 ? (
           <div className="text-center py-12">
@@ -520,6 +789,9 @@ export default function NutrisiHarianPage() {
           </form>
         </div>
       </div>
+
+      {/* Popup Messages */}
+      <Popup popup={popup} onClose={() => setPopup({ ...popup, show: false })} />
     </div>
   );
 }

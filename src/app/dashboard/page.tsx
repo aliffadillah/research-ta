@@ -2,9 +2,36 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Camera, TrendingUp, ChevronRight, Flame, Drumstick, Wheat, Apple, Users, Utensils, ClipboardList, BookOpen, Brain } from "lucide-react";
+import { Camera, ChevronRight, Flame, Drumstick, Wheat, Apple, Users, Utensils, ClipboardList, BookOpen, Brain } from "lucide-react";
 import { formatDate } from "@/lib/utils/nutrition";
 import PredictionCard from "@/components/ui/PredictionCard";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+
+interface DailyNutrition {
+  id: string;
+  date: string;
+  carbsBesar: number;
+  proteinBesar: number;
+  fatBesar: number;
+  fiberBesar: number;
+  energyBesar: number;
+  carbsKecil: number;
+  proteinKecil: number;
+  fatKecil: number;
+  fiberKecil: number;
+  energyKecil: number;
+}
 
 interface AllData {
   summary: {
@@ -53,6 +80,8 @@ interface Food {
 export default function DashboardPage() {
   const [allData, setAllData] = useState<AllData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [todayNutrition, setTodayNutrition] = useState<DailyNutrition | null>(null);
+  const [nutritionHistory, setNutritionHistory] = useState<DailyNutrition[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -72,8 +101,61 @@ export default function DashboardPage() {
       }
     }
 
+    // Fetch nutrition data
+    async function fetchNutritionData() {
+      try {
+        const res = await fetch("/api/daily-nutritions");
+        if (res.ok) {
+          const data: DailyNutrition[] = await res.json();
+          setNutritionHistory(data);
+          // Get today's date in WIB
+          const now = new Date();
+          const utcHours = now.getUTCHours();
+          const wibHours = utcHours + 7;
+          let today = new Date(now);
+          if (wibHours >= 24) {
+            today.setUTCDate(today.getUTCDate() + 1);
+          }
+          const todayStr = today.toISOString().split("T")[0];
+
+          const todayData = data.find((n) => n.date.split("T")[0] === todayStr);
+          setTodayNutrition(todayData || null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch nutrition data");
+      }
+    }
+
     fetchData();
+    fetchNutritionData();
   }, []);
+
+  // Prepare chart data - last 7 days
+  const chartData = nutritionHistory.slice(-14).map((n) => {
+    const date = new Date(n.date);
+    return {
+      date: date.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+      energiBG: n.energyBesar,
+      energiKCL: n.energyKecil,
+      karboBG: n.carbsBesar,
+      proteinBG: n.proteinBesar,
+      lemakBG: n.fatBesar,
+    };
+  });
+
+  // Helper to get formatted date
+  const getFormattedDate = () => {
+    const now = new Date();
+    const utcHours = now.getUTCHours();
+    const wibHours = utcHours + 7;
+    let wibDate = new Date(now);
+    if (wibHours >= 24) {
+      wibDate.setUTCDate(wibDate.getUTCDate() + 1);
+    }
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    return `${days[wibDate.getUTCDay()]}, ${wibDate.getUTCDate()} ${months[wibDate.getUTCMonth()]} ${wibDate.getUTCFullYear()}`;
+  };
 
   if (loading) {
     return (
@@ -119,8 +201,123 @@ export default function DashboardPage() {
         <ChevronRight className="w-6 h-6 text-text-muted group-hover:translate-x-2 group-hover:text-primary transition-all" />
       </Link>
 
+      {/* Today's Nutrition Info */}
+      <div className="card-static">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Brain className="w-5 h-5 text-primary" />
+            Nutrisi Hari Ini - {getFormattedDate()}
+          </h3>
+          <Link href="/dashboard/nutrisi-harian" className="text-primary text-sm font-medium hover:underline">
+            Lihat Detail
+          </Link>
+        </div>
+
+        {todayNutrition ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Porsi Besar */}
+            <div>
+              <div className="text-sm font-medium text-gray-500 mb-3">Porsi Besar</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
+                  <div className="text-xl font-bold text-green-800">{todayNutrition.carbsBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="text-xs text-blue-600 mb-1">Protein</div>
+                  <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                </div>
+                <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                  <div className="text-xs text-orange-600 mb-1">Lemak</div>
+                  <div className="text-xl font-bold text-orange-800">{todayNutrition.fatBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                </div>
+                <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                  <div className="text-xs text-rose-600 mb-1">Energi</div>
+                  <div className="text-xl font-bold text-rose-800">{todayNutrition.energyBesar.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Porsi Kecil */}
+            <div>
+              <div className="text-sm font-medium text-gray-500 mb-3">Porsi Kecil</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
+                  <div className="text-xl font-bold text-green-800">{todayNutrition.carbsKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="text-xs text-blue-600 mb-1">Protein</div>
+                  <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                </div>
+                <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                  <div className="text-xs text-orange-600 mb-1">Lemak</div>
+                  <div className="text-xl font-bold text-orange-800">{todayNutrition.fatKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                </div>
+                <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                  <div className="text-xs text-rose-600 mb-1">Energi</div>
+                  <div className="text-xl font-bold text-rose-800">{todayNutrition.energyKecil.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 bg-gray-50 rounded-lg">
+            <Brain className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <p className="text-text-muted text-sm">Belum ada data nutrisi untuk hari ini</p>
+            <Link href="/dashboard/nutrisi-harian" className="text-primary text-sm font-medium hover:underline mt-1 inline-block">
+              Sync data sekarang
+            </Link>
+          </div>
+        )}
+      </div>
+
       {/* Nutrition Standards Summary */}
       <PredictionCard />
+
+      {/* Nutrition Charts */}
+      {chartData.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Line Chart - Energi Trend */}
+          <div className="card-static">
+            <h3 className="text-lg font-semibold mb-4">Tren Energi 14 Hari Terakhir</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#6b7280" />
+                <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
+                  formatter={(value: number) => [`${value.toFixed(0)} kkal`]}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Line type="monotone" dataKey="energiBG" stroke="#22c55e" strokeWidth={2} name="Energi BG" dot={{ fill: "#22c55e", r: 3 }} />
+                <Line type="monotone" dataKey="energiKCL" stroke="#3b82f6" strokeWidth={2} name="Energi KCL" dot={{ fill: "#3b82f6", r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Bar Chart - Makro Nutrients */}
+          <div className="card-static">
+            <h3 className="text-lg font-semibold mb-4">Makro Nutrients Porsi Besar</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#6b7280" />
+                <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
+                  formatter={(value: number) => [`${value.toFixed(1)} g`]}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="karboBG" fill="#22c55e" name="Karbo" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="proteinBG" fill="#3b82f6" name="Protein" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="lemakBG" fill="#f59e0b" name="Lemak" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {/* Database Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
