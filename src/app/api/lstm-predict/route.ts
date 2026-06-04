@@ -70,11 +70,17 @@ function getNextBusinessDay(date: Date): Date {
 // API ENDPOINTS
 // ============================================================
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const lastData = await prisma.dailyNutrition.findFirst({
-      orderBy: { date: "desc" },
+    const { searchParams } = new URL(request.url);
+    const targetDate = searchParams.get("date"); // Optional: check specific date
+
+    // Get all entries for count and data check
+    const allEntries = await prisma.dailyNutrition.findMany({
+      orderBy: { date: "asc" },
     });
+
+    const lastData = allEntries.length > 0 ? allEntries[allEntries.length - 1] : null;
 
     const predictedCount = await prisma.dailyNutrition.count({
       where: { isPredicted: true },
@@ -84,12 +90,41 @@ export async function GET() {
       where: { isPredicted: false },
     });
 
+    // Calculate next predict date
+    let nextPredictDate: Date;
+    if (lastData) {
+      const tomorrow = new Date(lastData.date);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      nextPredictDate = getNextBusinessDay(tomorrow);
+    } else {
+      nextPredictDate = new Date();
+      nextPredictDate = getNextBusinessDay(nextPredictDate);
+    }
+
+    // Check if data exists for next predict date
+    let hasDataForNext = false;
+    if (lastData) {
+      const existing = await prisma.dailyNutrition.findUnique({
+        where: { date: nextPredictDate },
+      });
+      hasDataForNext = !!existing;
+    }
+
     return NextResponse.json({
-      lastDate: lastData?.date,
+      success: true,
+      lastDataDate: lastData?.date || null,
+      nextPredictDate: nextPredictDate.toISOString().split("T")[0],
+      hasDataForNext,
       totalRecords: actualCount + predictedCount,
       actualDataCount: actualCount,
       predictedDataCount: predictedCount,
-      needsSync: lastData ? isWeekend(lastData.date) : true,
+      canPredict: allEntries.length >= SLIDING_WINDOW_SIZE,
+      hasEnoughData: allEntries.length >= SLIDING_WINDOW_SIZE,
+      message: hasDataForNext
+        ? "Data untuk besok sudah ada"
+        : allEntries.length >= SLIDING_WINDOW_SIZE
+          ? "Siap memprediksi nutrisi untuk besok"
+          : `Butuh minimal ${SLIDING_WINDOW_SIZE} data. Saat ini: ${allEntries.length}`,
     });
   } catch (error) {
     console.error("GET error:", error);
@@ -97,8 +132,12 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    // Parse request body for optional date parameter
+    const body = await request.json().catch(() => ({}));
+    const targetDate = body.date; // Optional: specific date to predict for
+
     // 1. Ambil SEMUA data dari database, urut dari lama ke baru
     const allEntries = await prisma.dailyNutrition.findMany({
       orderBy: { date: "asc" },
@@ -110,64 +149,26 @@ export async function POST() {
       }, { status: 400 });
     }
 
-    // 2. Tentukan tanggal mulai prediksi (hari setelah data terakhir)
-    const lastDate = new Date(allEntries[allEntries.length - 1].date);
+    // 2. Tentukan tanggal target prediksi
+    let nextDate: Date;
 
-    // Hitung tanggal mulai: hari setelah data terakhir
-    const startDate = new Date(lastDate);
-    startDate.setDate(startDate.getDate() + 1);
+    if (targetDate) {
+      // Jika user specify tanggal tertentu
+      nextDate = new Date(targetDate);
+      nextDate.setHours(0, 0, 0, 0);
+    } else {
+      // Default: prediksi untuk HARI ESOK ( besok )
+      const lastDate = new Date(allEntries[allEntries.length - 1].date);
+      const tomorrow = new Date(lastDate);
+      tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Skip weekend untuk tanggal mulai
-    let nextDate = getNextBusinessDay(startDate);
-
-    // Dapatkan tanggal hari ini di UTC, lalu konversi ke WIB (UTC+7)
-    const now = new Date();
-    const utcHours = now.getUTCHours();
-    const wibHours = utcHours + 7;
-
-    // Buat tanggal today berdasarkan UTC date, tapi dengan jam WIB
-    const today = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      0, 0, 0, 0
-    ));
-
-    // Jika WIB sudah melewati tengah malam UTC, adjust tanggal
-    if (wibHours >= 24) {
-      today.setUTCDate(today.getUTCDate() + 1);
+      // Skip weekend
+      nextDate = getNextBusinessDay(tomorrow);
     }
 
-    console.log(`[LSTM] ============= DEBUG INFO =============`);
-    console.log(`[LSTM] UTC time: ${now.toISOString()}`);
-    console.log(`[LSTM] UTC hours: ${utcHours}, WIB hours: ${wibHours}`);
-    console.log(`[LSTM] Last data date (from DB): ${lastDate.toISOString()}`);
-    console.log(`[LSTM] Last date (local): ${lastDate.toLocaleDateString("id-ID")}`);
-    console.log(`[LSTM] Start date (next day): ${startDate.toLocaleDateString("id-ID")}`);
-    console.log(`[LSTM] Next date (after weekend skip): ${nextDate.toLocaleDateString("id-ID")}`);
-    console.log(`[LSTM] Today (WIB, adjusted): ${today.toLocaleDateString("id-ID")}`);
-    console.log(`[LSTM] Next date time (ms): ${nextDate.getTime()}`);
-    console.log(`[LSTM] Today time (ms): ${today.getTime()}`);
-    console.log(`[LSTM] Comparison: ${nextDate.getTime()} > ${today.getTime()} = ${nextDate.getTime() > today.getTime()}`);
-    console.log(`[LSTM] ============= DEBUG END =============`);
-
-    // Jika tanggal mulai sudah lebih dari hari ini, berarti sudah up-to-date
-    // nextDate > today = up-to-date (tidak bisa prediksi tanggal yang belum datang)
-    // nextDate <= today = BISA prediksi (tanggal sudah reachable)
-    if (nextDate.getTime() > today.getTime()) {
-      console.log(`[LSTM] RETURN: up-to-date (nextDate > today)`);
-      return NextResponse.json({
-        success: true,
-        message: "Data sudah up-to-date. Tidak ada tanggal yang perlu diprediksi.",
-        synced: 0,
-        debug: {
-          lastDate: lastDate.toISOString(),
-          nextDate: nextDate.toISOString(),
-          today: today.toISOString(),
-          reason: "nextDate is in the future"
-        }
-      });
-    }
+    console.log(`[LSTM] ============= PREDICTION REQUEST =============`);
+    console.log(`[LSTM] Target date: ${nextDate.toISOString().split("T")[0]}`);
+    console.log(`[LSTM] Total entries in DB: ${allEntries.length}`);
 
     // 3. CEK: Jika data sudah ada untuk tanggal ini, skip
     const existing = await prisma.dailyNutrition.findUnique({
@@ -180,6 +181,13 @@ export async function POST() {
         success: true,
         message: "Data sudah ada untuk tanggal ini.",
         synced: 0,
+        date: nextDate.toISOString().split("T")[0],
+        existingData: {
+          isPredicted: existing.isPredicted,
+          energyBesar: existing.energyBesar,
+          carbsBesar: existing.carbsBesar,
+          proteinBesar: existing.proteinBesar,
+        },
       });
     }
 

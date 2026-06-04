@@ -128,6 +128,20 @@ body {
   .stagger-3 { animation-delay: 200ms; }
   .stagger-4 { animation-delay: 300ms; }
   .stagger-5 { animation-delay: 400ms; }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 4s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
 /* Page transition */

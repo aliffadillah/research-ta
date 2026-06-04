@@ -168,7 +168,7 @@ export async function POST(request: Request) {
     // Use clean base64 (without data URL prefix)
     const imageData = hasDataPrefix ? cleanBase64 : image;
 
-    console.log("[Menu API] Calling...", API_MENU);
+    console.log("[Menu API] Calling...");
 
     // Call Menu API
     const form = new FormData();
@@ -201,7 +201,6 @@ export async function POST(request: Request) {
     const rawDetections = parseUltralyticsResponse(data);
     console.log("[Menu API] Parsed detections:", rawDetections.length);
 
-    // Build predictions with database nutrition
     let predictions: {
       class: string;
       confidence: number;
