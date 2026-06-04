@@ -41,6 +41,7 @@ interface DetectionResultProps {
   onSelectPrediction: (prediction: Prediction) => void;
   imageWidth?: number;
   imageHeight?: number;
+  portionSize?: number;
 }
 
 const sourceConfig: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
@@ -86,8 +87,11 @@ export default function DetectionResult({
   onSelectPrediction,
   imageWidth = 640,
   imageHeight = 640,
+  portionSize = 100,
 }: DetectionResultProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [portionBesarPercent, setPortionBesarPercent] = useState(32);
+  const [portionKecilPercent, setPortionKecilPercent] = useState(22);
 
   if (predictions.length === 0) {
     return null;
@@ -97,41 +101,115 @@ export default function DetectionResult({
     setExpandedIndex(expandedIndex === index ? null : index);
   };
 
+  // Calculate total nutrition from all detections
+  const totalNutrition = predictions.reduce((acc, p) => ({
+    calories: acc.calories + (p.nutrition?.calories || 0),
+    protein: acc.protein + (p.nutrition?.protein || 0),
+    carbs: acc.carbs + (p.nutrition?.carbs || 0),
+    fat: acc.fat + (p.nutrition?.fat || 0),
+    fiber: acc.fiber + (p.nutrition?.fiber || 0),
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
+
   return (
     <div className="space-y-4">
-      {/* Summary Stats - MOVED TO TOP */}
-      <div className="card-static bg-gradient-to-r from-primary/5 to-accent/5">
-        <h4 className="font-semibold mb-3">Ringkasan Total Nutrisi</h4>
-        <div className="grid grid-cols-5 gap-4 text-center">
-          <div>
-            <p className="text-2xl font-bold text-primary">
-              {Math.round(predictions.reduce((sum, p) => sum + (p.nutrition?.calories || 0), 0))}
-            </p>
-            <p className="text-xs text-text-muted">Total Kalori</p>
+      {/* Summary Stats - Ringkasan Nutrisi */}
+      <div className="card bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-semibold text-gray-800">Ringkasan Nutrisi Terdeteksi</h4>
+          <span className="text-sm text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
+            {portionSize}g
+          </span>
+        </div>
+
+        {/* Header Row */}
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          <div className="text-center">
+            <div className="h-8 flex items-center justify-center">
+              <span className="text-xs text-gray-500 font-medium">Kalori</span>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-blue-600">
-              {predictions.reduce((sum, p) => sum + (p.nutrition?.protein || 0), 0).toFixed(1)}g
-            </p>
-            <p className="text-xs text-text-muted">Total Protein</p>
+          <div className="text-center">
+            <div className="h-8 flex items-center justify-center">
+              <span className="text-xs text-gray-500 font-medium">Protein</span>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-amber-600">
-              {predictions.reduce((sum, p) => sum + (p.nutrition?.carbs || 0), 0).toFixed(1)}g
-            </p>
-            <p className="text-xs text-text-muted">Total Karbo</p>
+          <div className="text-center">
+            <div className="h-8 flex items-center justify-center">
+              <span className="text-xs text-gray-500 font-medium">Karbo</span>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-red-500">
-              {predictions.reduce((sum, p) => sum + (p.nutrition?.fat || 0), 0).toFixed(1)}g
-            </p>
-            <p className="text-xs text-text-muted">Total Lemak</p>
+          <div className="text-center">
+            <div className="h-8 flex items-center justify-center">
+              <span className="text-xs text-gray-500 font-medium">Lemak</span>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-green-600">
-              {predictions.reduce((sum, p) => sum + (p.nutrition?.fiber || 0), 0).toFixed(1)}g
-            </p>
-            <p className="text-xs text-text-muted">Total Serat</p>
+        </div>
+
+        {/* Per 100g */}
+        <div className="mb-3">
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="text-center text-xs text-gray-500 mb-2 font-medium">per 100g</div>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="text-xl font-bold text-gray-700">{Math.round(totalNutrition.calories)}</div>
+              <div className="text-xl font-bold text-gray-700">{totalNutrition.protein.toFixed(1)}g</div>
+              <div className="text-xl font-bold text-gray-700">{totalNutrition.carbs.toFixed(1)}g</div>
+              <div className="text-xl font-bold text-gray-700">{totalNutrition.fat.toFixed(1)}g</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Porsi Besar & Kecil side by side with adjustable percentage */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Porsi Besar - adjustable 30-35% */}
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-green-800">Porsi Besar</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="30"
+                  max="35"
+                  step="1"
+                  value={portionBesarPercent}
+                  onChange={(e) => setPortionBesarPercent(Number(e.target.value))}
+                  className="w-20 h-2 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                />
+                <span className="text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full font-medium w-12 text-center">{portionBesarPercent}%</span>
+              </div>
+            </div>
+            <div className="text-xs text-green-600 mb-2">{Math.round(portionSize * portionBesarPercent / 100)}g dari {portionSize}g</div>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="text-lg font-bold text-green-700">{Math.round(totalNutrition.calories * portionBesarPercent / 100)}</div>
+              <div className="text-lg font-bold text-green-700">{(totalNutrition.protein * portionBesarPercent / 100).toFixed(1)}g</div>
+              <div className="text-lg font-bold text-green-700">{(totalNutrition.carbs * portionBesarPercent / 100).toFixed(1)}g</div>
+              <div className="text-lg font-bold text-green-700">{(totalNutrition.fat * portionBesarPercent / 100).toFixed(1)}g</div>
+            </div>
+          </div>
+
+          {/* Porsi Kecil - adjustable 20-25% */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-blue-800">Porsi Kecil</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="20"
+                  max="25"
+                  step="1"
+                  value={portionKecilPercent}
+                  onChange={(e) => setPortionKecilPercent(Number(e.target.value))}
+                  className="w-20 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <span className="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full font-medium w-12 text-center">{portionKecilPercent}%</span>
+              </div>
+            </div>
+            <div className="text-xs text-blue-600 mb-2">{Math.round(portionSize * portionKecilPercent / 100)}g dari {portionSize}g</div>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="text-lg font-bold text-blue-700">{Math.round(totalNutrition.calories * portionKecilPercent / 100)}</div>
+              <div className="text-lg font-bold text-blue-700">{(totalNutrition.protein * portionKecilPercent / 100).toFixed(1)}g</div>
+              <div className="text-lg font-bold text-blue-700">{(totalNutrition.carbs * portionKecilPercent / 100).toFixed(1)}g</div>
+              <div className="text-lg font-bold text-blue-700">{(totalNutrition.fat * portionKecilPercent / 100).toFixed(1)}g</div>
+            </div>
           </div>
         </div>
       </div>
