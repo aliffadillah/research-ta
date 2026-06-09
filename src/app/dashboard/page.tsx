@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Camera, ChevronRight, Flame, Drumstick, Wheat, Apple, Users, Utensils, ClipboardList, BookOpen, Brain } from "lucide-react";
+import { Camera, ChevronRight, Flame, Drumstick, Wheat, Apple, Users, Utensils, ClipboardList, BookOpen, Brain, ChefHat } from "lucide-react";
 import { formatDate } from "@/lib/utils/nutrition";
 import PredictionCard from "@/components/ui/PredictionCard";
 import {
@@ -199,6 +199,23 @@ export default function DashboardPage() {
           </div>
         </div>
         <ChevronRight className="w-6 h-6 text-text-muted group-hover:translate-x-2 group-hover:text-primary transition-all" />
+      </Link>
+
+      {/* Quick Action - Rekomendasi Makanan */}
+      <Link
+        href="/dashboard/rekomendasi-nutrisi"
+        className="card flex items-center justify-between group hover:border-accent"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center">
+            <ChefHat className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">Rekomendasi Makanan</h2>
+            <p className="text-text-muted">Lihat saran makanan sesuai kebutuhan gizi</p>
+          </div>
+        </div>
+        <ChevronRight className="w-6 h-6 text-text-muted group-hover:translate-x-2 group-hover:text-accent transition-all" />
       </Link>
 
       {/* Today's Nutrition Info */}

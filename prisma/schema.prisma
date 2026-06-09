@@ -45,8 +45,8 @@ model Detection {
   id             String    @id @default(cuid())
   imageUrl       String
   confidence     Float
-  predictedClass String?   // Class name from ML model
-  mlPrediction   Json?    // Full prediction from model
+  predictedClass String?   
+  mlPrediction   Json?      
   portionSize    Float     @default(100)
   portionUnit    String    @default("g")
   detectedAt     DateTime  @default(now())

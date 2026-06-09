@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { generateMenuCombinations } from '@/lib/generate-menu';
 import { FoodItem, NutritionValues } from '@/types/menu';
 
@@ -47,9 +47,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Query DailyNutrition by date
+    // Query DailyNutrition by date — must be a full ISO-8601 datetime for Prisma DateTime @db.Date
     const dailyNutrition = await prisma.dailyNutrition.findUnique({
-      where: { date: targetDate },
+      where: { date: new Date(targetDate + 'T00:00:00.000Z') },
     });
 
     if (!dailyNutrition) {
@@ -82,18 +82,18 @@ export async function GET(request: NextRequest) {
     // Prepare daily needs for besar and kecil
     const dailyNeeds: Record<string, NutritionValues> = {
       besar: {
-        energi: dailyNutrition.energiBesar,
+        energi: dailyNutrition.energyBesar,
         protein: dailyNutrition.proteinBesar,
-        karbohidrat: dailyNutrition.karbohidratBesar,
-        lemak: dailyNutrition.lemakBesar,
-        serat: dailyNutrition.seratBesar,
+        karbohidrat: dailyNutrition.carbsBesar,
+        lemak: dailyNutrition.fatBesar,
+        serat: dailyNutrition.fiberBesar,
       },
       kecil: {
-        energi: dailyNutrition.energiKecil,
+        energi: dailyNutrition.energyKecil,
         protein: dailyNutrition.proteinKecil,
-        karbohidrat: dailyNutrition.karbohidratKecil,
-        lemak: dailyNutrition.lemakKecil,
-        serat: dailyNutrition.seratKecil,
+        karbohidrat: dailyNutrition.carbsKecil,
+        lemak: dailyNutrition.fatKecil,
+        serat: dailyNutrition.fiberKecil,
       },
     };
 

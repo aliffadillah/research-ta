@@ -136,7 +136,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-field"
-                placeholder="••••••••"
+                placeholder="password"
                 required
               />
             </div>

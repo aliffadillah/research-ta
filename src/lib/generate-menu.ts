@@ -90,12 +90,14 @@ export function calculateTotalNutrition(components: MenuComponent[]): NutritionV
 }
 
 /**
- * Find the food in a category closest to the allocated target
+ * Find a good food for a category from top candidates with randomness for variety.
+ * Picks from top-N candidates instead of always the single best.
  */
 export function findBestFoodForCategory(
   foods: FoodItem[],
   category: string,
-  target: NutritionValues
+  target: NutritionValues,
+  topN: number = 5
 ): FoodItem | null {
   const categoryFoods = foods.filter(f => f.category === category);
   if (categoryFoods.length === 0) return null;
@@ -112,11 +114,8 @@ export function findBestFoodForCategory(
     serat: target.serat * ratio.serat,
   };
 
-  // Find food closest to target (using total distance)
-  let bestFood: FoodItem | null = null;
-  let bestDistance = Infinity;
-
-  for (const food of categoryFoods) {
+  // Score every food by inverse distance (higher = closer to target)
+  const scored = categoryFoods.map(food => {
     const foodNutrition: NutritionValues = {
       energi: food.calories,
       protein: food.protein,
@@ -125,20 +124,22 @@ export function findBestFoodForCategory(
       serat: food.fiber,
     };
 
-    // Calculate Euclidean distance from allocated target
     let distance = 0;
     for (const nutrient of Object.keys(allocatedTarget) as Array<keyof NutritionValues>) {
       const diff = foodNutrition[nutrient] - allocatedTarget[nutrient];
       distance += diff * diff;
     }
 
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestFood = food;
-    }
-  }
+    return { food, distance };
+  });
 
-  return bestFood;
+  // Sort by distance ascending
+  scored.sort((a, b) => a.distance - b.distance);
+
+  // Pick randomly from top-N candidates
+  const candidates = scored.slice(0, Math.min(topN, scored.length));
+  const randomIndex = Math.floor(Math.random() * candidates.length);
+  return candidates[randomIndex].food;
 }
 
 /**

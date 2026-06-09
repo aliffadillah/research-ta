@@ -171,11 +171,11 @@ export default function GenerateMenuPage() {
               {data.recommendations.besar.map((combo, idx) => (
                 <MenuCombinationCard
                   key={idx}
-                  combination={combo.combination}
+                  combination={combo.components}
                   index={idx}
                   isBest={idx === 0}
                   totalNutrition={combo.totalNutrition}
-                  matchScore={combo.matchScore}
+                  matchScore={combo.score}
                 />
               ))}
             </div>
@@ -200,11 +200,11 @@ export default function GenerateMenuPage() {
               {data.recommendations.kecil.map((combo, idx) => (
                 <MenuCombinationCard
                   key={idx}
-                  combination={combo.combination}
+                  combination={combo.components}
                   index={idx}
                   isBest={idx === 0}
                   totalNutrition={combo.totalNutrition}
-                  matchScore={combo.matchScore}
+                  matchScore={combo.score}
                 />
               ))}
             </div>
