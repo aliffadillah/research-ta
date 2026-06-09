@@ -13,6 +13,7 @@ import {
   LogOut,
   Apple,
   Brain,
+  Sparkles,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils/helpers";
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
   { href: "/dashboard/detect", icon: Camera, label: "Deteksi" },
   { href: "/dashboard/history", icon: History, label: "Riwayat" },
+  { href: "/dashboard/generate-menu", icon: Sparkles, label: "Generate Menu" },
   { href: "/dashboard/menu-harian", icon: Utensils, label: "Menu Harian" },
   { href: "/dashboard/nutrisi-harian", icon: Brain, label: "Nutrisi Harian" },
   { href: "/dashboard/foods", icon: Apple, label: "Daftar Makanan" },
