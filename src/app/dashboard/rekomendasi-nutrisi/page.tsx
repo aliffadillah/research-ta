@@ -171,7 +171,7 @@ export default function RekomendasiNutrisiPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-display mb-2">Rekomendasi Makanan</h1>
+        <h1 className="text-3xl font-sans mb-2">Rekomendasi Makanan</h1>
         <p className="text-text-muted">
           Rekomendasi makanan dari Daftar Makanan sesuai kebutuhan gizi harian -
           {getFormattedDate()}

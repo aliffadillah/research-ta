@@ -1,0 +1,78 @@
+flowchart TD
+    Start([Mulai]) --> Login
+
+    subgraph Auth["🔐 Autentikasi"]
+        Login{Login?}
+        Login -->|Belum| Register[Register]
+        Register --> |Berhasil| Dashboard[Dashboard]
+        Login -->|Sudah| Dashboard
+    end
+
+    Dashboard --> Fitur[Pilihan Fitur]
+
+    subgraph Detect["📷 Deteksi Makanan"]
+        Fitur --> Deteksi[Deteksi Makanan]
+        Deteksi --> PilihFoto[Pilih / Ambil Foto]
+        PilihFoto --> Model[Model Mendeteksi]
+        Model --> Hasil[Hasil Deteksi]
+        Hasil --> Aksi1{Aksi?}
+        Aksi1 -->|Simpan| SimpanLog[Simpan ke Log]
+        Aksi1 -->|Ulangi| PilihFoto
+    end
+
+    subgraph Nutrition["📊 Nutrisi Harian"]
+        Fitur --> Nutrisi[Lihat Nutrisi Harian]
+        Nutrisi --> Ringkasan[Ringkasan Gizi]
+        Ringkasan --> Chart[Grafik Nutrisi]
+        Chart --> Detail{Detail?}
+        Detail -->|Karbohidrat| Karbo[Info Karbohidrat]
+        Detail -->|Protein| Protein[Info Protein]
+        Detail -->|Lemak| Lemak[Info Lemak]
+    end
+
+    subgraph Generate["🍽️ Generate Menu"]
+        Fitur --> Generate[Generate Menu]
+        Generate --> InputNutrisi[Input Kebutuhan Nutrisi]
+        InputNutrisi --> PilihPreferensi[Pilih Preferensi]
+        PilihPreferensi --> Sistem[Sistem Buat Menu]
+        Sistem --> Menu[Menu Harian]
+        Menu --> Aksi2{Aksi?}
+        Aksi2 -->|Simpan| SimpanMenu[Simpan Menu]
+        Aksi2 -->|Ulangi| InputNutrisi
+    end
+
+    subgraph Rekomendasi["💡 Rekomendasi Makanan"]
+        Fitur --> Rekomendasi[Rekomendasi]
+        Rekomendasi --> Analisis[Analisis Kekurangan Nutrisi]
+        Analisis --> Scoring[Scoring Makanan]
+        Scoring --> Tampilkan[Tampilkan Rekomendasi]
+        Tampilkan --> Aksi3{Aksi?}
+        Aksi3 -->|Tambah| TambahLog2[Tambah ke Log]
+        Aksi3 -->|Detail| ModalDetail[Detail Gizi]
+    end
+
+    subgraph Prediksi["🤖 Prediksi LSTM"]
+        Fitur --> Prediksi[Prediksi Nutrisi]
+        Prediksi --> DataHistori[Data Histori]
+        DataHistori --> ModelLSTM[Model LSTM]
+        ModelLSTM --> Forecast[Grafik Prediksi]
+        Forecast --> Interpret[Interpretasi Hasil]
+    end
+
+    SimpanLog --> Selesai([Selesai])
+    SimpanMenu --> Selesai
+    TambahLog2 --> Selesai
+    TambahLog --> Selesai
+    Interpret --> Selesai
+
+    classDef start fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef process fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef auth fill:#9b59b6,stroke:#8e44ad,color:#fff
+    classDef success fill:#27ae60,stroke:#2ecc71,color:#fff
+
+    class Start start
+    class Dashboard,Fitur process
+    class Login,Register auth
+    class Aksi1,Aksi2,Aksi3,Detail decision
+    class SimpanLog,SimpanMenu,TambahLog,TambahLog2,Interpret success

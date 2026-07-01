@@ -282,15 +282,6 @@ export default function DetectionResult({
 
                   {/* Tags */}
                   <div className="flex flex-wrap items-center gap-2 mt-2">
-                    <span className={cn(
-                      "px-2 py-1 rounded-lg text-sm font-bold",
-                      prediction.confidence >= 80 ? "bg-green-100 text-green-700" :
-                      prediction.confidence >= 60 ? "bg-yellow-100 text-yellow-700" :
-                      "bg-red-100 text-red-700"
-                    )}>
-                      {prediction.confidence.toFixed(1)}%
-                    </span>
-
                     {prediction.source && (
                       <span className={cn(
                         "inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium",
@@ -381,7 +372,7 @@ export default function DetectionResult({
                             style={{ width: `${Math.min(prediction.nutrition.calories / 4, 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono w-12 text-right">{Math.round(prediction.nutrition.calories)}</span>
+                        <span className="text-xs font-sans w-12 text-right">{Math.round(prediction.nutrition.calories)}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-text-muted w-16">Protein</span>
@@ -391,7 +382,7 @@ export default function DetectionResult({
                             style={{ width: `${Math.min(prediction.nutrition.protein * 5, 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono w-12 text-right">{prediction.nutrition.protein.toFixed(1)}g</span>
+                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.protein.toFixed(1)}g</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-text-muted w-16">Karbo</span>
@@ -401,7 +392,7 @@ export default function DetectionResult({
                             style={{ width: `${Math.min(prediction.nutrition.carbs / 4, 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono w-12 text-right">{prediction.nutrition.carbs.toFixed(1)}g</span>
+                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.carbs.toFixed(1)}g</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-text-muted w-16">Lemak</span>
@@ -411,7 +402,7 @@ export default function DetectionResult({
                             style={{ width: `${Math.min(prediction.nutrition.fat * 5, 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono w-12 text-right">{prediction.nutrition.fat.toFixed(1)}g</span>
+                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.fat.toFixed(1)}g</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-text-muted w-16">Serat</span>
@@ -421,7 +412,7 @@ export default function DetectionResult({
                             style={{ width: `${Math.min(prediction.nutrition.fiber * 10, 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono w-12 text-right">{prediction.nutrition.fiber.toFixed(1)}g</span>
+                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.fiber.toFixed(1)}g</span>
                       </div>
                     </div>
                   </div>
@@ -430,7 +421,7 @@ export default function DetectionResult({
                   {bbox && (
                     <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                       <p className="text-xs text-text-muted mb-2">Bounding Box:</p>
-                      <div className="grid grid-cols-4 gap-2 text-xs font-mono">
+                      <div className="grid grid-cols-4 gap-2 text-xs font-sans">
                         <div className="bg-white p-2 rounded">x1: {bbox.x1.toFixed(0)}</div>
                         <div className="bg-white p-2 rounded">y1: {bbox.y1.toFixed(0)}</div>
                         <div className="bg-white p-2 rounded">x2: {bbox.x2.toFixed(0)}</div>

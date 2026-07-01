@@ -437,7 +437,7 @@ export default function NutrisiHarianPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display mb-2">Nutrisi Harian</h1>
+          <h1 className="text-3xl font-sans mb-2">Nutrisi Harian</h1>
           <div className="flex items-center gap-2 text-sm text-text-muted">
             <Clock className="w-4 h-4" />
             <span>{currentTime} (WIB)</span>

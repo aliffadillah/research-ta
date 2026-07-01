@@ -1,0 +1,33 @@
+flowchart TD
+    Start([Mulai]) --> BukaApp[User Buka Aplikasi]
+    BukaApp --> CekLogin{Sudah Login?}
+    CekLogin -->|Ya| KeDashboard[&#8594; Ke Dashboard]
+    CekLogin -->|Tidak| PilihAksi{Pilih Aksi?}
+    PilihAksi -->|Login| HalamanLogin[&#8594; Halaman Login]
+    PilihAksi -->|Daftar| HalamanDaftar[&#8594; Halaman Daftar]
+    HalamanLogin --> InputLogin[Input Email dan Password]
+    HalamanDaftar --> InputDaftar[Input Nama, Email, Password]
+    InputLogin --> TombolLogin[Tekan Tombol Login]
+    InputDaftar --> TombolDaftar[Tekan Tombol Daftar]
+    TombolLogin --> Validasi{Data Valid?}
+    TombolDaftar --> Validasi
+    Validasi -->|Tidak| ErrorLogin[Tampilkan Pesan Error]
+    Validasi -->|Ya| CekAkun{Cek Akun di Database?}
+    CekAkun -->|Tidak Ada| BuatAkun[Buat Akun Baru]
+    CekAkun -->|Sudah Ada| BuatSesi[Buat Sesi Login]
+    BuatAkun --> KeLogin[&#8594; Halaman Login]
+    BuatSesi --> Dashboard([&#8594; Ke Dashboard])
+    ErrorLogin -.-> HalamanLogin
+    KeLogin -.-> HalamanLogin
+    KeDashboard --> Dashboard
+
+    classDef start fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef process fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef error fill:#e74c3c,stroke:#c0392b,color:#fff
+    classDef success fill:#27ae60,stroke:#2ecc71,color:#fff
+
+    class Start start
+    class BukaApp,CekLogin,PilihAksi,HalamanLogin,HalamanDaftar,InputLogin,InputDaftar,TombolLogin,TombolDaftar,Validasi,CekAkun,BuatAkun,BuatSesi,KeLogin,KeDashboard process
+    class ErrorLogin error
+    class Dashboard success

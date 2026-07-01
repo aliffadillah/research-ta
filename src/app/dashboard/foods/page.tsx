@@ -97,14 +97,22 @@ export default function FoodsPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Hapus makanan ini?")) return;
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null; name: string }>({
+    open: false,
+    id: null,
+    name: "",
+  });
+
+  const handleDelete = async () => {
+    if (!deleteDialog.id) return;
 
     try {
-      const res = await fetch(`/api/foods-crud?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/foods-crud?id=${deleteDialog.id}`, { method: "DELETE" });
       if (res.ok) fetchFoods();
     } catch (err) {
       console.error("Delete error:", err);
+    } finally {
+      setDeleteDialog({ open: false, id: null, name: "" });
     }
   };
 
@@ -131,7 +139,7 @@ export default function FoodsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display mb-2">Daftar Makanan</h1>
+          <h1 className="text-3xl font-sans mb-2">Daftar Makanan</h1>
           <p className="text-text-muted">
             {foods.length} jenis makanan dengan kandungan gizi
           </p>
@@ -179,7 +187,7 @@ export default function FoodsPage() {
                       <Pencil className="w-4 h-4 text-primary" />
                     </button>
                     <button
-                      onClick={() => handleDelete(food.id)}
+                      onClick={() => setDeleteDialog({ open: true, id: food.id, name: food.name })}
                       className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-4 h-4 text-red-500" />
@@ -333,6 +341,34 @@ export default function FoodsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Dialog */}
+      {deleteDialog.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-center mb-2">Hapus Makanan</h3>
+            <p className="text-text-muted text-center mb-6">
+              Apakah Anda yakin ingin menghapus <span className="font-medium text-text">{deleteDialog.name}</span>? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteDialog({ open: false, id: null, name: "" })}
+                className="btn-secondary flex-1"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 bg-red-500 text-white py-2.5 px-4 rounded-xl font-medium hover:bg-red-600 transition-colors"
+              >
+                Hapus
+              </button>
+            </div>
           </div>
         </div>
       )}

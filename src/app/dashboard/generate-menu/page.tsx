@@ -93,7 +93,7 @@ export default function GenerateMenuPage() {
           <Sparkles className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-display">Generate Menu Rekomendasi</h1>
+          <h1 className="text-3xl font-sans">Generate Menu Rekomendasi</h1>
           <p className="text-text-muted">
             Hasilkan kombinasi menu makanan yang sesuai kebutuhan gizi harian
           </p>

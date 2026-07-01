@@ -61,10 +61,10 @@ function LoginForm() {
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
               <Leaf className="w-7 h-7" />
             </div>
-            <span className="text-2xl font-display">Makan Bergizi</span>
+            <span className="text-2xl font-sans">Makan Bergizi</span>
           </div>
 
-          <h1 className="text-5xl font-display leading-tight mb-6">
+          <h1 className="text-5xl font-sans leading-tight mb-6">
             Deteksi Nutrisi<br />dari Foto Makanan
           </h1>
 
@@ -91,10 +91,10 @@ function LoginForm() {
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-display">Makan Bergizi</span>
+            <span className="text-xl font-sans">Makan Bergizi</span>
           </div>
 
-          <h2 className="text-3xl font-display mb-2">Masuk</h2>
+          <h2 className="text-3xl font-sans mb-2">Masuk</h2>
           <p className="text-text-muted mb-8">
             Belum punya akun?{" "}
             <Link href="/register" className="text-primary font-medium hover:underline">

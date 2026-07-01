@@ -1,0 +1,32 @@
+flowchart TB
+    START([MULAI]) --> HOME[Halaman Dashboard]
+    HOME --> DETEKSI[Halaman Deteksi Makanan]
+
+    DETEKSI --> INPUT{Pilih Input}
+    INPUT -->|Upload| FILE[Pilih File]
+    INPUT -->|Kamera| KAMERA[Ambil Foto]
+
+    FILE --> KONVERSI[Konversi Gambar]
+    KAMERA --> KONVERSI
+
+    KONVERSI --> API[Kirim ke API]
+    API --> YOLO[YOLO Mendeteksi]
+    YOLO --> MATCH[Cocokkan Database]
+    MATCH --> HASIL[Tampilkan Hasil]
+
+    HASIL --> PILIH{Pilih Makanan}
+    PILIH --> PORSI[Atur Porsi]
+    PORSI --> INFO[Tampilkan Nutrisi]
+    INFO --> SIMPAN{Simpan?}
+
+    SIMPAN -->|Ya| SAVE[Simpan ke DB]
+    SIMPAN -->|Tidak| RESET[Reset]
+    SAVE --> DONE([SELESAI])
+
+    RESET --> INPUT
+    RESET -.-> HOME
+
+    style START fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style HOME fill:#2196F3,stroke:#1565C0,color:#fff
+    style HASIL fill:#E3F2FD,stroke:#1976D2,color:#1976D2
+    style DONE fill:#4CAF50,stroke:#2E7D32,color:#fff

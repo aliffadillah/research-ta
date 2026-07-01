@@ -1,0 +1,27 @@
+flowchart TD
+    Start([Mulai]) --> BukaHalaman[User Buka Halaman Nutrisi Harian]
+    BukaHalaman --> PilihTanggal[Pilih Tanggal]
+    PilihTanggal --> AmbilData[Ambil Data dari Database]
+    AmbilData --> HitungTotal[Hitung Total Nutrisi]
+    HitungTotal --> Bandingkan[Bandingkan dengan Standar AKG]
+    Bandingkan --> CekKekurangan{Cek Kekurangan Nutrisi?}
+    CekKekurangan -->|Tidak Ada| TampilkanOK[Tampilkan: Nutrisi Sudah Cukup]
+    CekKekurangan -->|Ada| TampilkanKurang[Tampilkan Nutrisi yang Kurang]
+    TampilkanKurang --> Rekomendasi[Tampilkan Rekomendasi Makanan]
+    Rekomendasi --> PilihAksi{Pilih Aksi?}
+    PilihAksi -->|Lihat Detail| LihatDetail[Lihat Detail Gizi]
+    PilihAksi -->|Tambah| TambahMakanan[Tambah Makanan ke Log]
+    PilihAksi -->|Selesai| Selesai([Selesai])
+    TampilkanOK --> Selesai
+    LihatDetail -.-> PilihAksi
+    TambahMakanan -.-> Selesai
+
+    classDef start fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef process fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef success fill:#27ae60,stroke:#2ecc71,color:#fff
+
+    class Start start
+    class BukaHalaman,PilihTanggal,AmbilData,HitungTotal,Bandingkan,Rekomendasi,LihatDetail,TambahMakanan process
+    class CekKekurangan,PilihAksi decision
+    class TampilkanOK,TampilkanKurang,Selesai success

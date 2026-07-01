@@ -40,7 +40,7 @@ export default function Sidebar() {
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
             <Leaf className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-display">Makan Bergizi</span>
+          <span className="text-xl font-sans">Makan Bergizi</span>
         </Link>
       </div>
 

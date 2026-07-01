@@ -1,0 +1,32 @@
+flowchart TD
+    Start([Mulai]) --> BukaHalaman[User Buka Halaman Generate Menu]
+    BukaHalaman --> InputKebutuhan[Input Kebutuhan Nutrisi]
+    InputKebutuhan --> PilihPreferensi[Pilih Preferensi Makanan]
+    PilihPreferensi --> PilihBatasan[Pilih Batasan Kalori]
+    PilihBatasan --> Generate[Tekan Tombol Generate]
+    Generate --> SistemBuat[Sistem Membuat Kombinasi Menu]
+    SistemBuat --> CekKombinasi{Cek Kombinasi Sesuai?}
+    CekKombinasi -->|Kurang Sesuai| CobaLagi[Coba Kombinasi Lain]
+    CekKombinasi -->|Sesuai| PilihTerbaik[Pilih Kombinasi Terbaik]
+    CobaLagi -.-> SistemBuat
+    PilihTerbaik --> CekVariasi{Cek Variasi Menu?}
+    CekVariasi -->|Terlalu Monoton| Sesuaikan[Sesuaikan Pilihan]
+    CekVariasi -->|OK| SimpanMenu[Simpan Menu]
+    Sesuaikan -.-> SistemBuat
+    SimpanMenu --> Tampilkan[Tampilkan Menu Harian]
+    Tampilkan --> PilihAksi{Pilih Aksi?}
+    PilihAksi -->|Simpan| Konfirmasi[Menu Tersimpan]
+    PilihAksi -->|Ubah| UbahMenu[Ubah Menu]
+    PilihAksi -->|Generate Ulang| Generate
+    UbahMenu -.-> Generate
+    Konfirmasi --> Selesai([Selesai])
+
+    classDef start fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef process fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef success fill:#27ae60,stroke:#2ecc71,color:#fff
+
+    class Start start
+    class BukaHalaman,InputKebutuhan,PilihPreferensi,PilihBatasan,Generate,SistemBuat,CobaLagi,PilihTerbaik,CekVariasi,Sesuaikan,SimpanMenu,Tampilkan,UbahMenu process
+    class PilihAksi decision
+    class Konfirmasi,Selesai success

@@ -31,6 +31,12 @@ features = [
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+torch.manual_seed(42)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(42)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
 model_path = 'model_lstm_mbg.pt'
 scaler_path = 'scaler_mbg.pkl'
 
@@ -53,6 +59,11 @@ def predict_daily():
         return jsonify({"error": "Model atau Scaler belum dimuat di server."}), 500
 
     try:
+        # Reset seed untuk konsistensi
+        torch.manual_seed(42)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(42)
+
         csv_path = 'MBG Historis Latest 2.csv'
         if not os.path.exists(csv_path):
             return jsonify({"error": f"File {csv_path} tidak ditemukan"}), 404
@@ -91,6 +102,11 @@ def predict_custom():
         return jsonify({"error": "Model atau Scaler belum dimuat di server."}), 500
 
     try:
+        # Reset seed untuk konsistensi
+        torch.manual_seed(42)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(42)
+
         data = request.get_json()
         history = data.get('history')
         

@@ -9,15 +9,15 @@ export function formatFileSize(bytes: number): string {
 }
 
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-  const maxSize = 10 * 1024 * 1024; // 10MB
+  const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"];
+  const maxSize = 5 * 1024 * 1024; // 5MB
 
   if (!validTypes.includes(file.type)) {
-    return { valid: false, error: "Format tidak didukung. Gunakan JPG, PNG, atau WebP." };
+    return { valid: false, error: "Format tidak didukung. Gunakan JPG, PNG, WebP, GIF, atau BMP." };
   }
 
   if (file.size > maxSize) {
-    return { valid: false, error: "Ukuran file terlalu besar. Maksimal 10MB." };
+    return { valid: false, error: "Ukuran file terlalu besar. Maksimal 5MB." };
   }
 
   return { valid: true };

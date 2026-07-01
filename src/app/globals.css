@@ -3,9 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --font-dm-serif: "DM Serif Display", serif;
-  --font-plus-jakarta: "Plus Jakarta Sans", sans-serif;
-  --font-jetbrains: "JetBrains Mono", monospace;
+  /* Font already loaded via next/font/google */
 }
 
 html {
@@ -13,7 +11,6 @@ html {
 }
 
 body {
-  font-family: var(--font-plus-jakarta);
   background-color: #FAFAF7;
   color: #1A1A18;
   -webkit-font-smoothing: antialiased;
@@ -90,7 +87,7 @@ body {
   }
 
   .nutrition-value {
-    @apply font-mono text-lg font-semibold tabular-nums;
+    @apply text-lg font-semibold tabular-nums;
   }
 
   .progress-bar {
@@ -163,4 +160,14 @@ body {
 /* Loading skeleton */
 .skeleton {
   @apply bg-border/50 animate-pulse rounded;
+}
+
+/* Slow spin animation */
+@keyframes slow-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: slow-spin 2s linear infinite;
 }

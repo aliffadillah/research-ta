@@ -1,0 +1,25 @@
+flowchart TB
+    START([MULAI]) --> HOME[Halaman Dashboard]
+    HOME --> NH[Halaman Nutrisi Harian]
+
+    NH --> SYNC[Sync Sekarang]
+
+    SYNC --> CHECK{Cek Data}
+    CHECK -->|Data Sudah Ada| DONE1([Tidak Ada Perubahan])
+    CHECK -->|Belum Ada| WINDOW[Ambil 7 Data Terakhir]
+
+    WINDOW --> FLASK[Kirim ke Flask API]
+    FLASK --> LSTM[LSTM Prediksi]
+    LSTM --> HASIL[Hasil Prediksi]
+    HASIL --> SIMPAN[Simpan ke Database]
+    SIMPAN --> DONE2([Selesai])
+
+    DONE1 -.-> HOME
+    DONE2 -.-> HOME
+
+    style START fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style HOME fill:#2196F3,stroke:#1565C0,color:#fff
+    style NH fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    style LSTM fill:#FF9800,stroke:#E65100,color:#fff
+    style DONE1 fill:#9E9E9E,stroke:#616161,color:#fff
+    style DONE2 fill:#4CAF50,stroke:#2E7D32,color:#fff

@@ -180,7 +180,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-display mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-sans mb-2">Dashboard</h1>
         <p className="text-text-muted">{formatDate(new Date())}</p>
       </div>
 

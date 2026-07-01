@@ -119,7 +119,7 @@ export default function ReferensiAKGPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-display mb-2">Referensi AKG</h1>
+        <h1 className="text-3xl font-sans mb-2">Referensi AKG</h1>
         <p className="text-text-muted">
           Angka Kecukupan Gizi yang Dianjurkan per Hari
         </p>

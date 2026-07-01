@@ -222,7 +222,7 @@ export default function HistoryPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-display mb-2">Riwayat Nutrisi</h1>
+        <h1 className="text-3xl font-sans mb-2">Riwayat Nutrisi</h1>
         <p className="text-text-muted">
           Lacak asupan harian dan lihat tren nutrisi kamu
         </p>

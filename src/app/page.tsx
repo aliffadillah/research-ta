@@ -161,7 +161,7 @@ function FeatureCard({ icon: Icon, title, description, index }: { icon: any; tit
       >
         <Icon className="w-8 h-8 text-primary" />
       </motion.div>
-      <h3 className="font-display text-xl mb-3">{title}</h3>
+      <h3 className="font-sans text-xl mb-3">{title}</h3>
       <p className="text-text-muted leading-relaxed">{description}</p>
     </motion.div>
   );
@@ -182,7 +182,7 @@ function StepCard({ number, title, description, index }: { number: string; title
         whileInView={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, delay: index * 0.2 + 0.3 }}
         viewport={{ once: true }}
-        className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-mono text-2xl font-bold mb-6 shadow-lg"
+        className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-sans text-2xl font-bold mb-6 shadow-lg"
       >
         {number}
       </motion.div>
@@ -195,7 +195,7 @@ function StepCard({ number, title, description, index }: { number: string; title
           className="hidden md:block absolute top-8 -right-8 w-16 h-0.5 bg-gradient-to-r from-primary to-transparent"
         />
       )}
-      <h3 className="font-display text-2xl mb-4">{title}</h3>
+      <h3 className="font-sans text-2xl mb-4">{title}</h3>
       <p className="text-text-muted leading-relaxed">{description}</p>
     </motion.div>
   );
@@ -215,7 +215,7 @@ function StatCounter({ value, label, color }: { value: string; label: string; co
         whileInView={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 100 }}
         viewport={{ once: true }}
-        className="font-mono text-5xl font-bold mb-2"
+        className="font-sans text-5xl font-bold mb-2"
       >
         {value}
       </motion.p>
@@ -312,7 +312,7 @@ function UIMockup() {
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
             >
-              <p className={`font-mono text-2xl font-semibold ${stat.color}`}>{stat.value}</p>
+              <p className={`font-sans text-2xl font-semibold ${stat.color}`}>{stat.value}</p>
               <p className="text-xs text-text-muted mt-1">{stat.label}</p>
             </motion.div>
           ))}
@@ -386,7 +386,7 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <UtensilsCrossed className="w-5 h-5 text-white" />
             </div>
-            <span className="font-display text-xl">Makan Bergizi</span>
+            <span className="font-sans text-xl">Makan Bergizi</span>
           </motion.div>
 
           <motion.div
@@ -441,7 +441,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="font-display text-5xl md:text-6xl lg:text-7xl tracking-tight leading-[1.1]"
+              className="font-sans text-5xl md:text-6xl lg:text-7xl tracking-tight leading-[1.1]"
             >
               Deteksi Nutrisi
               <motion.span
@@ -502,7 +502,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
-            <h2 className="font-display text-4xl md:text-5xl tracking-tight mb-4">Fitur Unggulan</h2>
+            <h2 className="font-sans text-4xl md:text-5xl tracking-tight mb-4">Fitur Unggulan</h2>
             <p className="text-text-muted text-lg">
               Teknologi AI untuk membantu Anda memantau dan mengoptimalkan asupan gizi harian
             </p>
@@ -526,7 +526,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
-            <h2 className="font-display text-4xl md:text-5xl tracking-tight mb-4">Cara Kerja</h2>
+            <h2 className="font-sans text-4xl md:text-5xl tracking-tight mb-4">Cara Kerja</h2>
             <p className="text-text-muted text-lg">
               Tiga langkah mudah untuk mulai memantau nutrisi Anda
             </p>
@@ -551,7 +551,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.6 }}
                 viewport={{ once: true }}
               >
-                <h2 className="font-display text-4xl md:text-5xl tracking-tight mb-4">
+                <h2 className="font-sans text-4xl md:text-5xl tracking-tight mb-4">
                   Dirancang untuk<br />
                   <span className="text-primary">Kebutuhan Indonesia</span>
                 </h2>
@@ -643,7 +643,7 @@ export default function LandingPage() {
                 <UtensilsCrossed className="w-10 h-10" />
               </motion.div>
 
-              <h2 className="font-display text-4xl md:text-5xl mb-6">
+              <h2 className="font-sans text-4xl md:text-5xl mb-6">
                 Siap Mulai?
                 <motion.span
                   className="block text-accent"
@@ -707,7 +707,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                 <UtensilsCrossed className="w-5 h-5 text-white" />
               </div>
-              <span className="font-display text-xl">Makan Bergizi</span>
+              <span className="font-sans text-xl">Makan Bergizi</span>
             </motion.div>
 
             <motion.div

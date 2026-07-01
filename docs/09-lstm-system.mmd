@@ -1,0 +1,67 @@
+flowchart TD
+    Start([Mulai]) --> PilihMenu[Pilih Menu Prediksi]
+    PilihMenu --> PilihWaktu{Pilih Jangka Waktu?}
+
+    subgraph DataCollection["📊 Pengumpulan Data"]
+        PilihWaktu --> AmbilData[Ambil Data Histori]
+        AmbilData --> Nutrition[Data Nutrisi Harian]
+        AmbilData --> Meals[Data Makanan]
+        AmbilData --> Weight[Data Berat Badan]
+        Nutrition --> Gabung[Gabungkan Dataset]
+        Meals --> Gabung
+        Weight --> Gabung
+    end
+tta
+    Gabung --> Preprocessing
+
+    subgraph Preprocess["🔄 Preprocessing"]
+        Preprocessing --> Clean[Hapus Missing Value]
+        Clean --> Normalize2[Normalisasi Min-Max]
+        Normalize2 --> Sequence[Buat Sequence Data]
+        Sequence --> Split[Train 80% / Test 20%]
+    end
+
+    Split --> ModelLSTM[🧠 Model LSTM]
+
+    subgraph Training["Pelatihan Model"]
+        ModelLSTM --> Feed[Feed Sequence ke LSTM]
+        Feed --> Forward[Forward Pass]
+        Forward --> Loss[Hitung Loss MSE]
+        Loss --> Backprop[Backpropagation]
+        Backprop --> Update[Update Bobot]
+        Update --> Iterasi{Iterasi?}
+        Iterasi -->|Belum Cukup| Feed
+        Iterasi -->|Selesai| SaveModel[Simpan Model]
+    end
+
+    SaveModel --> Prediksi[🔮 Prediksi]
+
+    subgraph Prediction["Prediksi"]
+        Prediksi --> InputNew[Input Data Terbaru]
+        InputNew --> Load[Load Model Terlatih]
+        Load --> Predict[Generate Prediksi]
+        Predict --> Inverse[Inverse Normalisasi]
+        Inverse --> Forecast[Hasil Prediksi]
+    end
+
+    Forecast --> Visualisasi[📈 Visualisasi]
+
+    subgraph Output["Output"]
+        Visualisasi --> Grafik[Grafik Line Chart]
+        Visualisasi --> Confidence[Interval Kepercayaan]
+        Visualisasi --> Rekomendasi[Ringkasan Rekomendasi]
+    end
+
+    Grafik --> Selesai([Selesai])
+
+    classDef start fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef process fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef data fill:#1abc9c,stroke:#16a085,color:#fff
+    classDef training fill:#9b59b6,stroke:#8e44ad,color:#fff
+    classDef prediction fill:#e74c3c,stroke:#c0392b,color:#fff
+    classDef success fill:#27ae60,stroke:#2ecc71,color:#fff
+
+    class Start,PilihMenu,PilihWaktu,AmbilData,Nutrition,Meals,Weight,Gabung,Preprocessing,Clean,Normalize2,Sequence,Split,ModelLSTM,Feed,Forward,Loss,Backprop,Update,SaveModel,Predict,Inverse,Forecast,Visualisasi,Grafik,Confidence,Rekomendasi process
+    class Iterasi decision
+    class Selesai success

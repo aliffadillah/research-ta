@@ -141,7 +141,7 @@ export default function MenuHarianPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display mb-2">Menu Harian MBG</h1>
+          <h1 className="text-3xl font-sans mb-2">Menu Harian MBG</h1>
           <p className="text-text-muted">
             Kelola menu Makan Bergizi Gratis dengan nilai gizi
           </p>

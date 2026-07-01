@@ -29,9 +29,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-dm-serif)", "serif"],
-        body: ["var(--font-plus-jakarta)", "sans-serif"],
-        mono: ["var(--font-jetbrains)", "monospace"],
+        sans: ["var(--font-sans)", "sans-serif"],
       },
       borderRadius: {
         xl: "16px",

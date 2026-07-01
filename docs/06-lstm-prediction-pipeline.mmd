@@ -1,0 +1,26 @@
+flowchart TD
+    Start([Mulai]) --> Request[Request Prediksi Nutrisi]
+    Request --> Validasi{Request Valid?}
+    Validasi -->|Tidak| Error[Error: Request Tidak Valid]
+    Validasi -->|Ya| AmbilData[Ambil 7 Data Terakhir]
+    AmbilData --> ProsesData[Proses Data untuk LSTM]
+    ProsesData --> LoadModel[Load Model LSTM]
+    LoadModel --> Prediksi[Jalankan Prediksi LSTM]
+    Prediksi --> Hasil[Hasil Prediksi Nutrisi]
+    Hasil --> Simpan[Simpan ke Database]
+    Simpan --> Tampilkan[Tampilkan Hasil Prediksi]
+    Tampilkan --> Selesai([Selesai])
+    Error --> Selesai
+
+    classDef start fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef process fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef ml fill:#e74c3c,stroke:#c0392b,color:#fff
+    classDef success fill:#27ae60,stroke:#2ecc71,color:#fff
+    classDef error fill:#c0392b,stroke:#a93226,color:#fff
+
+    class Start start
+    class Request,AmbilData,ProsesData,LoadModel,Prediksi,Hasil,Simpan,Tampilkan process
+    class Validasi decision
+    class Error error
+    class Selesai success

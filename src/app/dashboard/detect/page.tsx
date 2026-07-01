@@ -1,11 +1,22 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, Upload, X, Check, Loader2, AlertCircle, Image, Box } from "lucide-react";
+import { Camera, Upload, X, Check, Loader2, AlertCircle, Image, Box, SearchX, Sparkles } from "lucide-react";
 import { cn, validateImageFile, fileToBase64 } from "@/lib/utils/helpers";
 import DetectionResult from "@/components/food/DetectionResult";
 
-type DetectionState = "idle" | "uploading" | "detecting" | "success" | "error";
+type DetectionState = "idle" | "preview" | "detecting" | "success" | "error";
+
+const DETECTING_MESSAGES = [
+  "Menganalisis Makanan...",
+  "Mendeteksi Semua Objek...",
+  "Menghitung Kandungan Nutrisi...",
+  "Proses Dilakukan...",
+  "Tunggu Sebentar...",
+  "Sedang Memproses...",
+  "Menganalisis Gambar...",
+  "Mendeteksi Nutrisi...",
+];
 
 interface BoundingBox {
   x1: number;
@@ -56,6 +67,7 @@ const getDetectionColor = (index: number) => {
 export default function DetectPage() {
   const [state, setState] = useState<DetectionState>("idle");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [selectedPrediction, setSelectedPrediction] = useState<Prediction | null>(null);
   const [portionSize, setPortionSize] = useState(100);
@@ -70,6 +82,24 @@ export default function DetectPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [detectingMessage, setDetectingMessage] = useState(DETECTING_MESSAGES[0]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Cycling text effect during detection
+  useEffect(() => {
+    if (state !== "detecting") return;
+
+    let messageIndex = 0;
+
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % DETECTING_MESSAGES.length;
+      setDetectingMessage(DETECTING_MESSAGES[messageIndex]);
+    }, 1500);
+
+    return () => {
+      clearInterval(messageInterval);
+    };
+  }, [state]);
 
   // Handle image load to get dimensions
   const handleImageLoad = useCallback(() => {
@@ -89,28 +119,29 @@ export default function DetectPage() {
       return;
     }
 
-    setState("uploading");
     setError(null);
     setDebugInfo(null);
     setPredictions([]);
     setSelectedPrediction(null);
     setSelectedIndex(0);
+    setImageDimensions({ width: 0, height: 0 });
 
     // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       setImagePreview(e.target?.result as string);
+      setState("preview");
+
+      // Convert to base64
+      try {
+        const base64 = await fileToBase64(file);
+        setImageBase64(base64);
+      } catch (err) {
+        setError("Gagal memproses gambar");
+        setState("error");
+      }
     };
     reader.readAsDataURL(file);
-
-    // Convert to base64
-    try {
-      const base64 = await fileToBase64(file);
-      await detectFood(base64);
-    } catch (err) {
-      setError("Gagal memproses gambar");
-      setState("error");
-    }
   }, []);
 
   const detectFood = async (imageBase64: string) => {
@@ -174,7 +205,8 @@ export default function DetectPage() {
 
     // Convert data URL to base64
     const base64 = imageDataUrl.split(",")[1];
-    detectFood(base64);
+    setImageBase64(base64);
+    setState("preview");
   }, []);
 
   const startCamera = async () => {
@@ -200,10 +232,25 @@ export default function DetectPage() {
     setShowCamera(false);
   };
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
+    if (file) {
       handleFileSelect(file);
     }
   }, [handleFileSelect]);
@@ -242,6 +289,7 @@ export default function DetectPage() {
   const reset = () => {
     setState("idle");
     setImagePreview(null);
+    setImageBase64(null);
     setPredictions([]);
     setSelectedPrediction(null);
     setPortionSize(100);
@@ -249,6 +297,11 @@ export default function DetectPage() {
     setDebugInfo(null);
     setSaved(false);
     setSelectedIndex(0);
+  };
+
+  const handleStartDetect = async () => {
+    if (!imageBase64) return;
+    await detectFood(imageBase64);
   };
 
   // Extract bbox from prediction
@@ -268,7 +321,7 @@ export default function DetectPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-display mb-2">Deteksi Makanan</h1>
+        <h1 className="text-3xl font-sans mb-2">Deteksi Makanan</h1>
         <p className="text-text-muted">
           Upload atau pindai foto makanan untuk mengetahui kandungan nutrisinya
         </p>
@@ -278,11 +331,18 @@ export default function DetectPage() {
       {(state === "idle" || state === "error") && (
         <div
           className={cn(
-            "card border-2 border-dashed transition-colors",
-            state === "error" ? "border-red-300" : "border-border hover:border-primary"
+            "card border-2 border-dashed transition-all cursor-pointer",
+            isDragging
+              ? "border-primary bg-primary/5 scale-[1.02]"
+              : state === "error"
+              ? "border-red-300"
+              : "border-border hover:border-primary"
           )}
           onDrop={handleDrop}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
           onDragOver={(e) => e.preventDefault()}
+          onClick={() => !showCamera && fileInputRef.current?.click()}
         >
           {state === "error" && error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-700 text-sm">
@@ -292,15 +352,22 @@ export default function DetectPage() {
           )}
 
           <div className="text-center py-12">
-            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Camera className="w-10 h-10 text-primary" />
+            <div className={cn(
+              "w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-all",
+              isDragging ? "bg-primary/20 scale-110" : "bg-primary/10"
+            )}>
+              {isDragging ? (
+                <Upload className="w-10 h-10 text-primary" />
+              ) : (
+                <Camera className="w-10 h-10 text-primary" />
+              )}
             </div>
 
             <h2 className="text-xl font-semibold mb-2">
-              {showCamera ? "Ambil Foto" : "Unggah Foto Makanan"}
+              {showCamera ? "Ambil Foto" : isDragging ? "Lepaskan file di sini" : "Unggah Foto Makanan"}
             </h2>
             <p className="text-text-muted mb-6">
-              {showCamera ? "Arahkan kamera ke makanan" : "Drag & drop atau pilih dari galeri"}
+              {showCamera ? "Arahkan kamera ke makanan" : "Drag & drop atau pilih dari galeri (Maks. 5MB)"}
             </p>
 
             {showCamera ? (
@@ -316,7 +383,7 @@ export default function DetectPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/bmp"
                 onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
                 className="hidden"
               />
@@ -336,19 +403,66 @@ export default function DetectPage() {
               ) : (
                 <>
                   <button
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                     className="btn-primary flex items-center gap-2"
                   >
                     <Upload className="w-5 h-5" />
                     Pilih File
                   </button>
-                  <button onClick={startCamera} className="btn-secondary flex items-center gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startCamera(); }}
+                    className="btn-secondary flex items-center gap-2"
+                  >
                     <Camera className="w-5 h-5" />
                     Buka Kamera
                   </button>
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview State */}
+      {state === "preview" && (
+        <div className="card">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-700 text-sm">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold mb-2">Pratinjau Gambar</h2>
+            <p className="text-text-muted">Pastikan gambar sudah benar sebelum mendeteksi</p>
+          </div>
+
+          <div className="relative max-w-md mx-auto mb-6 rounded-2xl overflow-hidden bg-gray-100">
+            {imagePreview && (
+              <img
+                ref={imageRef}
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-auto"
+                onLoad={handleImageLoad}
+              />
+            )}
+          </div>
+
+          <div className="flex items-center justify-center gap-4">
+            <button onClick={reset} className="btn-secondary flex items-center gap-2">
+              <X className="w-5 h-5" />
+              Batal
+            </button>
+            <button
+              onClick={handleStartDetect}
+              disabled={!imageBase64}
+              className="btn-primary flex items-center gap-2"
+            >
+              <Sparkles className="w-5 h-5" />
+              Deteksi Makanan
+            </button>
           </div>
         </div>
       )}
@@ -364,17 +478,44 @@ export default function DetectPage() {
                 className="w-full h-full object-cover rounded-2xl"
               />
             )}
-            <div className="absolute inset-0 bg-primary/50 rounded-2xl flex items-center justify-center">
-              <Loader2 className="w-10 h-10 text-white animate-spin" />
+            <div className="absolute inset-0 bg-primary/50 rounded-2xl flex items-center justify-center animate-pulse">
+              <div className="animate-spin-slow">
+                <Sparkles className="w-10 h-10 text-white" />
+              </div>
             </div>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Menganalisis Makanan</h2>
-          <p className="text-text-muted">Mendeteksi semua objek makanan...</p>
+          <h2 className="text-xl font-semibold mb-2 animate-pulse">
+            {detectingMessage}
+          </h2>
+          <p className="text-text-muted">Mohon tunggu...</p>
+
+          {/* Progress dots */}
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
         </div>
       )}
 
-      {/* Success State */}
-      {(state === "success" || saved) && (
+      {/* Success State - No Detections */}
+      {(state === "success" || saved) && predictions.length === 0 && (
+        <div className="card text-center py-16">
+          <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center">
+            <SearchX className="w-12 h-12 text-gray-400" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Tidak Ada yang Terdeteksi</h2>
+          <p className="text-text-muted mb-6">
+            Tidak ada objek makanan yang terdeteksi dalam gambar ini. Coba gunakan gambar lain dengan makanan yang lebih jelas.
+          </p>
+          <button onClick={reset} className="btn-primary">
+            Coba Lagi
+          </button>
+        </div>
+      )}
+
+      {/* Success State - Has Detections */}
+      {(state === "success" || saved) && predictions.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Image with Bounding Boxes */}
           <div className="space-y-4">
@@ -442,7 +583,6 @@ export default function DetectPage() {
                         style={{ maxWidth: "90%" }}
                       >
                         <span className="truncate block">{pred.class}</span>
-                        <span className="text-[10px] opacity-80">{pred.confidence.toFixed(0)}%</span>
                       </div>
                     </div>
                   );
@@ -450,7 +590,7 @@ export default function DetectPage() {
               </div>
             </div>
 
-           
+
           </div>
 
           {/* Right: Full Detection Results */}
