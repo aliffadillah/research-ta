@@ -99,3 +99,5 @@ PLAN.md
 flask_api/model_lstm_mbg.pt
 flask_api/scaler_mbg.pkl
 flask_api/run.bat
+
+docs/
