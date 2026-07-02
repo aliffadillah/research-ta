@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Brain,
   Calendar,
@@ -18,6 +18,8 @@ import {
   AlertCircle,
   Info,
 } from "lucide-react";
+import ImportModal from "@/components/modals/ImportModal";
+import SyncProgressModal from "@/components/modals/SyncProgressModal";
 
 interface DailyNutrition {
   id: string;
@@ -37,12 +39,69 @@ interface DailyNutrition {
   createdAt: string;
 }
 
+interface NormalizedNutritionRow {
+  date: string;
+  carbsBesar: number;
+  proteinBesar: number;
+  fatBesar: number;
+  fiberBesar: number;
+  energyBesar: number;
+  carbsKecil: number;
+  proteinKecil: number;
+  fatKecil: number;
+  fiberKecil: number;
+  energyKecil: number;
+  isValid: boolean;
+  error?: string;
+}
+
+interface FilePreviewResult {
+  success: boolean;
+  preview: NormalizedNutritionRow[];
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  dateRange: { start: string; end: string } | null;
+}
+
 interface SyncStatus {
+  lastDataDate: string | null;
   lastDate: string | null;
+  nextPredictDate: string;
+  today: string;
+  daysToSync: number;
+  needsSync: boolean;
   totalRecords: number;
   actualDataCount: number;
   predictedDataCount: number;
-  needsSync: boolean;
+  canPredict: boolean;
+  hasEnoughData: boolean;
+  message: string;
+}
+
+interface SyncProgressEvent {
+  type: "start" | "progress" | "synced" | "error_day" | "complete" | "error";
+  message?: string;
+  current?: number;
+  total?: number;
+  date?: string;
+  energy?: number;
+  percentage?: number;
+  synced?: number;
+  errors?: number;
+  results?: { date: string; status: string; energy?: number }[];
+}
+
+interface SyncProgress {
+  status: "idle" | "syncing" | "complete" | "error";
+  message: string;
+  current: number;
+  total: number;
+  date: string;
+  percentage: number;
+  synced: number;
+  errors: number;
+  results: { date: string; status: string; energy?: number }[];
 }
 
 interface PopupMessage {
@@ -134,11 +193,29 @@ export default function NutrisiHarianPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [popup, setPopup] = useState<PopupMessage>({ show: false, type: "info", message: "" });
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [previewResult, setPreviewResult] = useState<FilePreviewResult | null>(null);
+  const [rawFileData, setRawFileData] = useState<string | null>(null);
+  const [selectedFileType, setSelectedFileType] = useState<"json" | "csv">("json");
+  const [previewing, setPreviewing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<SyncProgress>({
+    status: "idle",
+    message: "",
+    current: 0,
+    total: 0,
+    date: "",
+    percentage: 0,
+    synced: 0,
+    errors: 0,
+    results: [],
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update current time every second
   useEffect(() => {
@@ -199,7 +276,7 @@ export default function NutrisiHarianPage() {
 
   const fetchSyncStatus = async () => {
     try {
-      const res = await fetch("/api/lstm-predict");
+      const res = await fetch("/api/lstm-sync/status");
       if (res.ok) {
         const data = await res.json();
         setSyncStatus(data);
@@ -209,113 +286,153 @@ export default function NutrisiHarianPage() {
     }
   };
 
-  const handleImportJSON = async () => {
-    setPopup({
-      show: true,
-      type: "confirm",
-      message: "Import data dari file JSON?\nData yang sudah ada akan diupdate.",
-      onConfirm: async () => {
-        setImporting(true);
-        try {
-          const res = await fetch("/api/daily-nutritions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type: "import" }),
-          });
+  const handleSync = () => {
+    // Check how many days need syncing
+    if (syncStatus && (syncStatus.daysToSync || 0) === 0) {
+      setPopup({
+        show: true,
+        type: "info",
+        message: "Data sudah up-to-date!",
+      });
+      return;
+    }
 
-          if (res.ok) {
-            const result = await res.json();
-            setPopup({
-              show: true,
-              type: "success",
-              message: result.message || "Data berhasil diimport!",
-            });
+    // Open sync progress modal
+    setSyncProgress({
+      status: "syncing",
+      message: "Memulai sinkronisasi...",
+      current: 0,
+      total: 0,
+      date: "",
+      percentage: 0,
+      synced: 0,
+      errors: 0,
+      results: [],
+    });
+    setShowSyncModal(true);
+    setSyncing(true);
+
+    // Start SSE connection
+    const eventSource = new EventSource("/api/lstm-sync");
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data: SyncProgressEvent = JSON.parse(event.data);
+
+        switch (data.type) {
+          case "start":
+            setSyncProgress((prev) => ({
+              ...prev,
+              status: "syncing",
+              message: data.message || "Memulai...",
+              total: data.total || 0,
+              current: 0,
+              percentage: 0,
+            }));
+            break;
+
+          case "progress":
+            setSyncProgress((prev) => ({
+              ...prev,
+              status: "syncing",
+              message: data.message || `Memproses...`,
+              current: data.current || 0,
+              total: data.total || 0,
+              date: data.date || "",
+              percentage: data.percentage || 0,
+            }));
+            break;
+
+          case "synced":
+            setSyncProgress((prev) => ({
+              ...prev,
+              status: "syncing",
+              current: data.current || 0,
+              total: data.total || 0,
+              date: data.date || "",
+              percentage: data.percentage || 0,
+              synced: prev.synced + 1,
+              results: [
+                ...prev.results.slice(-9), // Keep last 10
+                { date: data.date || "", status: "success", energy: data.energy },
+              ],
+            }));
+            break;
+
+          case "error_day":
+            setSyncProgress((prev) => ({
+              ...prev,
+              status: "syncing",
+              current: data.current || 0,
+              total: data.total || 0,
+              date: data.date || "",
+              errors: prev.errors + 1,
+              results: [
+                ...prev.results.slice(-9),
+                { date: data.date || "", status: "error" },
+              ],
+            }));
+            break;
+
+          case "complete":
+            setSyncProgress((prev) => ({
+              ...prev,
+              status: "complete",
+              message: data.message || "Sinkronisasi selesai!",
+              synced: data.synced || prev.synced,
+              errors: data.errors || prev.errors,
+              percentage: 100,
+              results: data.results || prev.results,
+            }));
+            eventSource.close();
+            setSyncing(false);
+            // Refresh data
             fetchNutritions();
             fetchSyncStatus();
-          } else {
-            setPopup({
-              show: true,
-              type: "error",
-              message: "Gagal import data",
-            });
-          }
-        } catch (error) {
-          console.error("Import error:", error);
-          setPopup({
-            show: true,
-            type: "error",
-            message: "Gagal import data.\nPastikan Flask API berjalan di port 5000.",
-          });
-        } finally {
-          setImporting(false);
+            break;
+
+          case "error":
+            setSyncProgress((prev) => ({
+              ...prev,
+              status: "error",
+              message: data.message || "Terjadi kesalahan",
+            }));
+            eventSource.close();
+            setSyncing(false);
+            break;
         }
-      },
-    });
+      } catch (error) {
+        console.error("Error parsing SSE data:", error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("SSE error:", error);
+      setSyncProgress((prev) => ({
+        ...prev,
+        status: "error",
+        message: "Koneksi terputus. Silakan coba lagi.",
+      }));
+      eventSource.close();
+      setSyncing(false);
+    };
   };
 
-  const handleSync = async () => {
-    setPopup({
-      show: true,
-      type: "confirm",
-      message: "Prediksi data dari tanggal terakhir hingga saat ini?\nAkan diprediksi bertahap hari per hari.",
-      onConfirm: async () => {
-        setSyncing(true);
-        try {
-          const res = await fetch("/api/lstm-predict", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "sync" }),
-          });
-
-          if (res.ok) {
-            const result = await res.json();
-            if (result.success) {
-              if (result.synced === 0) {
-                // Tampilkan info debug jika ada
-                const debugInfo = result.debug
-                  ? `\n\n[Debug Info]\nLast Date: ${new Date(result.debug.lastDate).toLocaleDateString("id-ID")}\nNext Date: ${new Date(result.debug.nextDate).toLocaleDateString("id-ID")}\nToday: ${new Date(result.debug.today).toLocaleDateString("id-ID")}\nReason: ${result.debug.reason}`
-                  : "";
-                setPopup({
-                  show: true,
-                  type: "info",
-                  message: "Data sudah up-to-date. Tidak ada data baru untuk diprediksi." + debugInfo,
-                });
-              } else {
-                setPopup({
-                  show: true,
-                  type: "success",
-                  message: result.message || `Berhasil memprediksi ${result.synced} hari!`,
-                });
-              }
-              fetchNutritions();
-              fetchSyncStatus();
-            } else {
-              setPopup({
-                show: true,
-                type: "error",
-                message: result.error || result.message || "Gagal sync data",
-              });
-            }
-          } else {
-            const errorData = await res.json();
-            setPopup({
-              show: true,
-              type: "error",
-              message: errorData.error || "Gagal sync data.\nPastikan Flask API berjalan di port 5000.",
-            });
-          }
-        } catch (error) {
-          console.error("Sync error:", error);
-          setPopup({
-            show: true,
-            type: "error",
-            message: "Gagal sync data.\nPastikan Flask API berjalan di port 5000.",
-          });
-        } finally {
-          setSyncing(false);
-        }
-      },
-    });
+  const closeSyncModal = () => {
+    if (!syncing) {
+      setShowSyncModal(false);
+      setSyncProgress({
+        status: "idle",
+        message: "",
+        current: 0,
+        total: 0,
+        date: "",
+        percentage: 0,
+        synced: 0,
+        errors: 0,
+        results: [],
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -379,6 +496,143 @@ export default function NutrisiHarianPage() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isJson = file.name.endsWith(".json");
+    const isCsv = file.name.endsWith(".csv");
+
+    if (!isJson && !isCsv) {
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Hanya file JSON atau CSV yang diizinkan!",
+      });
+      return;
+    }
+
+    const fileType = isJson ? "json" : "csv";
+    setSelectedFileType(fileType);
+
+    try {
+      const content = await file.text();
+      setRawFileData(content);
+
+      // Auto preview
+      setPreviewing(true);
+      const res = await fetch("/api/daily-nutritions-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "preview",
+          data: content,
+          fileType,
+        }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setPreviewResult(result);
+      } else {
+        const error = await res.json();
+        setPopup({
+          show: true,
+          type: "error",
+          message: error.error || "Gagal membaca file",
+        });
+      }
+    } catch (error) {
+      console.error("File read error:", error);
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Gagal membaca file",
+      });
+    } finally {
+      setPreviewing(false);
+    }
+  };
+
+  const handleImportFromPreview = () => {
+    if (!previewResult || !rawFileData) return;
+
+    if (previewResult.invalidRows > 0 && previewResult.validRows === 0) {
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Tidak ada data valid untuk diimport! Periksa format tanggal.",
+      });
+      return;
+    }
+
+    const warningMsg = previewResult.invalidRows > 0
+      ? `\n\n⚠️ Perhatian: ${previewResult.invalidRows} baris memiliki format tidak valid dan akan dilewati.`
+      : "";
+
+    setPopup({
+      show: true,
+      type: "confirm",
+      message: `Import ${previewResult.validRows} data nutrisi?\n\nRentang tanggal: ${previewResult.dateRange?.start} - ${previewResult.dateRange?.end}${warningMsg}`,
+      onConfirm: async () => {
+        setImporting(true);
+        try {
+          const res = await fetch("/api/daily-nutritions-file", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "import",
+              data: rawFileData,
+              fileType: selectedFileType,
+            }),
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            setPopup({
+              show: true,
+              type: "success",
+              message: result.message || "Data berhasil diimport!",
+            });
+            setShowImportModal(false);
+            resetImportState();
+            fetchNutritions();
+            fetchSyncStatus();
+          } else {
+            const error = await res.json();
+            setPopup({
+              show: true,
+              type: "error",
+              message: error.error || "Gagal import data",
+            });
+          }
+        } catch (error) {
+          console.error("Import error:", error);
+          setPopup({
+            show: true,
+            type: "error",
+            message: "Gagal import data",
+          });
+        } finally {
+          setImporting(false);
+        }
+      },
+    });
+  };
+
+  const resetImportState = () => {
+    setPreviewResult(null);
+    setRawFileData(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const openImportModal = () => {
+    resetImportState();
+    setShowImportModal(true);
+  };
+
   const openNewModal = () => {
     setEditingId(null);
     setForm(emptyForm);
@@ -418,8 +672,8 @@ export default function NutrisiHarianPage() {
       nutritions.length > 0
         ? `${formatDateShort(nutritions[0].date)} - ${formatDateShort(nutritions[nutritions.length - 1].date)}`
         : "-",
-    lastSync: syncStatus?.lastDate
-      ? formatDateShort(syncStatus.lastDate)
+    lastSync: syncStatus?.lastDataDate
+      ? formatDateShort(syncStatus.lastDataDate)
       : "Belum ada data",
     predicted: syncStatus?.predictedDataCount || 0,
   };
@@ -445,7 +699,7 @@ export default function NutrisiHarianPage() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={handleImportJSON}
+            onClick={openImportModal}
             disabled={importing}
             className="btn-secondary flex items-center gap-2"
           >
@@ -454,19 +708,25 @@ export default function NutrisiHarianPage() {
             ) : (
               <Upload className="w-5 h-5" />
             )}
-            Import JSON
+            Import File
           </button>
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="btn-primary flex items-center gap-2"
+            className={`btn-primary flex items-center gap-2 ${
+              syncStatus?.daysToSync && syncStatus.daysToSync > 0
+                ? "bg-orange-500 hover:bg-orange-600"
+                : ""
+            }`}
           >
             {syncing ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <Zap className="w-5 h-5" />
             )}
-            Sync Sekarang
+            {syncStatus?.daysToSync && syncStatus.daysToSync > 0
+              ? `Sync (${syncStatus.daysToSync} hari)`
+              : "Sync Sekarang"}
           </button>
           <button onClick={openNewModal} className="btn-secondary flex items-center gap-2">
             <Plus className="w-5 h-5" />
@@ -789,6 +1049,27 @@ export default function NutrisiHarianPage() {
           </form>
         </div>
       </div>
+
+      {/* Import Modal */}
+      <ImportModal
+        show={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        previewResult={previewResult}
+        selectedFileType={selectedFileType}
+        onFileSelect={handleFileUpload}
+        onImport={handleImportFromPreview}
+        onReset={resetImportState}
+        previewing={previewing}
+        importing={importing}
+        fileInputRef={fileInputRef}
+      />
+
+      <SyncProgressModal
+        show={showSyncModal}
+        syncProgress={syncProgress}
+        syncing={syncing}
+        onClose={closeSyncModal}
+      />
 
       {/* Popup Messages */}
       <Popup popup={popup} onClose={() => setPopup({ ...popup, show: false })} />
