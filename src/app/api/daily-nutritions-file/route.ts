@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseCSV, normalizeNutritionData } from "@/lib/utils/csv-parser";
+import { parseCSV, normalizeNutritionData, validateCSVColumns, parseCSVLine } from "@/lib/utils/csv-parser";
 
 // GET - Health check
 export async function GET() {
@@ -35,7 +35,47 @@ async function previewFile(data: unknown, fileType: "json" | "csv") {
 
     let parsedData: Record<string, string | number>[] = [];
 
+    // For CSV files, validate columns first
     if (fileType === "csv") {
+      const csvContent = data as string;
+      const lines = csvContent.trim().split("\n");
+      if (lines.length === 0) {
+        return NextResponse.json({ error: "File CSV kosong" }, { status: 400 });
+      }
+
+      // Parse header row
+      const headers = parseCSVLine(lines[0]);
+      console.log("CSV Headers:", headers);
+
+      // Validate columns
+      const columnValidation = validateCSVColumns(headers);
+      console.log("Column validation result:", columnValidation);
+
+      if (!columnValidation.isValid) {
+        // Create human-readable column names for the missing columns
+        const columnNames: Record<string, string> = {
+          date: "Tanggal",
+          carbsBesar: "Karbohidrat Besar",
+          proteinBesar: "Protein Besar",
+          fatBesar: "Lemak Besar",
+          fiberBesar: "Serat Besar",
+          energyBesar: "Energi Besar",
+          carbsKecil: "Karbohidrat Kecil",
+          proteinKecil: "Protein Kecil",
+          fatKecil: "Lemak Kecil",
+          fiberKecil: "Serat Kecil",
+          energyKecil: "Energi Kecil",
+        };
+        const missingLabels = columnValidation.missingColumns.map(col => columnNames[col] || col);
+
+        return NextResponse.json({
+          success: false,
+          error: "Kolom CSV tidak lengkap",
+          columnValidation,
+          message: `File CSV tidak memiliki kolom yang diperlukan:\n\n• ${missingLabels.join("\n• ")}\n\nPastikan file CSV memiliki 11 kolom: Tanggal, Karbohidrat Besar, Protein Besar, Lemak Besar, Serat Besar, Energi Besar, Karbohidrat Kecil, Protein Kecil, Lemak Kecil, Serat Kecil, Energi Kecil.`,
+        }, { status: 400 });
+      }
+
       // Parse CSV data
       parsedData = parseCSV(data as string);
     } else {

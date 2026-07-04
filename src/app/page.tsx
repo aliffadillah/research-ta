@@ -417,7 +417,7 @@ export default function LandingPage() {
               Masuk
             </Link>
             <MagneticButton href="/register" variant="primary">
-              Daftar Gratis
+              Daftar
             </MagneticButton>
           </motion.div>
         </div>
@@ -476,7 +476,7 @@ export default function LandingPage() {
                   <ArrowRight className="w-5 h-5" />
                 </>
               </MagneticButton>
-              <motion.a
+              {/* <motion.a
                 href="#cara-pakai"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-medium border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
@@ -484,7 +484,7 @@ export default function LandingPage() {
               >
                 <Play className="w-4 h-4" />
                 Lihat Demo
-              </motion.a>
+              </motion.a> */}
             </motion.div>
           </div>
 

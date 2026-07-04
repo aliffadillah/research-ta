@@ -17,9 +17,13 @@ import {
   CheckCircle,
   AlertCircle,
   Info,
+  ArrowRight,
+  CalendarDays,
+  ChevronDown,
 } from "lucide-react";
 import ImportModal from "@/components/modals/ImportModal";
 import SyncProgressModal from "@/components/modals/SyncProgressModal";
+import { parseDateUTC, formatDateDisplay } from "@/lib/utils/date-utils";
 
 interface DailyNutrition {
   id: string;
@@ -106,9 +110,13 @@ interface SyncProgress {
 
 interface PopupMessage {
   show: boolean;
-  type: "success" | "error" | "info" | "confirm";
+  type: "success" | "error" | "info" | "confirm" | "predict";
   message: string;
   onConfirm?: () => void;
+  onPredictNext?: () => void;
+  onSyncAll?: () => void;
+  predictNextDate?: string;
+  syncDaysCount?: number;
 }
 
 const emptyForm = {
@@ -134,6 +142,7 @@ function Popup({ popup, onClose }: { popup: PopupMessage; onClose: () => void })
     error: <AlertCircle className="w-12 h-12 text-red-500" />,
     info: <Info className="w-12 h-12 text-blue-500" />,
     confirm: <AlertCircle className="w-12 h-12 text-yellow-500" />,
+    predict: <Brain className="w-12 h-12 text-primary" />,
   };
 
   const borderColors = {
@@ -141,45 +150,134 @@ function Popup({ popup, onClose }: { popup: PopupMessage; onClose: () => void })
     error: "border-red-500",
     info: "border-blue-500",
     confirm: "border-yellow-500",
+    predict: "border-primary",
   };
 
+  // Predict type - show options
+  if (popup.type === "predict") {
+    // Calculate tomorrow's date in WIB for display
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const defaultDateStr = tomorrow.toISOString().split("T")[0];
+    const displayDate = popup.predictNextDate || defaultDateStr;
+
+    // Format date for display
+    const formattedDate = new Date(displayDate).toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+        <div className={`bg-white rounded-2xl p-6 w-full max-w-md mx-4 border-t-4 ${borderColors[popup.type]}`}>
+          <div className="flex flex-col items-center text-center">
+            {icons[popup.type]}
+            <h3 className="mt-4 text-lg font-semibold text-gray-800">
+              Prediksi Nutrisi
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Pilih jenis prediksi yang ingin dilakukan:
+            </p>
+
+            <div className="w-full mt-6 space-y-3">
+              {/* Prediksi Besok Option */}
+              <button
+                onClick={() => {
+                  popup.onPredictNext?.();
+                  onClose();
+                }}
+                className="w-full p-4 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <CalendarDays className="w-5 h-5 text-teal-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-teal-800">Prediksi Besok</p>
+                    <p className="text-sm text-teal-600">
+                      {popup.predictNextDate
+                        ? `Prediksi nutrisi untuk ${formattedDate}`
+                        : "Tidak ada data historis untuk diprediksi"}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-teal-600" />
+                </div>
+              </button>
+
+              {/* Sync Semua Option */}
+              <button
+                onClick={() => {
+                  popup.onSyncAll?.();
+                  onClose();
+                }}
+                className="w-full p-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-orange-800">Sync Semua</p>
+                    <p className="text-sm text-orange-600">
+                      Prediksi {popup.syncDaysCount || 0} hari yang belum ada datanya
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-orange-600" />
+                </div>
+              </button>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="mt-4 px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
-      <div className={`bg-white rounded-2xl p-6 w-full max-w-md mx-4 border-t-4 ${borderColors[popup.type]}`}>
-        <div className="flex flex-col items-center text-center">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+      <div className={`bg-white rounded-2xl p-6 w-full max-w-lg mx-4 border-t-4 ${borderColors[popup.type]} max-h-[80vh] flex flex-col`}>
+        <div className="flex flex-col items-center text-center flex-shrink-0">
           {icons[popup.type]}
           <p className="mt-4 text-lg font-medium text-gray-800 whitespace-pre-line">
             {popup.message}
           </p>
+        </div>
 
-          <div className="flex gap-3 mt-6">
-            {popup.type === "confirm" ? (
-              <>
-                <button
-                  onClick={() => {
-                    popup.onConfirm?.();
-                    onClose();
-                  }}
-                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                >
-                  Ya, Lanjutkan
-                </button>
-                <button
-                  onClick={onClose}
-                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                >
-                  Batal
-                </button>
-              </>
-            ) : (
+        <div className="flex gap-3 mt-6 flex-shrink-0">
+          {popup.type === "confirm" ? (
+            <>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  popup.onConfirm?.();
+                  onClose();
+                }}
                 className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
               >
-                OK
+                Ya, Lanjutkan
               </button>
-            )}
-          </div>
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Batal
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              OK
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -215,7 +313,56 @@ export default function NutrisiHarianPage() {
     errors: 0,
     results: [],
   });
+  const [predicting, setPredicting] = useState(false);
+  const [nextPredictDate, setNextPredictDate] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Filter states
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Filtered data
+  const filteredNutritions = nutritions.filter((n) => {
+    // Filter by date range
+    const dateStr = n.date.split("T")[0];
+    if (filterDateFrom && dateStr < filterDateFrom) return false;
+    if (filterDateTo && dateStr > filterDateTo) return false;
+
+    return true;
+  });
+
+  // Filtered stats
+  const filteredStats = {
+    total: filteredNutritions.length,
+    predicted: filteredNutritions.filter(n => n.isPredicted).length,
+    avgEnergyBesar: filteredNutritions.length > 0
+      ? Math.round(filteredNutritions.reduce((sum, n) => sum + (n.energyBesar || 0), 0) / filteredNutritions.length)
+      : 0,
+    avgEnergyKecil: filteredNutritions.length > 0
+      ? Math.round(filteredNutritions.reduce((sum, n) => sum + (n.energyKecil || 0), 0) / filteredNutritions.length)
+      : 0,
+  };
+
+  const resetFilters = () => {
+    setFilterDateFrom("");
+    setFilterDateTo("");
+  };
+
+  const hasActiveFilters = filterDateFrom || filterDateTo;
+
+  // Open prediction options popup
+  const openPredictPopup = () => {
+    setPopup({
+      show: true,
+      type: "predict",
+      message: "Pilih jenis prediksi:",
+      predictNextDate: nextPredictDate || undefined,
+      syncDaysCount: syncStatus?.daysToSync || 0,
+      onPredictNext: handlePredictNext,
+      onSyncAll: handleSync,
+    });
+  };
 
   // Update current time every second
   useEffect(() => {
@@ -258,6 +405,7 @@ export default function NutrisiHarianPage() {
   useEffect(() => {
     fetchNutritions();
     fetchSyncStatus();
+    fetchNextPredictDate();
   }, []);
 
   const fetchNutritions = async () => {
@@ -283,6 +431,125 @@ export default function NutrisiHarianPage() {
       }
     } catch (error) {
       console.error("Failed to fetch sync status:", error);
+    }
+  };
+
+  const fetchNextPredictDate = async () => {
+    try {
+      // Try lstm-predict first
+      const res = await fetch("/api/lstm-predict");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.nextPredictDate) {
+          setNextPredictDate(data.nextPredictDate);
+          return;
+        }
+      }
+
+      // Fallback to lstm-sync/status
+      const statusRes = await fetch("/api/lstm-sync/status");
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        if (statusData.nextPredictDate) {
+          setNextPredictDate(statusData.nextPredictDate);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch next predict date:", error);
+    }
+  };
+
+  const handlePredictNext = async () => {
+    setPredicting(true);
+
+    // Get the date to predict - try multiple sources
+    let targetDate = nextPredictDate;
+
+    // If no date, try to fetch from sync status
+    if (!targetDate && syncStatus?.nextPredictDate) {
+      targetDate = syncStatus.nextPredictDate;
+    }
+
+    // If still no date, fetch fresh from API
+    if (!targetDate) {
+      try {
+        const statusRes = await fetch("/api/lstm-sync/status");
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.nextPredictDate) {
+            targetDate = statusData.nextPredictDate;
+            setNextPredictDate(targetDate);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch next predict date:", e);
+      }
+    }
+
+    // If still no date, show error
+    if (!targetDate) {
+      setPredicting(false);
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Tidak dapat menentukan tanggal prediksi. Pastikan sudah ada data nutrisi historis.",
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/lstm-predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: targetDate }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Check if data already existed or was newly predicted
+        const nutritionData = data.prediction || data.existingData;
+        const isExisting = !!data.existingData && !data.prediction;
+
+        setPopup({
+          show: true,
+          type: "success",
+          message: isExisting
+            ? `Data untuk ${data.date} sudah ada sebelumnya:\n\nEnergi BG: ${nutritionData?.energyBesar?.toFixed(0) || "-"} kkal\nProtein BG: ${nutritionData?.proteinBesar?.toFixed(1) || "-"} g\nKarbo BG: ${nutritionData?.carbsBesar?.toFixed(1) || "-"} g\nLemak BG: ${nutritionData?.fatBesar?.toFixed(1) || "-"} g`
+            : `Berhasil memprediksi nutrisi untuk ${data.date}:\n\nEnergi BG: ${nutritionData?.energyBesar?.toFixed(0) || "-"} kkal\nProtein BG: ${nutritionData?.proteinBesar?.toFixed(1) || "-"} g\nKarbo BG: ${nutritionData?.carbsBesar?.toFixed(1) || "-"} g\nLemak BG: ${nutritionData?.fatBesar?.toFixed(1) || "-"} g`,
+        });
+        // Refresh data
+        fetchNutritions();
+        fetchSyncStatus();
+        fetchNextPredictDate();
+      } else {
+        // Check if it's a "data already exists" case
+        if (data.message?.includes("sudah ada")) {
+          setPopup({
+            show: true,
+            type: "success",
+            message: `Data untuk ${data.date || targetDate} sudah ada sebelumnya:\n\nEnergi BG: ${data.existingData?.energyBesar?.toFixed(0) || "-"} kkal\nProtein BG: ${data.existingData?.proteinBesar?.toFixed(1) || "-"} g\nKarbo BG: ${data.existingData?.carbsBesar?.toFixed(1) || "-"} g\nLemak BG: ${data.existingData?.fatBesar?.toFixed(1) || "-"} g`,
+          });
+          fetchNutritions();
+          fetchSyncStatus();
+          fetchNextPredictDate();
+        } else {
+          setPopup({
+            show: true,
+            type: "error",
+            message: data.message || data.error || "Gagal memprediksi nutrisi. Pastikan server Flask sedang berjalan.",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Predict error:", error);
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Gagal memprediksi nutrisi. Pastikan server Flask sedang berjalan.",
+      });
+    } finally {
+      setPredicting(false);
     }
   };
 
@@ -533,13 +800,23 @@ export default function NutrisiHarianPage() {
 
       if (res.ok) {
         const result = await res.json();
-        setPreviewResult(result);
+        if (!result.success) {
+          // Column validation error
+          setPopup({
+            show: true,
+            type: "error",
+            message: result.message || result.error || "Format file tidak sesuai",
+          });
+          setPreviewResult(null);
+        } else {
+          setPreviewResult(result);
+        }
       } else {
         const error = await res.json();
         setPopup({
           show: true,
           type: "error",
-          message: error.error || "Gagal membaca file",
+          message: error.message || error.error || "Gagal membaca file",
         });
       }
     } catch (error) {
@@ -640,21 +917,19 @@ export default function NutrisiHarianPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    // Parse date string as UTC to avoid timezone shifts
+    const date = parseDateUTC(dateStr.split("T")[0]);
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${date.getUTCDate()} ${months[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
   };
 
   const formatDateShort = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    // Parse date string as UTC to avoid timezone shifts
+    const dateStrOnly = dateStr.split("T")[0];
+    const date = parseDateUTC(dateStrOnly);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    return `${date.getUTCDate()} ${months[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
   };
 
   // Statistics
@@ -711,22 +986,12 @@ export default function NutrisiHarianPage() {
             Import File
           </button>
           <button
-            onClick={handleSync}
-            disabled={syncing}
-            className={`btn-primary flex items-center gap-2 ${
-              syncStatus?.daysToSync && syncStatus.daysToSync > 0
-                ? "bg-orange-500 hover:bg-orange-600"
-                : ""
-            }`}
+            onClick={openPredictPopup}
+            className="btn-primary flex items-center gap-2"
           >
-            {syncing ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Zap className="w-5 h-5" />
-            )}
-            {syncStatus?.daysToSync && syncStatus.daysToSync > 0
-              ? `Sync (${syncStatus.daysToSync} hari)`
-              : "Sync Sekarang"}
+            <Brain className="w-5 h-5" />
+            Prediksi
+            <ChevronDown className="w-4 h-4" />
           </button>
           <button onClick={openNewModal} className="btn-secondary flex items-center gap-2">
             <Plus className="w-5 h-5" />
@@ -744,7 +1009,7 @@ export default function NutrisiHarianPage() {
             </div>
             <div>
               <span className="text-text-muted text-sm">Total Data</span>
-              <p className="text-2xl font-semibold">{stats.total}</p>
+              <p className="text-2xl font-semibold">{filteredStats.total}</p>
             </div>
           </div>
         </div>
@@ -755,7 +1020,7 @@ export default function NutrisiHarianPage() {
             </div>
             <div>
               <span className="text-text-muted text-sm">Rata-rata Energi BG</span>
-              <p className="text-2xl font-semibold">{stats.avgEnergyBesar} kkal</p>
+              <p className="text-2xl font-semibold">{filteredStats.avgEnergyBesar} kkal</p>
             </div>
           </div>
         </div>
@@ -766,7 +1031,7 @@ export default function NutrisiHarianPage() {
             </div>
             <div>
               <span className="text-text-muted text-sm">Rata-rata Energi KCL</span>
-              <p className="text-2xl font-semibold">{stats.avgEnergyKecil} kkal</p>
+              <p className="text-2xl font-semibold">{filteredStats.avgEnergyKecil} kkal</p>
             </div>
           </div>
         </div>
@@ -800,19 +1065,86 @@ export default function NutrisiHarianPage() {
 
       {/* Table */}
       <div className="card-static overflow-x-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">Daftar Data Nutrisi Harian ({nutritions.length})</h3>
-          {stats.predicted > 0 && (
-            <span className="text-sm text-text-muted bg-cyan-50 px-3 py-1 rounded-full">
-              {stats.predicted} data hasil prediksi LSTM
-            </span>
-          )}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            Daftar Data Nutrisi Harian
+            {hasActiveFilters && (
+              <span className="ml-2 text-sm font-normal text-text-muted">
+                ({filteredNutritions.length} dari {nutritions.length})
+              </span>
+            )}
+          </h3>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              showFilters || hasActiveFilters
+                ? "bg-primary text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filter
+            {hasActiveFilters && (
+              <span className="ml-1 w-5 h-5 bg-white/20 rounded-full text-xs flex items-center justify-center">
+                {(filterDateFrom ? 1 : 0) + (filterDateTo ? 1 : 0)}
+              </span>
+            )}
+          </button>
         </div>
 
-        {nutritions.length === 0 ? (
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex flex-wrap gap-4 items-end">
+              {/* Filter by Date Range */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-gray-600">Dari Tanggal</label>
+                <input
+                  type="date"
+                  value={filterDateFrom}
+                  onChange={(e) => setFilterDateFrom(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-gray-600">Sampai Tanggal</label>
+                <input
+                  type="date"
+                  value={filterDateTo}
+                  onChange={(e) => setFilterDateTo(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+
+              {/* Reset Button */}
+              <button
+                onClick={resetFilters}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Stats badge for filtered predicted count */}
+        {filteredStats.predicted > 0 && (
+          <div className="mb-4">
+            <span className="text-sm text-text-muted bg-cyan-50 px-3 py-1 rounded-full">
+              {filteredStats.predicted} data hasil prediksi LSTM
+            </span>
+          </div>
+        )}
+
+        {filteredNutritions.length === 0 ? (
           <div className="text-center py-12">
             <Brain className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
-            <p className="text-text-muted">Tidak ada data. Import dari JSON atau tambah manual.</p>
+            <p className="text-text-muted">
+              {hasActiveFilters ? "Tidak ada data yang sesuai filter." : "Tidak ada data. Import dari JSON atau tambah manual."}
+            </p>
           </div>
         ) : (
           <table className="w-full min-w-[1200px]">
@@ -834,7 +1166,7 @@ export default function NutrisiHarianPage() {
               </tr>
             </thead>
             <tbody>
-              {nutritions.map((nutrition, index) => (
+              {filteredNutritions.map((nutrition, index) => (
                 <tr key={nutrition.id} className="border-b border-border hover:bg-bg">
                   <td className="py-3 px-3 text-sm text-text-muted">{index + 1}</td>
                   <td className="py-3 px-3 text-sm">

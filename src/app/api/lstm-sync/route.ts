@@ -1,6 +1,20 @@
 import { prisma } from "@/lib/prisma";
+import {
+  isWeekend,
+  getTodayWIB,
+  formatDateUTC,
+  addDaysUTC,
+} from "@/lib/utils/date-utils";
 
 const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
+
+// Model Error Metrics for Monte Carlo Simulation
+const MODEL_METRICS = {
+  RMSE: 22.12,      // Root Mean Square Error for energi (kkal)
+  MAPE: 34.27,      // Mean Absolute Percentage Error (%)
+};
+
+const MONTE_CARLO_ITERATIONS = 50;  // Number of simulations
 
 const COLUMN_MAP: Record<string, string> = {
   "Karbohidrat Besar": "carbsBesar",
@@ -17,9 +31,19 @@ const COLUMN_MAP: Record<string, string> = {
 
 const SLIDING_WINDOW_SIZE = 7;
 
-function isWeekend(date: Date): boolean {
-  return date.getDay() === 0 || date.getDay() === 6;
-}
+// RMSE ratios for each nutrient (relative to energy RMSE)
+const RMSE_RATIOS: Record<string, number> = {
+  energyBesar: 1.0,
+  energyKecil: 0.65,
+  carbsBesar: 0.68,
+  carbsKecil: 0.45,
+  proteinBesar: 0.23,
+  proteinKecil: 0.16,
+  fatBesar: 0.23,
+  fatKecil: 0.16,
+  fiberBesar: 0.09,
+  fiberKecil: 0.07,
+};
 
 function toFlaskData(nutritions: any[]): number[][] {
   return nutritions.map((n) => [
@@ -44,14 +68,68 @@ function fromFlaskResponse(flaskData: Record<string, number>): Record<string, nu
   return result;
 }
 
-function getNextBusinessDay(date: Date): Date {
-  const next = new Date(date);
-  if (isWeekend(next)) {
-    while (isWeekend(next)) {
-      next.setDate(next.getDate() + 1);
+// Box-Muller transform for normal distribution
+function randomNormal(mean: number, stdDev: number): number {
+  const u1 = Math.random();
+  const u2 = Math.random();
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return mean + z * stdDev;
+}
+
+// Apply Monte Carlo noise to prediction
+function applyMonteCarloNoise(
+  basePrediction: Record<string, number>,
+  iterations: number
+): Record<string, number> {
+  const result: Record<string, number> = {};
+  const nutritionKeys = Object.keys(basePrediction);
+
+  for (const key of nutritionKeys) {
+    const baseValue = basePrediction[key];
+    const stdDev = MODEL_METRICS.RMSE * (RMSE_RATIOS[key] || 0.3);
+    const maxVariation = MODEL_METRICS.MAPE;
+
+    const values: number[] = [];
+    for (let i = 0; i < iterations; i++) {
+      let noisyValue = randomNormal(baseValue, stdDev);
+
+      const maxNoise = baseValue * (maxVariation / 100);
+      noisyValue = Math.max(baseValue - maxNoise, Math.min(baseValue + maxNoise, noisyValue));
+
+      values.push(Math.max(0, Math.round(noisyValue * 100) / 100));
     }
+
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    result[key] = Math.round(mean * 100) / 100;
   }
-  return next;
+
+  return result;
+}
+
+/**
+ * Get exactly 7 future weekdays starting from the day after last data
+ * Respects existing data - only predicts dates that don't exist yet
+ */
+function getNext7FutureWeekdays(
+  existingDates: Set<string>,
+  lastDate: Date,
+  maxDaysToCheck: number = 30
+): Date[] {
+  const result: Date[] = [];
+  let current = addDaysUTC(lastDate, 1); // Start from day after last data
+  let found = 0;
+
+  for (let i = 0; i < maxDaysToCheck && found < 7; i++) {
+    const dateStr = formatDateUTC(current);
+    // Only add if: not a weekend AND not already in database
+    if (!isWeekend(current) && !existingDates.has(dateStr)) {
+      result.push(new Date(current));
+      found++;
+    }
+    current = addDaysUTC(current, 1);
+  }
+
+  return result;
 }
 
 async function runSync(sendEvent: (data: object) => void) {
@@ -67,71 +145,57 @@ async function runSync(sendEvent: (data: object) => void) {
     return;
   }
 
-  const lastDataDate = new Date(allEntries[allEntries.length - 1].date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const datesToSync: Date[] = [];
-  let currentDate = new Date(lastDataDate);
-  currentDate.setDate(currentDate.getDate() + 1);
-
-  while (currentDate <= today) {
-    datesToSync.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
+  // Build set of existing date strings (to avoid overwriting existing data)
+  const existingDates = new Set<string>();
+  for (const entry of allEntries) {
+    existingDates.add(formatDateUTC(new Date(entry.date)));
   }
 
-  const businessDates = datesToSync.filter(d => !isWeekend(d));
+  // Get last data date
+  const lastEntry = allEntries[allEntries.length - 1];
+  const lastDate = new Date(lastEntry.date);
 
-  if (businessDates.length === 0) {
-    sendEvent({ type: "complete", message: "Tidak ada hari kerja untuk sync.", synced: 0 });
+  // Get exactly 7 future weekdays that don't have data yet
+  const datesToPredict = getNext7FutureWeekdays(existingDates, lastDate, 30);
+
+  if (datesToPredict.length === 0) {
+    sendEvent({ type: "complete", message: "7 hari ke depan sudah terisi semua.", synced: 0 });
     return;
   }
 
   sendEvent({
     type: "start",
-    message: `Sync dari ${lastDataDate.toISOString().split("T")[0]} ke ${today.toISOString().split("T")[0]}`,
-    total: businessDates.length,
-    startDate: lastDataDate.toISOString().split("T")[0],
-    endDate: today.toISOString().split("T")[0],
+    message: `Prediksi 7 hari ke depan dari ${formatDateUTC(lastDate)}`,
+    total: datesToPredict.length,
+    startDate: formatDateUTC(lastDate),
+    endDate: formatDateUTC(datesToPredict[datesToPredict.length - 1]),
+    monteCarloEnabled: true,
   });
 
-  const existingDates = new Set<string>();
-  for (const entry of allEntries) {
-    existingDates.add(new Date(entry.date).toISOString().split("T")[0]);
-  }
-
-  const datesNeedingPrediction = businessDates.filter(
-    d => !existingDates.has(d.toISOString().split("T")[0])
-  );
-
-  if (datesNeedingPrediction.length === 0) {
-    sendEvent({ type: "complete", message: "Semua data sudah terbaru.", synced: 0 });
-    return;
-  }
-
   let synced = 0;
+  let skipped = 0;
   let errors = 0;
-  const results: { date: string; status: string; energy?: number }[] = [];
+  const results: { date: string; status: string; energy?: number; monteCarlo?: boolean }[] = [];
 
-  for (let i = 0; i < datesNeedingPrediction.length; i++) {
-    const targetDate = datesNeedingPrediction[i];
-    const dateStr = targetDate.toISOString().split("T")[0];
+  for (let i = 0; i < datesToPredict.length; i++) {
+    const targetDate = datesToPredict[i];
+    const dateStr = formatDateUTC(targetDate);
 
     sendEvent({
       type: "progress",
       current: i + 1,
-      total: datesNeedingPrediction.length,
+      total: datesToPredict.length,
       date: dateStr,
       message: `Memprediksi ${dateStr}...`,
-      percentage: Math.round(((i + 1) / datesNeedingPrediction.length) * 100),
+      percentage: Math.round(((i + 1) / datesToPredict.length) * 100),
     });
 
     try {
+      // Get recent entries for sliding window (always use the latest data)
       const recentEntries = await prisma.dailyNutrition.findMany({
         orderBy: { date: "desc" },
         take: SLIDING_WINDOW_SIZE,
       });
-
       const inputEntries = recentEntries.reverse();
       const currentWindow = toFlaskData(inputEntries);
 
@@ -145,25 +209,27 @@ async function runSync(sendEvent: (data: object) => void) {
         const errorText = await flaskResponse.text();
         console.error(`Flask error for ${dateStr}:`, errorText);
         errors++;
-        results.push({ date: dateStr, status: "error", energy: 0 });
+        results.push({ date: dateStr, status: "error", energy: 0, monteCarlo: false });
 
         sendEvent({
           type: "error_day",
           date: dateStr,
           message: `Error: ${errorText.substring(0, 100)}`,
           current: i + 1,
-          total: datesNeedingPrediction.length,
+          total: datesToPredict.length,
         });
         continue;
       }
 
       const flaskResult = await flaskResponse.json();
-      const prediction = flaskResult.prediksi_nutrisi;
-      const nutritionData = fromFlaskResponse(prediction);
+      const basePrediction = fromFlaskResponse(flaskResult.prediksi_nutrisi);
 
+      const nutritionData = applyMonteCarloNoise(basePrediction, MONTE_CARLO_ITERATIONS);
+
+      // Create new prediction (data lama tidak di-modifikasi)
       await prisma.dailyNutrition.create({
         data: {
-          date: new Date(targetDate),
+          date: targetDate,
           carbsBesar: nutritionData.carbsBesar,
           proteinBesar: nutritionData.proteinBesar,
           fatBesar: nutritionData.fatBesar,
@@ -180,39 +246,42 @@ async function runSync(sendEvent: (data: object) => void) {
       });
 
       synced++;
-      results.push({ date: dateStr, status: "success", energy: nutritionData.energyBesar });
+      results.push({ date: dateStr, status: "success", energy: nutritionData.energyBesar, monteCarlo: true });
 
       sendEvent({
         type: "synced",
         date: dateStr,
         energy: nutritionData.energyBesar,
         current: i + 1,
-        total: datesNeedingPrediction.length,
-        percentage: Math.round(((i + 1) / datesNeedingPrediction.length) * 100),
+        total: datesToPredict.length,
+        percentage: Math.round(((i + 1) / datesToPredict.length) * 100),
+        monteCarlo: true,
       });
 
       await new Promise(resolve => setTimeout(resolve, 300));
     } catch (error) {
       console.error(`Error syncing ${dateStr}:`, error);
       errors++;
-      results.push({ date: dateStr, status: "error", energy: 0 });
+      results.push({ date: dateStr, status: "error", energy: 0, monteCarlo: false });
 
       sendEvent({
         type: "error_day",
         date: dateStr,
         message: "Error tidak diketahui",
         current: i + 1,
-        total: datesNeedingPrediction.length,
+        total: datesToPredict.length,
       });
     }
   }
 
   sendEvent({
     type: "complete",
-    message: `Selesai: ${synced} diprediksi, ${errors} error`,
+    message: `Selesai: ${synced} diprediksi${skipped > 0 ? `, ${skipped} dilewati (sudah ada)` : ''}, ${errors} error`,
     synced,
     errors,
+    skipped,
     results: results.slice(-10),
+    monteCarloIterations: MONTE_CARLO_ITERATIONS,
   });
 }
 

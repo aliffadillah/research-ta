@@ -16,10 +16,43 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // Handle batch import
+    if (Array.isArray(body)) {
+      const menus = body.map((item: any) => ({
+        name: item.name || `Menu ${item.no || Math.random()}`,
+        description: item.description || null,
+        tanggal: item.tanggal || "",
+        daftarMenu: item.daftarMenu || [],
+        caloriesBesar: parseFloat(String(item.caloriesBesar || item.kandungan_gizi_porsi_besar?.energi || 0).replace(/[^\d.]/g, "")),
+        proteinBesar: parseFloat(String(item.proteinBesar || item.kandungan_gizi_porsi_besar?.protein || 0).replace(/[^\d.]/g, "")),
+        carbsBesar: parseFloat(String(item.carbsBesar || item.kandungan_gizi_porsi_besar?.karbohidrat || 0).replace(/[^\d.]/g, "")),
+        fatBesar: parseFloat(String(item.fatBesar || item.kandungan_gizi_porsi_besar?.lemak || 0).replace(/[^\d.]/g, "")),
+        fiberBesar: parseFloat(String(item.fiberBesar || item.kandungan_gizi_porsi_besar?.serat || 0).replace(/[^\d.]/g, "")),
+        caloriesKecil: parseFloat(String(item.caloriesKecil || item.kandungan_gizi_porsi_kecil?.energi || 0).replace(/[^\d.]/g, "")),
+        proteinKecil: parseFloat(String(item.proteinKecil || item.kandungan_gizi_porsi_kecil?.protein || 0).replace(/[^\d.]/g, "")),
+        carbsKecil: parseFloat(String(item.carbsKecil || item.kandungan_gizi_porsi_kecil?.karbohidrat || 0).replace(/[^\d.]/g, "")),
+        fatKecil: parseFloat(String(item.fatKecil || item.kandungan_gizi_porsi_kecil?.lemak || 0).replace(/[^\d.]/g, "")),
+        fiberKecil: parseFloat(String(item.fiberKecil || item.kandungan_gizi_porsi_kecil?.serat || 0).replace(/[^\d.]/g, "")),
+        isActive: true,
+      }));
+
+      await prisma.menuRecommendation.deleteMany({});
+      const created = await prisma.menuRecommendation.createMany({ data: menus });
+
+      return NextResponse.json({
+        success: true,
+        message: `Berhasil menambahkan ${created.count} menu`,
+        count: created.count,
+      }, { status: 201 });
+    }
+
+    // Single menu creation
     const {
       name,
       description,
       tanggal,
+      daftarMenu,
       caloriesBesar,
       proteinBesar,
       carbsBesar,
@@ -37,6 +70,7 @@ export async function POST(request: Request) {
         name,
         description,
         tanggal: tanggal || "",
+        daftarMenu: daftarMenu || [],
         caloriesBesar: caloriesBesar || 0,
         proteinBesar: proteinBesar || 0,
         carbsBesar: carbsBesar || 0,

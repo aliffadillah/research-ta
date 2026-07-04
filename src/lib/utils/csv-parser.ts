@@ -25,7 +25,7 @@ export function parseCSV(csvContent: string): Record<string, string>[] {
 /**
  * Parse a single CSV line handling quoted values
  */
-function parseCSVLine(line: string): string[] {
+export function parseCSVLine(line: string): string[] {
   const result: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -249,4 +249,58 @@ export function detectColumnMappings(headers: string[]): Record<string, string> 
   });
 
   return mappings;
+}
+
+// Required columns for nutrition data
+export const REQUIRED_COLUMNS = [
+  { key: "date", aliases: ["tanggal", "date", "waktu", "tgl"] },
+  { key: "carbsBesar", aliases: ["karbohidrat", "karbohidrat besar", "carbs", "karbo", "karbo bg", "karbohidrat besar"] },
+  { key: "proteinBesar", aliases: ["protein", "protein besar", "protein bg"] },
+  { key: "fatBesar", aliases: ["lemak", "lemak besar", "fat", "lemak bg"] },
+  { key: "fiberBesar", aliases: ["serat", "serat besar", "fiber", "serat bg"] },
+  { key: "energyBesar", aliases: ["energi", "energi besar", "energy", "calories", "kcal", "energi bg", "kkal bg"] },
+  { key: "carbsKecil", aliases: ["karbohidrat kecil", "carbskecil", "karbo kecil", "karbo kcl"] },
+  { key: "proteinKecil", aliases: ["protein kecil", "proteinkecil", "protein kcl"] },
+  { key: "fatKecil", aliases: ["lemak kecil", "fatkecil", "lemak kcl"] },
+  { key: "fiberKecil", aliases: ["serat kecil", "fiberkecil", "serat kcl"] },
+  { key: "energyKecil", aliases: ["energi kecil", "energykecil", "calorieskecil", "kcalkecil", "energi kcl", "kkal kcl"] },
+];
+
+export interface ColumnValidationResult {
+  isValid: boolean;
+  foundColumns: Record<string, string>; // Maps expected key -> found header name
+  missingColumns: string[];
+  matchedHeaders: string[];
+}
+
+/**
+ * Validate that required columns exist in CSV headers
+ */
+export function validateCSVColumns(headers: string[]): ColumnValidationResult {
+  const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
+  const foundColumns: Record<string, string> = {};
+  const missingColumns: string[] = [];
+
+  for (const required of REQUIRED_COLUMNS) {
+    let found = false;
+    for (let i = 0; i < normalizedHeaders.length; i++) {
+      const header = normalizedHeaders[i];
+      // Check if header matches any alias
+      if (required.aliases.some(alias => alias.toLowerCase() === header || header === alias.toLowerCase())) {
+        foundColumns[required.key] = headers[i];
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      missingColumns.push(required.key);
+    }
+  }
+
+  return {
+    isValid: missingColumns.length === 0,
+    foundColumns,
+    missingColumns,
+    matchedHeaders: Object.values(foundColumns),
+  };
 }

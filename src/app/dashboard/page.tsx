@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Camera, ChevronRight, Flame, Drumstick, Wheat, Apple, Users, Utensils, ClipboardList, BookOpen, Brain, ChefHat } from "lucide-react";
+import { Camera, ChevronRight, Flame, Drumstick, Wheat, Apple, Users, Utensils, ClipboardList, BookOpen, Brain, ChefHat, Plus } from "lucide-react";
 import { formatDate } from "@/lib/utils/nutrition";
 import PredictionCard from "@/components/ui/PredictionCard";
 import {
@@ -101,30 +101,37 @@ export default function DashboardPage() {
       }
     }
 
-    // Fetch nutrition data
-    async function fetchNutritionData() {
-      try {
-        const res = await fetch("/api/daily-nutritions");
-        if (res.ok) {
-          const data: DailyNutrition[] = await res.json();
-          setNutritionHistory(data);
-          // Get today's date in WIB
-          const now = new Date();
-          const utcHours = now.getUTCHours();
-          const wibHours = utcHours + 7;
-          let today = new Date(now);
-          if (wibHours >= 24) {
-            today.setUTCDate(today.getUTCDate() + 1);
-          }
-          const todayStr = today.toISOString().split("T")[0];
-
-          const todayData = data.find((n) => n.date.split("T")[0] === todayStr);
-          setTodayNutrition(todayData || null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch nutrition data");
-      }
+    // Get today's date in WIB timezone
+  const getTodayWIB = () => {
+    const now = new Date();
+    const utcHours = now.getUTCHours();
+    const wibHours = utcHours + 7;
+    let today = new Date(now);
+    if (wibHours >= 24) {
+      today.setUTCDate(today.getUTCDate() + 1);
     }
+    return today.toISOString().split("T")[0];
+  };
+
+  // Fetch nutrition data - get data for today
+  async function fetchNutritionData() {
+    try {
+      const res = await fetch("/api/daily-nutritions");
+      if (res.ok) {
+        const data: DailyNutrition[] = await res.json();
+        setNutritionHistory(data);
+
+        // Get today's date in WIB
+        const todayStr = getTodayWIB();
+
+        // Find data for today specifically
+        const todayData = data.find((n) => n.date.split("T")[0] === todayStr);
+        setTodayNutrition(todayData || null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch nutrition data");
+    }
+  }
 
     fetchData();
     fetchNutritionData();
@@ -218,12 +225,15 @@ export default function DashboardPage() {
         <ChevronRight className="w-6 h-6 text-text-muted group-hover:translate-x-2 group-hover:text-accent transition-all" />
       </Link>
 
-      {/* Today's Nutrition Info */}
+      {/* Today's Nutrition Data */}
       <div className="card-static">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
-            Nutrisi Hari Ini - {getFormattedDate()}
+            Nutrisi Hari Ini
+            <span className="text-sm font-normal text-text-muted">
+              ({new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })})
+            </span>
           </h3>
           <Link href="/dashboard/nutrisi-harian" className="text-primary text-sm font-medium hover:underline">
             Lihat Detail
@@ -231,59 +241,82 @@ export default function DashboardPage() {
         </div>
 
         {todayNutrition ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Porsi Besar */}
-            <div>
-              <div className="text-sm font-medium text-gray-500 mb-3">Porsi Besar</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                  <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
-                  <div className="text-xl font-bold text-green-800">{todayNutrition.carbsBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+          <div className="space-y-4">
+            <div className="text-sm text-text-muted bg-primary/5 rounded-lg p-3">
+              Data nutrisi untuk: <span className="font-semibold text-primary">{new Date(todayNutrition.date).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Porsi Besar */}
+              <div>
+                <div className="text-sm font-medium text-green-700 mb-3 flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full" />
+                  Porsi Besar
                 </div>
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <div className="text-xs text-blue-600 mb-1">Protein</div>
-                  <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
-                </div>
-                <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
-                  <div className="text-xs text-orange-600 mb-1">Lemak</div>
-                  <div className="text-xl font-bold text-orange-800">{todayNutrition.fatBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
-                </div>
-                <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
-                  <div className="text-xs text-rose-600 mb-1">Energi</div>
-                  <div className="text-xl font-bold text-rose-800">{todayNutrition.energyBesar.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
+                    <div className="text-xl font-bold text-green-800">{todayNutrition.carbsBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="text-xs text-blue-600 mb-1">Protein</div>
+                    <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                    <div className="text-xs text-orange-600 mb-1">Lemak</div>
+                    <div className="text-xl font-bold text-orange-800">{todayNutrition.fatBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
+                  <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                    <div className="text-xs text-rose-600 mb-1">Energi</div>
+                    <div className="text-xl font-bold text-rose-800">{todayNutrition.energyBesar.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                    <div className="text-xs text-purple-600 mb-1">Serat</div>
+                    <div className="text-xl font-bold text-purple-800">{todayNutrition.fiberBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Porsi Kecil */}
-            <div>
-              <div className="text-sm font-medium text-gray-500 mb-3">Porsi Kecil</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                  <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
-                  <div className="text-xl font-bold text-green-800">{todayNutrition.carbsKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+              {/* Porsi Kecil */}
+              <div>
+                <div className="text-sm font-medium text-blue-700 mb-3 flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                  Porsi Kecil
                 </div>
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <div className="text-xs text-blue-600 mb-1">Protein</div>
-                  <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
-                </div>
-                <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
-                  <div className="text-xs text-orange-600 mb-1">Lemak</div>
-                  <div className="text-xl font-bold text-orange-800">{todayNutrition.fatKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
-                </div>
-                <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
-                  <div className="text-xs text-rose-600 mb-1">Energi</div>
-                  <div className="text-xl font-bold text-rose-800">{todayNutrition.energyKecil.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
+                    <div className="text-xl font-bold text-green-800">{todayNutrition.carbsKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="text-xs text-blue-600 mb-1">Protein</div>
+                    <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                    <div className="text-xs text-orange-600 mb-1">Lemak</div>
+                    <div className="text-xl font-bold text-orange-800">{todayNutrition.fatKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
+                  <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                    <div className="text-xs text-rose-600 mb-1">Energi</div>
+                    <div className="text-xl font-bold text-rose-800">{todayNutrition.energyKecil.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                    <div className="text-xs text-purple-600 mb-1">Serat</div>
+                    <div className="text-xl font-bold text-purple-800">{todayNutrition.fiberKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="text-center py-6 bg-gray-50 rounded-lg">
-            <Brain className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-text-muted text-sm">Belum ada data nutrisi untuk hari ini</p>
-            <Link href="/dashboard/nutrisi-harian" className="text-primary text-sm font-medium hover:underline mt-1 inline-block">
-              Sync data sekarang
+          <div className="text-center py-8 bg-amber-50 rounded-lg border border-amber-200">
+            <Brain className="w-12 h-12 text-amber-300 mx-auto mb-3" />
+            <p className="text-amber-700 font-medium">Belum ada data nutrisi untuk hari ini</p>
+            <p className="text-text-muted text-sm mt-1 mb-4">
+              Silakan prediksi atau tambahkan data nutrisi harian terlebih dahulu
+            </p>
+            <Link href="/dashboard/nutrisi-harian" className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
+              <Plus className="w-4 h-4" />
+              Prediksi / Tambah Data
             </Link>
           </div>
         )}

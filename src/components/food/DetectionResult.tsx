@@ -1,22 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Database, Cpu, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, Database, Cpu, HelpCircle, ChevronDown, ChevronUp, CheckCircle2, XCircle, UtensilsCrossed, Info, CheckCircle, AlertTriangle, XCircle as XCircleIcon, Minus, BarChart3, Table2, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils/helpers";
+import { SppgMenu, matchWithSppgMenus, checkMenuNutrition, DEFAULT_NUTRITION_TARGET, NutritionCheckResult, NutritionTarget } from "@/data/sppg-menus";
 
 interface BoundingBox {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
-}
-
-interface RawDetection {
-  bbox?: BoundingBox;
-  box?: BoundingBox;
-  coordinates?: BoundingBox;
-  xyxy?: number[];
-  bounds?: number[];
 }
 
 interface Prediction {
@@ -42,6 +35,9 @@ interface DetectionResultProps {
   imageWidth?: number;
   imageHeight?: number;
   portionSize?: number;
+  sppgMenus?: SppgMenu[];
+  nutritionTarget?: NutritionTarget | null;
+  targetDate?: string | null;
 }
 
 const sourceConfig: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
@@ -52,54 +48,28 @@ const sourceConfig: Record<string, { icon: React.ReactNode; label: string; color
   default: { icon: <HelpCircle className="w-3 h-3" />, label: "Default", color: "bg-gray-100 text-gray-600" },
 };
 
-// Extract bounding box from various formats
-const extractBbox = (pred: Prediction): BoundingBox | null => {
-  const raw = pred.bbox;
-  if (!raw) return null;
-
-  if (Array.isArray(raw) && raw.length === 4) {
-    return { x1: raw[0], y1: raw[1], x2: raw[2], y2: raw[3] };
-  }
-  if (typeof raw === "object" && "x1" in raw) {
-    return raw as BoundingBox;
-  }
-  return null;
-};
-
-// Get color for each detection
-const getDetectionColor = (index: number) => {
-  const colors = [
-    "bg-red-500 border-red-500",    // 0
-    "bg-blue-500 border-blue-500",  // 1
-    "bg-green-500 border-green-500", // 2
-    "bg-yellow-500 border-yellow-500", // 3
-    "bg-purple-500 border-purple-500", // 4
-    "bg-pink-500 border-pink-500",  // 5
-    "bg-cyan-500 border-cyan-500",  // 6
-    "bg-orange-500 border-orange-500", // 7
-  ];
-  return colors[index % colors.length];
-};
+// Tab type
+type TabType = "summary" | "sppg" | "comparison";
 
 export default function DetectionResult({
   predictions,
   selectedPrediction,
   onSelectPrediction,
-  imageWidth = 640,
-  imageHeight = 640,
   portionSize = 100,
+  sppgMenus,
+  nutritionTarget,
+  targetDate,
 }: DetectionResultProps) {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [activeTab, setActiveTab] = useState<TabType>("summary");
   const [portionBesarPercent, setPortionBesarPercent] = useState(32);
   const [portionKecilPercent, setPortionKecilPercent] = useState(22);
+  const [expandedPredIndex, setExpandedPredIndex] = useState<number | null>(null);
+
+  const activeTarget = nutritionTarget || DEFAULT_NUTRITION_TARGET;
 
   if (predictions.length === 0) {
     return null;
   }
-
-  const toggleExpand = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
 
   // Calculate total nutrition from all detections
   const totalNutrition = predictions.reduce((acc, p) => ({
@@ -110,61 +80,91 @@ export default function DetectionResult({
     fiber: acc.fiber + (p.nutrition?.fiber || 0),
   }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
 
+  // Match with SPPG menus
+  const detectedFoodNames = predictions.map((p) => p.class);
+  const sppgMatches = sppgMenus ? matchWithSppgMenus(detectedFoodNames, 3) : matchWithSppgMenus(detectedFoodNames, 3);
+  const bestMatch = sppgMatches.length > 0 ? sppgMatches[0] : null;
+
+  // Check nutrition status
+  const nutritionBesar = bestMatch ? checkMenuNutrition(bestMatch.menu.kandungan_gizi_porsi_besar, activeTarget) : null;
+  const nutritionKecil = bestMatch ? checkMenuNutrition(bestMatch.menu.kandungan_gizi_porsi_kecil, activeTarget) : null;
+
+  // Color helper
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "terpenuhi": return "text-green-600 bg-green-100";
+      case "hampir": return "text-amber-600 bg-amber-100";
+      case "kurang": return "text-red-600 bg-red-100";
+      case "berlebihan": return "text-purple-600 bg-purple-100";
+      default: return "text-gray-500 bg-gray-100";
+    }
+  };
+
+  const getDiffColor = (diff: number) => {
+    const abs = Math.abs(diff);
+    if (abs <= 10) return "text-green-600 bg-green-100";
+    if (abs <= 25) return "text-amber-600 bg-amber-100";
+    return "text-red-600 bg-red-100";
+  };
+
+  // Tabs configuration
+  const tabs = [
+    { id: "summary" as TabType, label: "Ringkasan", icon: <BarChart3 className="w-4 h-4" /> },
+    { id: "sppg" as TabType, label: "Menu SPPG", icon: <UtensilsCrossed className="w-4 h-4" /> },
+    { id: "comparison" as TabType, label: "Perbandingan", icon: <Table2 className="w-4 h-4" /> },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* Summary Stats - Ringkasan Nutrisi */}
-      <div className="card bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="font-semibold text-gray-800">Ringkasan Nutrisi Terdeteksi</h4>
-          <span className="text-sm text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
-            {portionSize}g
-          </span>
-        </div>
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+              activeTab === tab.id
+                ? "bg-white text-primary shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            {tab.icon}
+            {tab.label}
+            {tab.id === "sppg" && bestMatch && (
+              <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">
+                {bestMatch.matchPercentage}%
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
 
-        {/* Header Row */}
-        <div className="grid grid-cols-4 gap-2 mb-3">
-          <div className="text-center">
-            <div className="h-8 flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-medium">Kalori</span>
-            </div>
+      {/* Tab Content */}
+      {activeTab === "summary" && (
+        <div className="space-y-4">
+          {/* Quick Stats - 5 Column Grid */}
+          <div className="grid grid-cols-5 gap-3">
+            {[
+              { label: "Kalori", value: Math.round(totalNutrition.calories), unit: "kkal", color: "from-orange-50 to-orange-100", textColor: "text-orange-600" },
+              { label: "Protein", value: totalNutrition.protein.toFixed(1), unit: "g", color: "from-blue-50 to-blue-100", textColor: "text-blue-600" },
+              { label: "Karbo", value: totalNutrition.carbs.toFixed(1), unit: "g", color: "from-amber-50 to-amber-100", textColor: "text-amber-600" },
+              { label: "Lemak", value: totalNutrition.fat.toFixed(1), unit: "g", color: "from-red-50 to-red-100", textColor: "text-red-500" },
+              { label: "Serat", value: totalNutrition.fiber.toFixed(1), unit: "g", color: "from-green-50 to-green-100", textColor: "text-green-600" },
+            ].map((item) => (
+              <div key={item.label} className={cn("card text-center bg-gradient-to-br border", item.color)}>
+                <p className="text-2xl font-bold mb-1">{item.value}</p>
+                <p className={cn("text-xs font-medium", item.textColor)}>{item.label} ({item.unit})</p>
+              </div>
+            ))}
           </div>
-          <div className="text-center">
-            <div className="h-8 flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-medium">Protein</span>
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="h-8 flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-medium">Karbo</span>
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="h-8 flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-medium">Lemak</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Per 100g */}
-        <div className="mb-3">
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="text-center text-xs text-gray-500 mb-2 font-medium">per 100g</div>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="text-xl font-bold text-gray-700">{Math.round(totalNutrition.calories)}</div>
-              <div className="text-xl font-bold text-gray-700">{totalNutrition.protein.toFixed(1)}g</div>
-              <div className="text-xl font-bold text-gray-700">{totalNutrition.carbs.toFixed(1)}g</div>
-              <div className="text-xl font-bold text-gray-700">{totalNutrition.fat.toFixed(1)}g</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Porsi Besar & Kecil side by side with adjustable percentage */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Porsi Besar - adjustable 30-35% */}
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-green-800">Porsi Besar</span>
-              <div className="flex items-center gap-2">
+          {/* Portion Calculator */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Porsi Besar */}
+            <div className="card bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-green-800">Porsi Besar ({portionBesarPercent}%)</span>
                 <input
                   type="range"
                   min="30"
@@ -174,23 +174,30 @@ export default function DetectionResult({
                   onChange={(e) => setPortionBesarPercent(Number(e.target.value))}
                   className="w-20 h-2 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600"
                 />
-                <span className="text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full font-medium w-12 text-center">{portionBesarPercent}%</span>
+              </div>
+              <p className="text-xs text-green-600 mb-3">
+                {Math.round(portionSize * portionBesarPercent / 100)}g dari {portionSize}g total
+              </p>
+              <div className="grid grid-cols-5 gap-2 text-center">
+                {[
+                  { v: Math.round(totalNutrition.calories * portionBesarPercent / 100), l: "Kal" },
+                  { v: (totalNutrition.protein * portionBesarPercent / 100).toFixed(1), l: "Prot" },
+                  { v: (totalNutrition.carbs * portionBesarPercent / 100).toFixed(1), l: "Karbo" },
+                  { v: (totalNutrition.fat * portionBesarPercent / 100).toFixed(1), l: "Lemak" },
+                  { v: (totalNutrition.fiber * portionBesarPercent / 100).toFixed(1), l: "Serat" },
+                ].map((item) => (
+                  <div key={item.l} className="bg-white/50 rounded-lg py-2">
+                    <p className="font-bold text-green-700">{item.v}</p>
+                    <p className="text-[10px] text-green-600">{item.l}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="text-xs text-green-600 mb-2">{Math.round(portionSize * portionBesarPercent / 100)}g dari {portionSize}g</div>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="text-lg font-bold text-green-700">{Math.round(totalNutrition.calories * portionBesarPercent / 100)}</div>
-              <div className="text-lg font-bold text-green-700">{(totalNutrition.protein * portionBesarPercent / 100).toFixed(1)}g</div>
-              <div className="text-lg font-bold text-green-700">{(totalNutrition.carbs * portionBesarPercent / 100).toFixed(1)}g</div>
-              <div className="text-lg font-bold text-green-700">{(totalNutrition.fat * portionBesarPercent / 100).toFixed(1)}g</div>
-            </div>
-          </div>
 
-          {/* Porsi Kecil - adjustable 20-25% */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-blue-800">Porsi Kecil</span>
-              <div className="flex items-center gap-2">
+            {/* Porsi Kecil */}
+            <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-blue-800">Porsi Kecil ({portionKecilPercent}%)</span>
                 <input
                   type="range"
                   min="20"
@@ -200,251 +207,286 @@ export default function DetectionResult({
                   onChange={(e) => setPortionKecilPercent(Number(e.target.value))}
                   className="w-20 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
-                <span className="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full font-medium w-12 text-center">{portionKecilPercent}%</span>
+              </div>
+              <p className="text-xs text-blue-600 mb-3">
+                {Math.round(portionSize * portionKecilPercent / 100)}g dari {portionSize}g total
+              </p>
+              <div className="grid grid-cols-5 gap-2 text-center">
+                {[
+                  { v: Math.round(totalNutrition.calories * portionKecilPercent / 100), l: "Kal" },
+                  { v: (totalNutrition.protein * portionKecilPercent / 100).toFixed(1), l: "Prot" },
+                  { v: (totalNutrition.carbs * portionKecilPercent / 100).toFixed(1), l: "Karbo" },
+                  { v: (totalNutrition.fat * portionKecilPercent / 100).toFixed(1), l: "Lemak" },
+                  { v: (totalNutrition.fiber * portionKecilPercent / 100).toFixed(1), l: "Serat" },
+                ].map((item) => (
+                  <div key={item.l} className="bg-white/50 rounded-lg py-2">
+                    <p className="font-bold text-blue-700">{item.v}</p>
+                    <p className="text-[10px] text-blue-600">{item.l}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="text-xs text-blue-600 mb-2">{Math.round(portionSize * portionKecilPercent / 100)}g dari {portionSize}g</div>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="text-lg font-bold text-blue-700">{Math.round(totalNutrition.calories * portionKecilPercent / 100)}</div>
-              <div className="text-lg font-bold text-blue-700">{(totalNutrition.protein * portionKecilPercent / 100).toFixed(1)}g</div>
-              <div className="text-lg font-bold text-blue-700">{(totalNutrition.carbs * portionKecilPercent / 100).toFixed(1)}g</div>
-              <div className="text-lg font-bold text-blue-700">{(totalNutrition.fat * portionKecilPercent / 100).toFixed(1)}g</div>
-            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Header */}
-      <div className="card-static">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-semibold text-lg">Deteksi Teridentifikasi</h3>
-            <p className="text-sm text-text-muted">
-              {predictions.length} objek makanan terdeteksi
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1.5 bg-primary/10 rounded-lg">
-              <span className="text-primary font-semibold">{predictions.length}</span>
-              <span className="text-text-muted text-sm ml-1">Total</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* All Detections List */}
-      <div className="space-y-3">
-        {predictions.map((prediction, index) => {
-          const bbox = extractBbox(prediction);
-          const color = getDetectionColor(index);
-          const isSelected = selectedPrediction === prediction;
-          const isExpanded = expandedIndex === index;
-
-          return (
-            <div
-              key={index}
-              className={cn(
-                "card-static transition-all cursor-pointer",
-                isSelected ? "ring-2 ring-primary" : "hover:shadow-card-hover"
-              )}
-              onClick={() => {
-                onSelectPrediction(prediction);
-                toggleExpand(index);
-              }}
-            >
-              {/* Header Row */}
-              <div className="flex items-start gap-4">
-                {/* Number Badge with Bounding Box Preview */}
-                <div className="relative">
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold",
-                    color.split(" ")[0]
+          {/* Detected Foods Summary */}
+          <div className="card">
+            <h4 className="font-semibold text-gray-800 mb-3">Makanan Terdeteksi ({predictions.length})</h4>
+            <div className="flex flex-wrap gap-2">
+              {predictions.map((pred, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    onSelectPrediction(pred);
+                    setExpandedPredIndex(expandedPredIndex === idx ? null : idx);
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all",
+                    selectedPrediction === pred
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-gray-50 border-gray-200 hover:border-gray-300"
+                  )}
+                >
+                  <span className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white",
+                    ["bg-red-500", "bg-blue-500", "bg-green-500", "bg-yellow-500", "bg-purple-500"][idx % 5]
                   )}>
-                    {index + 1}
+                    {idx + 1}
+                  </span>
+                  {pred.class}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Food Detail */}
+          {selectedPrediction?.nutrition && (
+            <div className="card bg-gray-50">
+              <h5 className="font-medium text-gray-700 mb-3">Detail: {selectedPrediction.class}</h5>
+              <div className="grid grid-cols-5 gap-3">
+                {[
+                  { label: "Kalori", value: Math.round(selectedPrediction.nutrition.calories), unit: "kkal" },
+                  { label: "Protein", value: selectedPrediction.nutrition.protein.toFixed(1), unit: "g" },
+                  { label: "Karbo", value: selectedPrediction.nutrition.carbs.toFixed(1), unit: "g" },
+                  { label: "Lemak", value: selectedPrediction.nutrition.fat.toFixed(1), unit: "g" },
+                  { label: "Serat", value: selectedPrediction.nutrition.fiber.toFixed(1), unit: "g" },
+                ].map((item) => (
+                  <div key={item.label} className="bg-white rounded-lg p-3 text-center border">
+                    <p className="text-lg font-bold text-gray-800">{item.value}</p>
+                    <p className="text-xs text-gray-500">{item.label} ({item.unit})</p>
                   </div>
-                  {bbox && (
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center">
-                      <div className={cn("w-3 h-3 rounded-sm", color.split(" ")[0])} />
-                    </div>
-                  )}
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SPPG Tab */}
+      {activeTab === "sppg" && bestMatch && (
+        <div className="space-y-4">
+          {/* Match Header */}
+          <div className="card bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <UtensilsCrossed className="w-6 h-6 text-amber-600" />
                 </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-lg">{prediction.class}</h4>
-                    {prediction.originalClass && prediction.originalClass !== prediction.class && (
-                      <span className="text-xs text-text-muted bg-gray-100 px-2 py-0.5 rounded">
-                        ML: {prediction.originalClass}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    {prediction.source && (
-                      <span className={cn(
-                        "inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium",
-                        sourceConfig[prediction.source]?.color || "bg-gray-100 text-gray-600"
-                      )}>
-                        {sourceConfig[prediction.source]?.icon}
-                        {sourceConfig[prediction.source]?.label}
-                      </span>
-                    )}
-
-                    {prediction.foodId && (
-                      <span className="text-xs text-text-muted bg-gray-100 px-2 py-1 rounded">
-                        ID: {String(prediction.foodId).substring(0, 8)}...
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Expand/Collapse */}
-                <div className="flex items-center gap-2">
-                  {isExpanded ? (
-                    <ChevronUp className="w-5 h-5 text-text-muted" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-text-muted" />
-                  )}
+                <div>
+                  <h4 className="font-semibold text-amber-800">Menu #{bestMatch.menu.no} SPPG</h4>
+                  <p className="text-sm text-amber-600">{bestMatch.matchPercentage}% kecocokan</p>
                 </div>
               </div>
-
-              {/* Expanded Details */}
-              {isExpanded && prediction.nutrition && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  {/* Nutrition Grid */}
-                  <div className="bg-bg rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h5 className="font-medium">Kandungan Nutrisi (per 100g)</h5>
-                      <span className="text-xs text-text-muted">per {prediction.nutrition.calories} kkal</span>
-                    </div>
-
-                    <div className="grid grid-cols-5 gap-3">
-                      {/* Kalori */}
-                      <div className="text-center p-3 bg-primary/10 rounded-xl">
-                        <p className="text-2xl font-bold text-primary">
-                          {Math.round(prediction.nutrition.calories)}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">Kalori (kkal)</p>
-                      </div>
-
-                      {/* Protein */}
-                      <div className="text-center p-3 bg-blue-50 rounded-xl">
-                        <p className="text-2xl font-bold text-blue-600">
-                          {prediction.nutrition.protein.toFixed(1)}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">Protein (g)</p>
-                      </div>
-
-                      {/* Karbo */}
-                      <div className="text-center p-3 bg-amber-50 rounded-xl">
-                        <p className="text-2xl font-bold text-amber-600">
-                          {prediction.nutrition.carbs.toFixed(1)}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">Karbo (g)</p>
-                      </div>
-
-                      {/* Lemak */}
-                      <div className="text-center p-3 bg-red-50 rounded-xl">
-                        <p className="text-2xl font-bold text-red-500">
-                          {prediction.nutrition.fat.toFixed(1)}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">Lemak (g)</p>
-                      </div>
-
-                      {/* Serat */}
-                      <div className="text-center p-3 bg-green-50 rounded-xl">
-                        <p className="text-2xl font-bold text-green-600">
-                          {prediction.nutrition.fiber.toFixed(1)}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">Serat (g)</p>
-                      </div>
-                    </div>
-
-                    {/* Progress Bars */}
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-text-muted w-16">Kalori</span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${Math.min(prediction.nutrition.calories / 4, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-sans w-12 text-right">{Math.round(prediction.nutrition.calories)}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-text-muted w-16">Protein</span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 rounded-full"
-                            style={{ width: `${Math.min(prediction.nutrition.protein * 5, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.protein.toFixed(1)}g</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-text-muted w-16">Karbo</span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-amber-500 rounded-full"
-                            style={{ width: `${Math.min(prediction.nutrition.carbs / 4, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.carbs.toFixed(1)}g</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-text-muted w-16">Lemak</span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-red-400 rounded-full"
-                            style={{ width: `${Math.min(prediction.nutrition.fat * 5, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.fat.toFixed(1)}g</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-text-muted w-16">Serat</span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-green-500 rounded-full"
-                            style={{ width: `${Math.min(prediction.nutrition.fiber * 10, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-sans w-12 text-right">{prediction.nutrition.fiber.toFixed(1)}g</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bounding Box Info */}
-                  {bbox && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-text-muted mb-2">Bounding Box:</p>
-                      <div className="grid grid-cols-4 gap-2 text-xs font-sans">
-                        <div className="bg-white p-2 rounded">x1: {bbox.x1.toFixed(0)}</div>
-                        <div className="bg-white p-2 rounded">y1: {bbox.y1.toFixed(0)}</div>
-                        <div className="bg-white p-2 rounded">x2: {bbox.x2.toFixed(0)}</div>
-                        <div className="bg-white p-2 rounded">y2: {bbox.y2.toFixed(0)}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Raw Data */}
-                  <details className="mt-3">
-                    <summary className="text-xs text-text-muted cursor-pointer hover:text-text">
-                      Data mentah JSON
-                    </summary>
-                    <pre className="mt-2 p-3 bg-gray-100 rounded-lg text-xs overflow-x-auto max-h-40">
-                      {JSON.stringify(prediction, null, 2)}
-                    </pre>
-                  </details>
-                </div>
+              {nutritionBesar && (
+                <span className={cn("px-3 py-1 rounded-full text-sm font-medium", getStatusColor(nutritionBesar.overallStatus))}>
+                  {nutritionBesar.overallStatus === "terpenuhi" && <><CheckCircle className="w-4 h-4 inline mr-1" />Terpenuhi</>}
+                  {nutritionBesar.overallStatus === "hampir" && <><AlertTriangle className="w-4 h-4 inline mr-1" />Hampir</>}
+                  {nutritionBesar.overallStatus === "kurang" && <><XCircle className="w-4 h-4 inline mr-1" />Kurang</>}
+                  {nutritionBesar.overallStatus === "berlebihan" && <><Minus className="w-4 h-4 inline mr-1" />Berlebihan</>}
+                </span>
               )}
             </div>
-          );
-        })}
-      </div>
+          </div>
+
+          {/* Daftar Menu */}
+          <div className="card">
+            <h4 className="font-medium text-gray-700 mb-3">Daftar Menu</h4>
+            <div className="flex flex-wrap gap-2">
+              {bestMatch.menu.daftar_menu.map((menuItem, idx) => {
+                const isMatched = bestMatch.matchedItems.some(
+                  (m) =>
+                    m.toLowerCase() === menuItem.toLowerCase() ||
+                    menuItem.toLowerCase().includes(m.toLowerCase()) ||
+                    m.toLowerCase().includes(menuItem.toLowerCase())
+                );
+                return (
+                  <span
+                    key={idx}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border",
+                      isMatched ? "bg-green-100 text-green-700 border-green-200" : "bg-gray-100 text-gray-500 border-gray-200"
+                    )}
+                  >
+                    {isMatched ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                    {menuItem}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Nutrition Status - Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Porsi Besar */}
+            <div className="card bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-semibold text-green-800">Porsi Besar</span>
+                <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", getStatusColor(nutritionBesar?.overallStatus))}>
+                  {nutritionBesar?.terpenuhiCount}/{nutritionBesar?.totalCount} nutrisi
+                </span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { label: "Energi", result: nutritionBesar?.energi },
+                  { label: "Protein", result: nutritionBesar?.protein },
+                  { label: "Karbo", result: nutritionBesar?.karbohidrat },
+                  { label: "Lemak", result: nutritionBesar?.lemak },
+                  { label: "Serat", result: nutritionBesar?.serat },
+                ].map((item) => (
+                  <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
+                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-bold">
+                      {item.result ? `${item.result.actual} / ${item.result.target} (${item.result.percentage}%)` : "-"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Porsi Kecil */}
+            <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-semibold text-blue-800">Porsi Kecil</span>
+                <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", getStatusColor(nutritionKecil?.overallStatus))}>
+                  {nutritionKecil?.terpenuhiCount}/{nutritionKecil?.totalCount} nutrisi
+                </span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { label: "Energi", result: nutritionKecil?.energi },
+                  { label: "Protein", result: nutritionKecil?.protein },
+                  { label: "Karbo", result: nutritionKecil?.karbohidrat },
+                  { label: "Lemak", result: nutritionKecil?.lemak },
+                  { label: "Serat", result: nutritionKecil?.serat },
+                ].map((item) => (
+                  <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
+                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-bold">
+                      {item.result ? `${item.result.actual} / ${item.result.target} (${item.result.percentage}%)` : "-"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Target Info */}
+          <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-start gap-2">
+            <Info className="w-4 h-4 text-green-600 mt-0.5" />
+            <div className="text-xs text-green-700">
+              <strong>Target:</strong> {activeTarget.energi} kkal, {activeTarget.protein}g Prot, {activeTarget.karbohidrat}g Karbo, {activeTarget.lemak}g Lemak, {activeTarget.serat}g Serat
+              {targetDate && <span className="ml-2">({new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })})</span>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "sppg" && !bestMatch && (
+        <div className="card text-center py-12">
+          <UtensilsCrossed className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500">Tidak ada menu SPPG yang cocok</p>
+        </div>
+      )}
+
+      {/* Comparison Tab */}
+      {activeTab === "comparison" && bestMatch && (
+        <div className="space-y-4">
+          {/* Table */}
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Nutrisi</th>
+                    <th className="px-4 py-3 text-center font-semibold text-orange-600">Deteksi BG</th>
+                    <th className="px-4 py-3 text-center font-semibold text-orange-500">Deteksi KCL</th>
+                    <th className="px-4 py-3 text-center font-semibold text-green-600">SPPG BG</th>
+                    <th className="px-4 py-3 text-center font-semibold text-blue-600">SPPG KCL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: "Energi", key: "energi", unit: "kkal", det: totalNutrition.calories },
+                    { label: "Protein", key: "protein", unit: "g", det: totalNutrition.protein },
+                    { label: "Karbohidrat", key: "karbohidrat", unit: "g", det: totalNutrition.carbs },
+                    { label: "Lemak", key: "lemak", unit: "g", det: totalNutrition.fat },
+                    { label: "Serat", key: "serat", unit: "g", det: totalNutrition.fiber },
+                  ].map((item) => {
+                    const detBG = item.det * portionBesarPercent / 100;
+                    const detKCL = item.det * portionKecilPercent / 100;
+                    const sppgBG = parseFloat(bestMatch.menu.kandungan_gizi_porsi_besar[item.key as keyof typeof bestMatch.menu.kandungan_gizi_porsi_besar] as string) || 0;
+                    const sppgKCL = parseFloat(bestMatch.menu.kandungan_gizi_porsi_kecil[item.key as keyof typeof bestMatch.menu.kandungan_gizi_porsi_kecil] as string) || 0;
+                    const diffBG = sppgBG > 0 ? ((detBG - sppgBG) / sppgBG * 100) : 0;
+                    const diffKCL = sppgKCL > 0 ? ((detKCL - sppgKCL) / sppgKCL * 100) : 0;
+
+                    return (
+                      <tr key={item.key} className="border-b border-gray-100">
+                        <td className="px-4 py-3 font-medium text-gray-700">
+                          {item.label}
+                          <span className="text-xs text-gray-400 ml-1">({item.unit})</span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="font-bold text-orange-700">{Math.round(detBG)}</span>
+                          <span className={cn("ml-2 px-1.5 py-0.5 rounded text-xs font-medium", getDiffColor(diffBG))}>
+                            {diffBG > 0 ? "+" : ""}{diffBG.toFixed(0)}%
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="font-bold text-orange-600">{Math.round(detKCL)}</span>
+                          <span className={cn("ml-2 px-1.5 py-0.5 rounded text-xs font-medium", getDiffColor(diffKCL))}>
+                            {diffKCL > 0 ? "+" : ""}{diffKCL.toFixed(0)}%
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center bg-green-50 font-bold text-green-700">{sppgBG}</td>
+                        <td className="px-4 py-3 text-center bg-blue-50 font-bold text-blue-700">{sppgKCL}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="flex flex-wrap gap-4 text-xs text-gray-600">
+            <span className="flex items-center gap-1">
+              <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">±10%</span> Sesuai
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">±25%</span> Hampir
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-medium">&gt;25%</span> Berbeda
+            </span>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "comparison" && !bestMatch && (
+        <div className="card text-center py-12">
+          <Table2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500">Tidak ada data perbandingan</p>
+        </div>
+      )}
     </div>
   );
 }

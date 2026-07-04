@@ -1,20 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import {
+  isWeekend,
+  getTodayWIB,
+  formatDateUTC,
+  addDaysUTC,
+} from "@/lib/utils/date-utils";
 
 const SLIDING_WINDOW_SIZE = 7;
-
-function isWeekend(date: Date): boolean {
-  return date.getDay() === 0 || date.getDay() === 6;
-}
-
-function getNextBusinessDay(date: Date): Date {
-  const next = new Date(date);
-  if (isWeekend(next)) {
-    while (isWeekend(next)) {
-      next.setDate(next.getDate() + 1);
-    }
-  }
-  return next;
-}
 
 export async function GET() {
   try {
@@ -23,8 +15,6 @@ export async function GET() {
     });
 
     const lastData = allEntries.length > 0 ? allEntries[allEntries.length - 1] : null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     const predictedCount = await prisma.dailyNutrition.count({
       where: { isPredicted: true },
@@ -34,35 +24,42 @@ export async function GET() {
       where: { isPredicted: false },
     });
 
-    let nextPredictDate: Date;
-    if (lastData) {
-      const tomorrow = new Date(lastData.date);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      nextPredictDate = getNextBusinessDay(tomorrow);
-    } else {
-      nextPredictDate = new Date();
-      nextPredictDate = getNextBusinessDay(nextPredictDate);
+    // Build set of existing date strings
+    const existingDates = new Set<string>();
+    for (const entry of allEntries) {
+      existingDates.add(formatDateUTC(new Date(entry.date)));
     }
 
+    // Count how many of the next 7 weekdays are missing (starting from day after last data)
+    const lastDate = lastData ? new Date(lastData.date) : new Date();
     let daysToSync = 0;
-    if (lastData) {
-      let checkDate = new Date(lastData.date);
-      checkDate.setDate(checkDate.getDate() + 1);
-      while (checkDate <= today) {
-        if (!isWeekend(checkDate)) {
+    let current = addDaysUTC(lastDate, 1);
+    let found = 0;
+
+    for (let i = 0; i < 30 && found < 7; i++) {
+      if (!isWeekend(current)) {
+        const dateStr = formatDateUTC(current);
+        if (!existingDates.has(dateStr)) {
           daysToSync++;
+          found++;
         }
-        checkDate.setDate(checkDate.getDate() + 1);
       }
+      current = addDaysUTC(current, 1);
+    }
+
+    // Calculate next predict date (next weekday without data)
+    let nextPredictDate = addDaysUTC(lastDate, 1);
+    while (isWeekend(nextPredictDate) || existingDates.has(formatDateUTC(nextPredictDate))) {
+      nextPredictDate = addDaysUTC(nextPredictDate, 1);
     }
 
     return new Response(JSON.stringify({
       success: true,
       lastDataDate: lastData?.date || null,
       lastDate: lastData?.date || null,
-      nextPredictDate: nextPredictDate.toISOString().split("T")[0],
-      today: today.toISOString().split("T")[0],
-      daysToSync: daysToSync > 0 ? daysToSync : 0,
+      today: formatDateUTC(getTodayWIB()),
+      nextPredictDate: formatDateUTC(nextPredictDate),
+      daysToSync,
       needsSync: daysToSync > 0,
       totalRecords: actualCount + predictedCount,
       actualDataCount: actualCount,
@@ -70,9 +67,9 @@ export async function GET() {
       canPredict: allEntries.length >= SLIDING_WINDOW_SIZE,
       hasEnoughData: allEntries.length >= SLIDING_WINDOW_SIZE,
       message: daysToSync > 0
-        ? `${daysToSync} hari perlu disinkronkan`
+        ? `${daysToSync} hari ke depan belum terisi`
         : allEntries.length >= SLIDING_WINDOW_SIZE
-          ? "Data sudah up-to-date"
+          ? "7 hari ke depan sudah terisi semua"
           : `Butuh minimal ${SLIDING_WINDOW_SIZE} data. Saat ini: ${allEntries.length}`,
     }), {
       headers: { "Content-Type": "application/json" },

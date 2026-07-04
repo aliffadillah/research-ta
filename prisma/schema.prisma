@@ -81,6 +81,9 @@ model MenuRecommendation {
   description     String?
   tanggal         String    // Tanggal menu
 
+  // Daftar menu makanan
+  daftarMenu      String[] // Array nama makanan
+
   // Porsi Besar
   caloriesBesar   Float
   proteinBesar    Float

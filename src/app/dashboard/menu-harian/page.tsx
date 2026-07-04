@@ -8,6 +8,7 @@ interface MenuRecommendation {
   name: string;
   description: string | null;
   tanggal: string;
+  daftarMenu?: string[];
   caloriesBesar: number;
   proteinBesar: number;
   carbsBesar: number;
@@ -25,6 +26,7 @@ const emptyMenu = {
   name: "",
   description: "",
   tanggal: "",
+  daftarMenu: [] as string[],
   caloriesBesar: 0,
   proteinBesar: 0,
   carbsBesar: 0,
@@ -97,6 +99,7 @@ export default function MenuHarianPage() {
       name: menu.name,
       description: menu.description || "",
       tanggal: menu.tanggal || "",
+      daftarMenu: menu.daftarMenu || [],
       caloriesBesar: menu.caloriesBesar,
       proteinBesar: menu.proteinBesar,
       carbsBesar: menu.carbsBesar,
@@ -199,7 +202,7 @@ export default function MenuHarianPage() {
 
       {/* Table */}
       <div className="card-static overflow-x-auto">
-        <h3 className="text-lg font-semibold mb-6">Daftar Menu ({menus.length})</h3>
+        <h3 className="text-lg font-semibold mb-6">Daftar Menu SPPG ({menus.length})</h3>
 
         {menus.length === 0 ? (
           <div className="text-center py-12">
@@ -207,60 +210,125 @@ export default function MenuHarianPage() {
             <p className="text-text-muted">Tidak ada menu yang ditemukan</p>
           </div>
         ) : (
-          <table className="w-full min-w-[1000px]">
-            <thead>
-              <tr className="border-b-2 border-border">
-                <th className="text-left py-3 px-3 text-sm font-semibold text-text-muted">No</th>
-                <th className="text-left py-3 px-3 text-sm font-semibold text-text-muted">Tanggal</th>
-                <th className="text-left py-3 px-3 text-sm font-semibold text-text-muted">Menu</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-green-600">Kkal B</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-blue-600">Kkal K</th>
-                <th className="text-center py-3 px-3 text-sm font-semibold text-text-muted">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {menus.map((menu, index) => (
-                <tr key={menu.id} className="border-b border-border hover:bg-bg">
-                  <td className="py-3 px-3 text-sm text-text-muted">{index + 1}</td>
-                  <td className="py-3 px-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-text-muted" />
-                      {menu.tanggal || "-"}
-                    </div>
-                  </td>
-                  <td className="py-3 px-3 text-sm font-medium">
-                    {menu.name}
-                    {menu.description && (
-                      <p className="text-xs text-text-muted">{menu.description}</p>
-                    )}
-                  </td>
-                  <td className="py-3 px-2 text-center font-semibold text-green-700">
-                    {menu.caloriesBesar}
-                  </td>
-                  <td className="py-3 px-2 text-center font-semibold text-blue-700">
-                    {menu.caloriesKecil}
-                  </td>
-                  <td className="py-3 px-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(menu)}
-                        className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
-                      >
-                        <Pencil className="w-4 h-4 text-primary" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(menu.id)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1200px]">
+              <thead>
+                <tr className="border-b-2 border-border">
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-text-muted">No</th>
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-text-muted">Menu</th>
+                  <th className="text-center py-3 px-2 text-xs font-semibold text-green-600" colSpan={5}>Porsi Besar</th>
+                  <th className="text-center py-3 px-2 text-xs font-semibold text-blue-600" colSpan={5}>Porsi Kecil</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-text-muted">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+                <tr className="border-b border-border bg-gray-50">
+                  <th className="text-left py-2 px-3 text-xs font-medium text-text-muted" colSpan={2}></th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-green-600">Kkal</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-green-600">Prot</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-green-600">Karbo</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-green-600">Lemak</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-green-600">Serat</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-blue-600">Kkal</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-blue-600">Prot</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-blue-600">Karbo</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-blue-600">Lemak</th>
+                  <th className="text-center py-2 px-1 text-xs font-medium text-blue-600">Serat</th>
+                  <th className="text-center py-2 px-3 text-xs font-medium text-text-muted"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {menus.map((menu, index) => (
+                  <tr key={menu.id} className="border-b border-border hover:bg-bg">
+                    <td className="py-3 px-3 text-sm text-text-muted">{index + 1}</td>
+                    <td className="py-3 px-3 text-sm">
+                      <div className="font-medium text-gray-800">{menu.name}</div>
+                      {menu.daftarMenu && menu.daftarMenu.length > 0 && (
+                        <div className="text-xs text-text-muted mt-1">
+                          {menu.daftarMenu.slice(0, 3).join(", ")}
+                          {menu.daftarMenu.length > 3 && ` +${menu.daftarMenu.length - 3} lagi`}
+                        </div>
+                      )}
+                      {menu.description && !menu.daftarMenu && (
+                        <div className="text-xs text-text-muted">{menu.description}</div>
+                      )}
+                    </td>
+                    {/* Porsi Besar */}
+                    <td className="py-3 px-1 text-center text-sm font-semibold text-green-700 bg-green-50/50">
+                      {menu.caloriesBesar}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-green-700 bg-green-50/50">
+                      {menu.proteinBesar}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-green-700 bg-green-50/50">
+                      {menu.carbsBesar}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-green-700 bg-green-50/50">
+                      {menu.fatBesar}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-green-700 bg-green-50/50">
+                      {menu.fiberBesar}
+                    </td>
+                    {/* Porsi Kecil */}
+                    <td className="py-3 px-1 text-center text-sm font-semibold text-blue-700 bg-blue-50/50">
+                      {menu.caloriesKecil}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-blue-700 bg-blue-50/50">
+                      {menu.proteinKecil}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-blue-700 bg-blue-50/50">
+                      {menu.carbsKecil}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-blue-700 bg-blue-50/50">
+                      {menu.fatKecil}
+                    </td>
+                    <td className="py-3 px-1 text-center text-sm text-blue-700 bg-blue-50/50">
+                      {menu.fiberKecil}
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit(menu)}
+                          className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                        >
+                          <Pencil className="w-4 h-4 text-primary" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(menu.id)}
+                          className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
+
+        {/* Legend */}
+        <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-6 text-xs text-text-muted">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+            <span>Prot = Protein (g)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+            <span>Karbo = Karbohidrat (g)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-orange-500 rounded-full"></span>
+            <span>Lemak = Lemak (g)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-green-600 rounded-full"></span>
+            <span>Serat = Serat (g)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-gray-400 rounded-full"></span>
+            <span>Kkal = Kalori</span>
+          </div>
+        </div>
       </div>
 
       {/* Modal */}
@@ -297,6 +365,16 @@ export default function MenuHarianPage() {
                     placeholder="2024-01-15"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="label">Daftar Menu (pisahkan dengan koma)</label>
+                <textarea
+                  value={form.daftarMenu?.join(", ") || ""}
+                  onChange={(e) => setForm({ ...form, daftarMenu: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+                  className="input-field min-h-[80px]"
+                  placeholder="Apel, Tempe Goreng, Ayam Goreng, Gudeg, Nasi"
+                />
               </div>
 
               <div>

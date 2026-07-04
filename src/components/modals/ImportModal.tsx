@@ -160,36 +160,36 @@ Tanggal,Karbo BG,Protein BG,Lemak BG,Serat BG,Energi BG,Karbo KCL,Protein KCL,Le
           {previewResult && !previewing && (
             <>
               {/* Summary Stats */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div className="card bg-gradient-to-br from-green-50 to-green-100/50">
-                  <div className="flex items-center gap-2 mb-1">
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="card bg-gradient-to-br from-green-50 to-green-100/50 py-3 px-4">
+                  <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-green-600 font-medium">Valid</span>
+                    <span className="text-xs text-green-600 font-medium">Valid</span>
                   </div>
-                  <p className="text-2xl font-bold text-green-700">{previewResult.validRows}</p>
+                  <p className="text-xl font-bold text-green-700 mt-1">{previewResult.validRows}</p>
                 </div>
-                <div className="card bg-gradient-to-br from-red-50 to-red-100/50">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="card bg-gradient-to-br from-red-50 to-red-100/50 py-3 px-4">
+                  <div className="flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-red-600" />
-                    <span className="text-sm text-red-600 font-medium">Invalid</span>
+                    <span className="text-xs text-red-600 font-medium">Invalid</span>
                   </div>
-                  <p className="text-2xl font-bold text-red-700">{previewResult.invalidRows}</p>
+                  <p className="text-xl font-bold text-red-700 mt-1">{previewResult.invalidRows}</p>
                 </div>
-                <div className="card bg-gradient-to-br from-blue-50 to-blue-100/50">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="card bg-gradient-to-br from-blue-50 to-blue-100/50 py-3 px-4">
+                  <div className="flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-blue-600 font-medium">Total Baris</span>
+                    <span className="text-xs text-blue-600 font-medium">Total</span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-700">{previewResult.totalRows}</p>
+                  <p className="text-xl font-bold text-blue-700 mt-1">{previewResult.totalRows}</p>
                 </div>
-                <div className="card bg-gradient-to-br from-purple-50 to-purple-100/50">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="card bg-gradient-to-br from-purple-50 to-purple-100/50 py-3 px-4">
+                  <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-purple-600" />
-                    <span className="text-sm text-purple-600 font-medium">Tanggal</span>
+                    <span className="text-xs text-purple-600 font-medium">Tanggal</span>
                   </div>
-                  <p className="text-sm font-bold text-purple-700">
+                  <p className="text-xs font-bold text-purple-700 mt-1 truncate" title={previewResult.dateRange ? `${formatDate(previewResult.dateRange.start)} - ${formatDate(previewResult.dateRange.end)}` : "-"}>
                     {previewResult.dateRange
-                      ? `${formatDate(previewResult.dateRange.start)} - ${formatDate(previewResult.dateRange.end)}`
+                      ? `${formatDate(previewResult.dateRange.start)}`
                       : "-"}
                   </p>
                 </div>
@@ -207,77 +207,86 @@ Tanggal,Karbo BG,Protein BG,Lemak BG,Serat BG,Energi BG,Karbo KCL,Protein KCL,Le
                   </span>
                 </div>
                 <div className="overflow-x-auto max-h-80">
-                  <table className="w-full min-w-[900px]">
-                    <thead className="bg-bg sticky top-0">
+                  <table className="w-full min-w-[900px] text-xs">
+                    <thead className="bg-bg sticky top-0 shadow-sm">
                       <tr className="border-b border-border">
-                        <th className="text-left py-2 px-3 text-xs font-semibold text-text-muted">Status</th>
-                        <th className="text-left py-2 px-3 text-xs font-semibold text-text-muted">Tanggal</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-green-600">Karbo BG</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-green-600">Protein BG</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-green-600">Lemak BG</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-green-600">Serat BG</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-green-600">Energi BG</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-blue-600">Karbo KCL</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-blue-600">Protein KCL</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-blue-600">Lemak KCL</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-blue-600">Serat KCL</th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-blue-600">Energi KCL</th>
+                        <th className="text-left py-2 px-2 font-semibold text-text-muted w-8">#</th>
+                        <th className="text-left py-2 px-2 font-semibold text-text-muted">Tanggal</th>
+                        <th className="text-center py-2 px-1 font-semibold text-green-600">Karbo BG</th>
+                        <th className="text-center py-2 px-1 font-semibold text-green-600">Protein BG</th>
+                        <th className="text-center py-2 px-1 font-semibold text-green-600">Lemak BG</th>
+                        <th className="text-center py-2 px-1 font-semibold text-green-600">Serat BG</th>
+                        <th className="text-center py-2 px-1 font-semibold text-green-600">Energi BG</th>
+                        <th className="text-center py-2 px-1 font-semibold text-blue-600">Karbo KCL</th>
+                        <th className="text-center py-2 px-1 font-semibold text-blue-600">Protein KCL</th>
+                        <th className="text-center py-2 px-1 font-semibold text-blue-600">Lemak KCL</th>
+                        <th className="text-center py-2 px-1 font-semibold text-blue-600">Serat KCL</th>
+                        <th className="text-center py-2 px-1 font-semibold text-blue-600">Energi KCL</th>
                       </tr>
                     </thead>
                     <tbody>
                       {previewResult.preview.map((row, index) => (
                         <tr
                           key={index}
-                          className={`border-b border-border ${
-                            !row.isValid ? "bg-red-50/50" : "hover:bg-bg"
+                          className={`border-b border-border/50 ${
+                            !row.isValid ? "bg-red-50/50" : "hover:bg-gray-50"
                           }`}
                         >
-                          <td className="py-2 px-3">
+                          <td className="py-2 px-2">
                             {row.isValid ? (
                               <Check className="w-4 h-4 text-green-500" />
                             ) : (
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center justify-center">
                                 <AlertCircle className="w-4 h-4 text-red-500" />
-                                <span className="text-xs text-red-500">{row.error}</span>
                               </div>
                             )}
                           </td>
-                          <td className="py-2 px-3 text-sm font-medium">{row.date}</td>
-                          <td className="py-2 px-2 text-center text-sm text-green-700">
-                            {row.carbsBesar.toFixed(1)}
+                          <td className="py-2 px-2 font-medium text-gray-800">
+                            {row.date || "-"}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-green-700">
-                            {row.proteinBesar.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-green-700">
+                            {typeof row.carbsBesar === 'number' ? row.carbsBesar.toFixed(1) : row.carbsBesar}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-green-700">
-                            {row.fatBesar.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-green-700">
+                            {typeof row.proteinBesar === 'number' ? row.proteinBesar.toFixed(1) : row.proteinBesar}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-green-700">
-                            {row.fiberBesar.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-green-700">
+                            {typeof row.fatBesar === 'number' ? row.fatBesar.toFixed(1) : row.fatBesar}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-green-700">
-                            {row.energyBesar.toFixed(0)}
+                          <td className="py-2 px-1 text-center text-green-700">
+                            {typeof row.fiberBesar === 'number' ? row.fiberBesar.toFixed(1) : row.fiberBesar}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-blue-700">
-                            {row.carbsKecil.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-green-700">
+                            {typeof row.energyBesar === 'number' ? row.energyBesar.toFixed(0) : row.energyBesar}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-blue-700">
-                            {row.proteinKecil.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-blue-700">
+                            {typeof row.carbsKecil === 'number' ? row.carbsKecil.toFixed(1) : row.carbsKecil}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-blue-700">
-                            {row.fatKecil.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-blue-700">
+                            {typeof row.proteinKecil === 'number' ? row.proteinKecil.toFixed(1) : row.proteinKecil}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-blue-700">
-                            {row.fiberKecil.toFixed(1)}
+                          <td className="py-2 px-1 text-center text-blue-700">
+                            {typeof row.fatKecil === 'number' ? row.fatKecil.toFixed(1) : row.fatKecil}
                           </td>
-                          <td className="py-2 px-2 text-center text-sm text-blue-700">
-                            {row.energyKecil.toFixed(0)}
+                          <td className="py-2 px-1 text-center text-blue-700">
+                            {typeof row.fiberKecil === 'number' ? row.fiberKecil.toFixed(1) : row.fiberKecil}
+                          </td>
+                          <td className="py-2 px-1 text-center text-blue-700">
+                            {typeof row.energyKecil === 'number' ? row.energyKecil.toFixed(0) : row.energyKecil}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                {/* Error details for invalid rows */}
+                {previewResult.invalidRows > 0 && (
+                  <div className="p-3 bg-red-50 border-t border-red-100">
+                    <p className="text-xs text-red-600 font-medium">
+                      {previewResult.invalidRows} baris tidak valid (format tanggal tidak sesuai)
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}

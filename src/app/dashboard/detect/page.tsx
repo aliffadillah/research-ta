@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Upload, X, Check, Loader2, AlertCircle, Image, Box, SearchX, Sparkles } from "lucide-react";
 import { cn, validateImageFile, fileToBase64 } from "@/lib/utils/helpers";
 import DetectionResult from "@/components/food/DetectionResult";
+import { SppgMenu, NutritionTarget } from "@/data/sppg-menus";
 
 type DetectionState = "idle" | "preview" | "detecting" | "success" | "error";
 
@@ -84,6 +85,9 @@ export default function DetectPage() {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [detectingMessage, setDetectingMessage] = useState(DETECTING_MESSAGES[0]);
   const [isDragging, setIsDragging] = useState(false);
+  const [sppgMenus, setSppgMenus] = useState<SppgMenu[]>([]);
+  const [lstmNutritionTarget, setLstmNutritionTarget] = useState<NutritionTarget | null>(null);
+  const [lstmDate, setLstmDate] = useState<string | null>(null);
 
   // Cycling text effect during detection
   useEffect(() => {
@@ -100,6 +104,53 @@ export default function DetectPage() {
       clearInterval(messageInterval);
     };
   }, [state]);
+
+  // Fetch SPPG menus on mount
+  useEffect(() => {
+    const fetchSppgMenus = async () => {
+      try {
+        const response = await fetch("/api/sppg-menu");
+        if (response.ok) {
+          const data = await response.json();
+          setSppgMenus(data.menus || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch SPPG menus:", err);
+      }
+    };
+
+    fetchSppgMenus();
+  }, []);
+
+  // Fetch LSTM daily nutrition on mount
+  useEffect(() => {
+    const fetchLstmNutrition = async () => {
+      try {
+        const response = await fetch("/api/lstm-daily-nutrition");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            // Use Porsi Besar as the target for lunch (33% of daily)
+            // The LSTM data represents full daily needs, so we convert to lunch portion
+            const besar = data.data.besar;
+            const lunchTarget: NutritionTarget = {
+              energi: Math.round(besar.energi * 0.33),
+              protein: Math.round(besar.protein * 0.33 * 10) / 10,
+              karbohidrat: Math.round(besar.karbohidrat * 0.33 * 10) / 10,
+              lemak: Math.round(besar.lemak * 0.33 * 10) / 10,
+              serat: Math.round(besar.serat * 0.33 * 10) / 10,
+            };
+            setLstmNutritionTarget(lunchTarget);
+            setLstmDate(data.data.date);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch LSTM nutrition:", err);
+      }
+    };
+
+    fetchLstmNutrition();
+  }, []);
 
   // Handle image load to get dimensions
   const handleImageLoad = useCallback(() => {
@@ -606,6 +657,9 @@ export default function DetectPage() {
               imageWidth={imageDimensions.width}
               imageHeight={imageDimensions.height}
               portionSize={portionSize}
+              sppgMenus={sppgMenus}
+              nutritionTarget={lstmNutritionTarget}
+              targetDate={lstmDate}
             />
 
           </div>
