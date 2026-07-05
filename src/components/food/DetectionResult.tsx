@@ -132,7 +132,7 @@ export default function DetectionResult({
             {tab.icon}
             {tab.label}
             {tab.id === "sppg" && bestMatch && (
-              <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">
+              <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
                 {bestMatch.matchPercentage}%
               </span>
             )}
@@ -144,17 +144,17 @@ export default function DetectionResult({
       {activeTab === "summary" && (
         <div className="space-y-4">
           {/* Quick Stats - 5 Column Grid */}
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-5 gap-2">
             {[
-              { label: "Kalori", value: Math.round(totalNutrition.calories), unit: "kkal", color: "from-orange-50 to-orange-100", textColor: "text-orange-600" },
-              { label: "Protein", value: totalNutrition.protein.toFixed(1), unit: "g", color: "from-blue-50 to-blue-100", textColor: "text-blue-600" },
-              { label: "Karbo", value: totalNutrition.carbs.toFixed(1), unit: "g", color: "from-amber-50 to-amber-100", textColor: "text-amber-600" },
-              { label: "Lemak", value: totalNutrition.fat.toFixed(1), unit: "g", color: "from-red-50 to-red-100", textColor: "text-red-500" },
-              { label: "Serat", value: totalNutrition.fiber.toFixed(1), unit: "g", color: "from-green-50 to-green-100", textColor: "text-green-600" },
+              { label: "Kalori", value: Math.round(totalNutrition.calories), unit: "kkal", bg: "bg-orange-50", text: "text-orange-700" },
+              { label: "Protein", value: totalNutrition.protein.toFixed(1), unit: "g", bg: "bg-blue-50", text: "text-blue-700" },
+              { label: "Karbo", value: totalNutrition.carbs.toFixed(1), unit: "g", bg: "bg-amber-50", text: "text-amber-700" },
+              { label: "Lemak", value: totalNutrition.fat.toFixed(1), unit: "g", bg: "bg-red-50", text: "text-red-600" },
+              { label: "Serat", value: totalNutrition.fiber.toFixed(1), unit: "g", bg: "bg-green-50", text: "text-green-700" },
             ].map((item) => (
-              <div key={item.label} className={cn("card text-center bg-gradient-to-br border", item.color)}>
-                <p className="text-2xl font-bold mb-1">{item.value}</p>
-                <p className={cn("text-xs font-medium", item.textColor)}>{item.label} ({item.unit})</p>
+              <div key={item.label} className={cn("card text-center", item.bg)}>
+                <p className="text-xl font-semibold mb-0.5">{item.value}</p>
+                <p className={cn("text-xs", item.text)}>{item.label} <span className="opacity-60">({item.unit})</span></p>
               </div>
             ))}
           </div>
@@ -162,9 +162,12 @@ export default function DetectionResult({
           {/* Portion Calculator */}
           <div className="grid grid-cols-2 gap-4">
             {/* Porsi Besar */}
-            <div className="card bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <div className="card">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-green-800">Porsi Besar ({portionBesarPercent}%)</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                  Porsi Besar ({portionBesarPercent}%)
+                </span>
                 <input
                   type="range"
                   min="30"
@@ -172,10 +175,10 @@ export default function DetectionResult({
                   step="1"
                   value={portionBesarPercent}
                   onChange={(e) => setPortionBesarPercent(Number(e.target.value))}
-                  className="w-20 h-2 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                  className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600"
                 />
               </div>
-              <p className="text-xs text-green-600 mb-3">
+              <p className="text-xs text-gray-500 mb-3">
                 {Math.round(portionSize * portionBesarPercent / 100)}g dari {portionSize}g total
               </p>
               <div className="grid grid-cols-5 gap-2 text-center">
@@ -186,18 +189,21 @@ export default function DetectionResult({
                   { v: (totalNutrition.fat * portionBesarPercent / 100).toFixed(1), l: "Lemak" },
                   { v: (totalNutrition.fiber * portionBesarPercent / 100).toFixed(1), l: "Serat" },
                 ].map((item) => (
-                  <div key={item.l} className="bg-white/50 rounded-lg py-2">
-                    <p className="font-bold text-green-700">{item.v}</p>
-                    <p className="text-[10px] text-green-600">{item.l}</p>
+                  <div key={item.l} className="bg-gray-100 rounded-lg py-2">
+                    <p className="font-semibold text-gray-700">{item.v}</p>
+                    <p className="text-[10px] text-gray-500">{item.l}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Porsi Kecil */}
-            <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <div className="card">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-blue-800">Porsi Kecil ({portionKecilPercent}%)</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                  Porsi Kecil ({portionKecilPercent}%)
+                </span>
                 <input
                   type="range"
                   min="20"
@@ -205,10 +211,10 @@ export default function DetectionResult({
                   step="1"
                   value={portionKecilPercent}
                   onChange={(e) => setPortionKecilPercent(Number(e.target.value))}
-                  className="w-20 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600"
                 />
               </div>
-              <p className="text-xs text-blue-600 mb-3">
+              <p className="text-xs text-gray-500 mb-3">
                 {Math.round(portionSize * portionKecilPercent / 100)}g dari {portionSize}g total
               </p>
               <div className="grid grid-cols-5 gap-2 text-center">
@@ -219,9 +225,9 @@ export default function DetectionResult({
                   { v: (totalNutrition.fat * portionKecilPercent / 100).toFixed(1), l: "Lemak" },
                   { v: (totalNutrition.fiber * portionKecilPercent / 100).toFixed(1), l: "Serat" },
                 ].map((item) => (
-                  <div key={item.l} className="bg-white/50 rounded-lg py-2">
-                    <p className="font-bold text-blue-700">{item.v}</p>
-                    <p className="text-[10px] text-blue-600">{item.l}</p>
+                  <div key={item.l} className="bg-gray-100 rounded-lg py-2">
+                    <p className="font-semibold text-gray-700">{item.v}</p>
+                    <p className="text-[10px] text-gray-500">{item.l}</p>
                   </div>
                 ))}
               </div>
@@ -247,8 +253,8 @@ export default function DetectionResult({
                   )}
                 >
                   <span className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white",
-                    ["bg-red-500", "bg-blue-500", "bg-green-500", "bg-yellow-500", "bg-purple-500"][idx % 5]
+                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white",
+                    selectedPrediction === pred ? "bg-primary" : "bg-gray-400"
                   )}>
                     {idx + 1}
                   </span>
@@ -260,7 +266,7 @@ export default function DetectionResult({
 
           {/* Selected Food Detail */}
           {selectedPrediction?.nutrition && (
-            <div className="card bg-gray-50">
+            <div className="card">
               <h5 className="font-medium text-gray-700 mb-3">Detail: {selectedPrediction.class}</h5>
               <div className="grid grid-cols-5 gap-3">
                 {[
@@ -270,8 +276,8 @@ export default function DetectionResult({
                   { label: "Lemak", value: selectedPrediction.nutrition.fat.toFixed(1), unit: "g" },
                   { label: "Serat", value: selectedPrediction.nutrition.fiber.toFixed(1), unit: "g" },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white rounded-lg p-3 text-center border">
-                    <p className="text-lg font-bold text-gray-800">{item.value}</p>
+                  <div key={item.label} className="bg-gray-100 rounded-lg p-3 text-center">
+                    <p className="text-lg font-semibold text-gray-800">{item.value}</p>
                     <p className="text-xs text-gray-500">{item.label} ({item.unit})</p>
                   </div>
                 ))}
@@ -285,15 +291,15 @@ export default function DetectionResult({
       {activeTab === "sppg" && bestMatch && (
         <div className="space-y-4">
           {/* Match Header */}
-          <div className="card bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+          <div className="card">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <UtensilsCrossed className="w-6 h-6 text-amber-600" />
+                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <UtensilsCrossed className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-amber-800">Menu #{bestMatch.menu.no} SPPG</h4>
-                  <p className="text-sm text-amber-600">{bestMatch.matchPercentage}% kecocokan</p>
+                  <h4 className="font-semibold text-gray-800">Menu #{bestMatch.menu.no} SPPG</h4>
+                  <p className="text-sm text-gray-500">{bestMatch.matchPercentage}% kecocokan</p>
                 </div>
               </div>
               {nutritionBesar && (
@@ -337,25 +343,28 @@ export default function DetectionResult({
           {/* Nutrition Status - Grid */}
           <div className="grid grid-cols-2 gap-4">
             {/* Porsi Besar */}
-            <div className="card bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <div className="card">
               <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-green-800">Porsi Besar</span>
+                <span className="font-semibold text-gray-700">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                  Porsi Besar
+                </span>
                 <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", getStatusColor(nutritionBesar?.overallStatus))}>
                   {nutritionBesar?.terpenuhiCount}/{nutritionBesar?.totalCount} nutrisi
                 </span>
               </div>
               <div className="space-y-2">
                 {[
-                  { label: "Energi", result: nutritionBesar?.energi },
-                  { label: "Protein", result: nutritionBesar?.protein },
-                  { label: "Karbo", result: nutritionBesar?.karbohidrat },
-                  { label: "Lemak", result: nutritionBesar?.lemak },
-                  { label: "Serat", result: nutritionBesar?.serat },
+                  { label: "Energi", result: nutritionBesar?.energi, unit: "kkal" },
+                  { label: "Protein", result: nutritionBesar?.protein, unit: "g" },
+                  { label: "Karbo", result: nutritionBesar?.karbohidrat, unit: "g" },
+                  { label: "Lemak", result: nutritionBesar?.lemak, unit: "g" },
+                  { label: "Serat", result: nutritionBesar?.serat, unit: "g" },
                 ].map((item) => (
                   <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
                     <span className="text-sm font-medium">{item.label}</span>
-                    <span className="text-sm font-bold">
-                      {item.result ? `${item.result.actual} / ${item.result.target} (${item.result.percentage}%)` : "-"}
+                    <span className="text-sm font-semibold">
+                      {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit} (${item.result.percentage}%)` : "-"}
                     </span>
                   </div>
                 ))}
@@ -363,25 +372,28 @@ export default function DetectionResult({
             </div>
 
             {/* Porsi Kecil */}
-            <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <div className="card">
               <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-blue-800">Porsi Kecil</span>
+                <span className="font-semibold text-gray-700">
+                  <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                  Porsi Kecil
+                </span>
                 <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", getStatusColor(nutritionKecil?.overallStatus))}>
                   {nutritionKecil?.terpenuhiCount}/{nutritionKecil?.totalCount} nutrisi
                 </span>
               </div>
               <div className="space-y-2">
                 {[
-                  { label: "Energi", result: nutritionKecil?.energi },
-                  { label: "Protein", result: nutritionKecil?.protein },
-                  { label: "Karbo", result: nutritionKecil?.karbohidrat },
-                  { label: "Lemak", result: nutritionKecil?.lemak },
-                  { label: "Serat", result: nutritionKecil?.serat },
+                  { label: "Energi", result: nutritionKecil?.energi, unit: "kkal" },
+                  { label: "Protein", result: nutritionKecil?.protein, unit: "g" },
+                  { label: "Karbo", result: nutritionKecil?.karbohidrat, unit: "g" },
+                  { label: "Lemak", result: nutritionKecil?.lemak, unit: "g" },
+                  { label: "Serat", result: nutritionKecil?.serat, unit: "g" },
                 ].map((item) => (
                   <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
                     <span className="text-sm font-medium">{item.label}</span>
-                    <span className="text-sm font-bold">
-                      {item.result ? `${item.result.actual} / ${item.result.target} (${item.result.percentage}%)` : "-"}
+                    <span className="text-sm font-semibold">
+                      {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit} (${item.result.percentage}%)` : "-"}
                     </span>
                   </div>
                 ))}
@@ -390,13 +402,27 @@ export default function DetectionResult({
           </div>
 
           {/* Target Info */}
-          <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-start gap-2">
-            <Info className="w-4 h-4 text-green-600 mt-0.5" />
-            <div className="text-xs text-green-700">
-              <strong>Target:</strong> {activeTarget.energi} kkal, {activeTarget.protein}g Prot, {activeTarget.karbohidrat}g Karbo, {activeTarget.lemak}g Lemak, {activeTarget.serat}g Serat
-              {targetDate && <span className="ml-2">({new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })})</span>}
+          {targetDate ? (
+            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 flex items-start gap-2">
+              <Info className="w-4 h-4 text-primary mt-0.5" />
+              <div className="text-xs text-gray-700">
+                <strong>Target harian dari prediksi LSTM:</strong>
+                <div className="mt-1">
+                  {activeTarget.energi} kkal, {activeTarget.protein}g protein, {activeTarget.karbohidrat}g karbo, {activeTarget.lemak}g lemak, {activeTarget.serat}g serat
+                </div>
+                <div className="text-gray-500 mt-1">
+                  {new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="p-3 bg-gray-100 rounded-lg flex items-start gap-2">
+              <Info className="w-4 h-4 text-gray-500 mt-0.5" />
+              <div className="text-xs text-gray-500">
+                Target harian default. Prediksi LSTM belum tersedia.
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -410,54 +436,72 @@ export default function DetectionResult({
       {/* Comparison Tab */}
       {activeTab === "comparison" && bestMatch && (
         <div className="space-y-4">
+          {/* Target Info */}
+          {targetDate ? (
+            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 flex items-start gap-2">
+              <Info className="w-4 h-4 text-primary mt-0.5" />
+              <div className="text-xs text-gray-700">
+                <strong>Target harian dari prediksi LSTM pada:</strong>
+                <div className="mt-1">
+                  {activeTarget.energi} kkal Energi, {activeTarget.protein}g Protein, {activeTarget.karbohidrat}g Karbo, {activeTarget.lemak}g Lemak, {activeTarget.serat}g Serat
+                </div>
+                <div className="text-gray-500 mt-1">
+                  {new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 bg-gray-100 rounded-lg flex items-start gap-2">
+              <Info className="w-4 h-4 text-gray-500 mt-0.5" />
+              <div className="text-xs text-gray-500">
+                Target harian default. Prediksi LSTM belum tersedia.
+              </div>
+            </div>
+          )}
+
           {/* Table */}
           <div className="card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Nutrisi</th>
-                    <th className="px-4 py-3 text-center font-semibold text-orange-600">Deteksi BG</th>
-                    <th className="px-4 py-3 text-center font-semibold text-orange-500">Deteksi KCL</th>
-                    <th className="px-4 py-3 text-center font-semibold text-green-600">SPPG BG</th>
-                    <th className="px-4 py-3 text-center font-semibold text-blue-600">SPPG KCL</th>
+                    <th className="px-3 py-3 text-left font-semibold text-gray-700">Nutrisi</th>
+                    <th className="px-3 py-3 text-center font-semibold text-primary">Target</th>
+                    <th className="px-3 py-3 text-center font-semibold text-gray-500">Deteksi BG</th>
+                    <th className="px-3 py-3 text-center font-semibold text-green-700">SPPG BG</th>
+                    <th className="px-3 py-3 text-center font-semibold text-blue-700">SPPG KCL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    { label: "Energi", key: "energi", unit: "kkal", det: totalNutrition.calories },
-                    { label: "Protein", key: "protein", unit: "g", det: totalNutrition.protein },
-                    { label: "Karbohidrat", key: "karbohidrat", unit: "g", det: totalNutrition.carbs },
-                    { label: "Lemak", key: "lemak", unit: "g", det: totalNutrition.fat },
-                    { label: "Serat", key: "serat", unit: "g", det: totalNutrition.fiber },
+                    { label: "Energi", key: "energi", unit: "kkal", det: totalNutrition.calories, target: activeTarget.energi },
+                    { label: "Protein", key: "protein", unit: "g", det: totalNutrition.protein, target: activeTarget.protein },
+                    { label: "Karbo", key: "karbohidrat", unit: "g", det: totalNutrition.carbs, target: activeTarget.karbohidrat },
+                    { label: "Lemak", key: "lemak", unit: "g", det: totalNutrition.fat, target: activeTarget.lemak },
+                    { label: "Serat", key: "serat", unit: "g", det: totalNutrition.fiber, target: activeTarget.serat },
                   ].map((item) => {
-                    const detBG = item.det * portionBesarPercent / 100;
-                    const detKCL = item.det * portionKecilPercent / 100;
+                    const detVal = Math.round(item.det * portionBesarPercent / 100);
+                    const diff = item.target > 0 ? ((detVal - item.target) / item.target * 100) : 0;
                     const sppgBG = parseFloat(bestMatch.menu.kandungan_gizi_porsi_besar[item.key as keyof typeof bestMatch.menu.kandungan_gizi_porsi_besar] as string) || 0;
                     const sppgKCL = parseFloat(bestMatch.menu.kandungan_gizi_porsi_kecil[item.key as keyof typeof bestMatch.menu.kandungan_gizi_porsi_kecil] as string) || 0;
-                    const diffBG = sppgBG > 0 ? ((detBG - sppgBG) / sppgBG * 100) : 0;
-                    const diffKCL = sppgKCL > 0 ? ((detKCL - sppgKCL) / sppgKCL * 100) : 0;
 
                     return (
                       <tr key={item.key} className="border-b border-gray-100">
-                        <td className="px-4 py-3 font-medium text-gray-700">
+                        <td className="px-3 py-3 font-medium text-gray-700">
                           {item.label}
                           <span className="text-xs text-gray-400 ml-1">({item.unit})</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="font-bold text-orange-700">{Math.round(detBG)}</span>
-                          <span className={cn("ml-2 px-1.5 py-0.5 rounded text-xs font-medium", getDiffColor(diffBG))}>
-                            {diffBG > 0 ? "+" : ""}{diffBG.toFixed(0)}%
+                        <td className="px-3 py-3 text-center bg-primary/5">
+                          <span className="font-semibold text-primary">{item.target}</span>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span className="font-semibold text-gray-700">{detVal}</span>
+                          <span className={cn("ml-1 px-1 py-0.5 rounded text-xs font-medium", getDiffColor(diff))}>
+                            {diff > 0 ? "+" : ""}{diff.toFixed(0)}%
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="font-bold text-orange-600">{Math.round(detKCL)}</span>
-                          <span className={cn("ml-2 px-1.5 py-0.5 rounded text-xs font-medium", getDiffColor(diffKCL))}>
-                            {diffKCL > 0 ? "+" : ""}{diffKCL.toFixed(0)}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-center bg-green-50 font-bold text-green-700">{sppgBG}</td>
-                        <td className="px-4 py-3 text-center bg-blue-50 font-bold text-blue-700">{sppgKCL}</td>
+                        <td className="px-3 py-3 text-center bg-green-50 font-semibold text-green-700">{sppgBG}</td>
+                        <td className="px-3 py-3 text-center bg-blue-50 font-semibold text-blue-700">{sppgKCL}</td>
                       </tr>
                     );
                   })}

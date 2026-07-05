@@ -33,6 +33,26 @@ interface DailyNutrition {
   energyKecil: number;
 }
 
+interface LstmNutritionData {
+  date: string;
+  isToday: boolean;
+  source: string;
+  besar: {
+    energi: number;
+    protein: number;
+    karbohidrat: number;
+    lemak: number;
+    serat: number;
+  };
+  kecil: {
+    energi: number;
+    protein: number;
+    karbohidrat: number;
+    lemak: number;
+    serat: number;
+  };
+}
+
 interface AllData {
   summary: {
     totalUsers: number;
@@ -80,7 +100,7 @@ interface Food {
 export default function DashboardPage() {
   const [allData, setAllData] = useState<AllData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [todayNutrition, setTodayNutrition] = useState<DailyNutrition | null>(null);
+  const [lstmNutrition, setLstmNutrition] = useState<LstmNutritionData | null>(null);
   const [nutritionHistory, setNutritionHistory] = useState<DailyNutrition[]>([]);
 
   useEffect(() => {
@@ -101,32 +121,28 @@ export default function DashboardPage() {
       }
     }
 
-    // Get today's date in WIB timezone
-  const getTodayWIB = () => {
-    const now = new Date();
-    const utcHours = now.getUTCHours();
-    const wibHours = utcHours + 7;
-    let today = new Date(now);
-    if (wibHours >= 24) {
-      today.setUTCDate(today.getUTCDate() + 1);
+  // Fetch LSTM nutrition data
+  async function fetchLstmNutritionData() {
+    try {
+      const res = await fetch("/api/lstm-daily-nutrition");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          setLstmNutrition(data.data);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch LSTM nutrition data");
     }
-    return today.toISOString().split("T")[0];
-  };
+  }
 
-  // Fetch nutrition data - get data for today
-  async function fetchNutritionData() {
+  // Fetch nutrition history for charts
+  async function fetchNutritionHistory() {
     try {
       const res = await fetch("/api/daily-nutritions");
       if (res.ok) {
         const data: DailyNutrition[] = await res.json();
         setNutritionHistory(data);
-
-        // Get today's date in WIB
-        const todayStr = getTodayWIB();
-
-        // Find data for today specifically
-        const todayData = data.find((n) => n.date.split("T")[0] === todayStr);
-        setTodayNutrition(todayData || null);
       }
     } catch (error) {
       console.error("Failed to fetch nutrition data");
@@ -134,7 +150,8 @@ export default function DashboardPage() {
   }
 
     fetchData();
-    fetchNutritionData();
+    fetchLstmNutritionData();
+    fetchNutritionHistory();
   }, []);
 
   // Prepare chart data - last 7 days
@@ -230,21 +247,27 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
-            Nutrisi Hari Ini
-            <span className="text-sm font-normal text-text-muted">
-              ({new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })})
-            </span>
+            Target Nutrisi Harian
+            {!lstmNutrition?.isToday && lstmNutrition && (
+              <span className="text-xs font-normal px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">
+                {new Date(lstmNutrition.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+              </span>
+            )}
           </h3>
           <Link href="/dashboard/nutrisi-harian" className="text-primary text-sm font-medium hover:underline">
             Lihat Detail
           </Link>
         </div>
 
-        {todayNutrition ? (
+        {lstmNutrition ? (
           <div className="space-y-4">
-            <div className="text-sm text-text-muted bg-primary/5 rounded-lg p-3">
-              Data nutrisi untuk: <span className="font-semibold text-primary">{new Date(todayNutrition.date).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
-            </div>
+            {!lstmNutrition.isToday && (
+              <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-3 border border-amber-200">
+                <strong>Catatan:</strong> Menggunakan data prediksi LSTM dari{" "}
+                <strong>{new Date(lstmNutrition.date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</strong>
+                {" "}karena belum ada data untuk hari ini.
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Porsi Besar */}
               <div>
@@ -255,23 +278,23 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-green-50 rounded-lg border border-green-100">
                     <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
-                    <div className="text-xl font-bold text-green-800">{todayNutrition.carbsBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-green-800">{lstmNutrition.besar.karbohidrat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="text-xs text-blue-600 mb-1">Protein</div>
-                    <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-blue-800">{lstmNutrition.besar.protein.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                   <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
                     <div className="text-xs text-orange-600 mb-1">Lemak</div>
-                    <div className="text-xl font-bold text-orange-800">{todayNutrition.fatBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-orange-800">{lstmNutrition.besar.lemak.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                   <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
                     <div className="text-xs text-rose-600 mb-1">Energi</div>
-                    <div className="text-xl font-bold text-rose-800">{todayNutrition.energyBesar.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                    <div className="text-xl font-bold text-rose-800">{lstmNutrition.besar.energi.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
                   </div>
                   <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
                     <div className="text-xs text-purple-600 mb-1">Serat</div>
-                    <div className="text-xl font-bold text-purple-800">{todayNutrition.fiberBesar.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-purple-800">{lstmNutrition.besar.serat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                 </div>
               </div>
@@ -285,23 +308,23 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-green-50 rounded-lg border border-green-100">
                     <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
-                    <div className="text-xl font-bold text-green-800">{todayNutrition.carbsKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-green-800">{lstmNutrition.kecil.karbohidrat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="text-xs text-blue-600 mb-1">Protein</div>
-                    <div className="text-xl font-bold text-blue-800">{todayNutrition.proteinKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-blue-800">{lstmNutrition.kecil.protein.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                   <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
                     <div className="text-xs text-orange-600 mb-1">Lemak</div>
-                    <div className="text-xl font-bold text-orange-800">{todayNutrition.fatKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-orange-800">{lstmNutrition.kecil.lemak.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                   <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
                     <div className="text-xs text-rose-600 mb-1">Energi</div>
-                    <div className="text-xl font-bold text-rose-800">{todayNutrition.energyKecil.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                    <div className="text-xl font-bold text-rose-800">{lstmNutrition.kecil.energi.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
                   </div>
                   <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
                     <div className="text-xs text-purple-600 mb-1">Serat</div>
-                    <div className="text-xl font-bold text-purple-800">{todayNutrition.fiberKecil.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-xl font-bold text-purple-800">{lstmNutrition.kecil.serat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                 </div>
               </div>
@@ -310,9 +333,9 @@ export default function DashboardPage() {
         ) : (
           <div className="text-center py-8 bg-amber-50 rounded-lg border border-amber-200">
             <Brain className="w-12 h-12 text-amber-300 mx-auto mb-3" />
-            <p className="text-amber-700 font-medium">Belum ada data nutrisi untuk hari ini</p>
+            <p className="text-amber-700 font-medium">Belum ada data nutrisi harian</p>
             <p className="text-text-muted text-sm mt-1 mb-4">
-              Silakan prediksi atau tambahkan data nutrisi harian terlebih dahulu
+              Silakan prediksi kebutuhan nutrisi harian terlebih dahulu
             </p>
             <Link href="/dashboard/nutrisi-harian" className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
               <Plus className="w-4 h-4" />

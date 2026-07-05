@@ -53,14 +53,14 @@ interface DebugInfo {
 
 const getDetectionColor = (index: number) => {
   const colors = [
-    "bg-red-500",
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-cyan-500",
-    "bg-orange-500",
+    "bg-primary",
+    "bg-blue-600",
+    "bg-green-600",
+    "bg-amber-600",
+    "bg-purple-600",
+    "bg-red-600",
+    "bg-cyan-600",
+    "bg-orange-600",
   ];
   return colors[index % colors.length];
 };
@@ -130,17 +130,16 @@ export default function DetectPage() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
-            // Use Porsi Besar as the target for lunch (33% of daily)
-            // The LSTM data represents full daily needs, so we convert to lunch portion
+            // Use Porsi Besar full daily target for comparison
             const besar = data.data.besar;
-            const lunchTarget: NutritionTarget = {
-              energi: Math.round(besar.energi * 0.33),
-              protein: Math.round(besar.protein * 0.33 * 10) / 10,
-              karbohidrat: Math.round(besar.karbohidrat * 0.33 * 10) / 10,
-              lemak: Math.round(besar.lemak * 0.33 * 10) / 10,
-              serat: Math.round(besar.serat * 0.33 * 10) / 10,
+            const dailyTarget: NutritionTarget = {
+              energi: Math.round(besar.energi),
+              protein: Math.round(besar.protein * 10) / 10,
+              karbohidrat: Math.round(besar.karbohidrat * 10) / 10,
+              lemak: Math.round(besar.lemak * 10) / 10,
+              serat: Math.round(besar.serat * 10) / 10,
             };
-            setLstmNutritionTarget(lunchTarget);
+            setLstmNutritionTarget(dailyTarget);
             setLstmDate(data.data.date);
           }
         }
@@ -526,26 +525,17 @@ export default function DetectPage() {
               <img
                 src={imagePreview}
                 alt="Food"
-                className="w-full h-full object-cover rounded-2xl"
+                className="w-full h-full object-cover rounded-xl"
               />
             )}
-            <div className="absolute inset-0 bg-primary/50 rounded-2xl flex items-center justify-center animate-pulse">
-              <div className="animate-spin-slow">
-                <Sparkles className="w-10 h-10 text-white" />
-              </div>
+            <div className="absolute inset-0 bg-primary/40 rounded-xl flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
           </div>
-          <h2 className="text-xl font-semibold mb-2 animate-pulse">
+          <h2 className="text-lg font-medium mb-2 text-gray-700">
             {detectingMessage}
           </h2>
-          <p className="text-text-muted">Mohon tunggu...</p>
-
-          {/* Progress dots */}
-          <div className="flex items-center justify-center gap-2 mt-6">
-            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-          </div>
+          <p className="text-sm text-gray-500">Mohon tunggu...</p>
         </div>
       )}
 
@@ -611,14 +601,15 @@ export default function DetectPage() {
                       key={index}
                       className={cn(
                         "absolute border-2 transition-all cursor-pointer",
-                        selectedIndex === index ? "border-primary opacity-100" : "border-white opacity-70"
+                        selectedIndex === index ? "opacity-100" : "opacity-70"
                       )}
                       style={{
                         left: `${left}%`,
                         top: `${top}%`,
                         width: `${width}%`,
                         height: `${height}%`,
-                        backgroundColor: `${getDetectionColor(index)}20`,
+                        borderColor: selectedIndex === index ? getDetectionColor(index) : "#6b7280",
+                        backgroundColor: `${selectedIndex === index ? getDetectionColor(index) : "#6b7280"}15`,
                       }}
                       onClick={() => {
                         setSelectedIndex(index);
@@ -628,7 +619,7 @@ export default function DetectPage() {
                       {/* Food name label */}
                       <div
                         className={cn(
-                          "absolute left-0 px-2 py-1 text-xs font-bold text-white rounded-br-lg shadow-md",
+                          "absolute left-0 px-2 py-1 text-xs font-medium text-white rounded-br shadow",
                           getDetectionColor(index)
                         )}
                         style={{ maxWidth: "90%" }}

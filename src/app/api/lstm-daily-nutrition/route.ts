@@ -21,62 +21,48 @@ export async function GET() {
     const today = getTodayWIBDate();
     const todayStr = formatDateUTC(today);
 
-    // Find data for today specifically
-    let dailyNutrition = await prisma.dailyNutrition.findFirst({
-      where: {
-        date: today,
+    // Get all available daily nutrition data
+    const allDailyNutrition = await prisma.dailyNutrition.findMany({
+      orderBy: {
+        date: "asc",
       },
     });
 
-    // If no data for today, try to get the most recent data
-    if (!dailyNutrition) {
-      dailyNutrition = await prisma.dailyNutrition.findFirst({
-        orderBy: {
-          date: "desc",
-        },
-      });
-    }
-
-    // If still no data, try to get from user daily goal as fallback
-    if (!dailyNutrition && session.user.id) {
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { dailyGoal: true },
-      });
-
-      if (user?.dailyGoal) {
-        const goal = user.dailyGoal as Record<string, number>;
-        return NextResponse.json({
-          success: true,
-          data: {
-            date: new Date().toISOString().split("T")[0],
-            source: "user_goal",
-            isToday: false,
-            besar: {
-              energi: goal.calories || 2100,
-              protein: goal.protein || 60,
-              karbohidrat: goal.carbs || 300,
-              lemak: goal.fat || 70,
-              serat: goal.fiber || 30,
-            },
-            kecil: {
-              energi: Math.round((goal.calories || 2100) * 0.65),
-              protein: Math.round((goal.protein || 60) * 0.65),
-              karbohidrat: Math.round((goal.carbs || 300) * 0.65),
-              lemak: Math.round((goal.fat || 70) * 0.65),
-              serat: Math.round((goal.fiber || 30) * 0.65),
-            },
-          },
-        });
-      }
-    }
-
-    if (!dailyNutrition) {
+    // If no data at all, return empty state
+    if (allDailyNutrition.length === 0) {
       return NextResponse.json({
         success: false,
-        error: "No daily nutrition data found",
+        error: "Belum terdapat data terbaru",
         data: null,
       });
+    }
+
+    // Find the first available data starting from today onwards
+    let dailyNutrition = null;
+    let searchDate = new Date(today);
+
+    // Try to find data from today or future
+    for (let i = 0; i < 365; i++) { // Max 1 year search
+      const searchDateStr = formatDateUTC(searchDate);
+      const found = allDailyNutrition.find((d) => {
+        const dDate = d.date instanceof Date
+          ? d.date.toISOString().split("T")[0]
+          : String(d.date).split("T")[0];
+        return dDate === searchDateStr;
+      });
+
+      if (found) {
+        dailyNutrition = found;
+        break;
+      }
+
+      // Move to next day
+      searchDate.setDate(searchDate.getDate() + 1);
+    }
+
+    // If still no data found, use the latest available data
+    if (!dailyNutrition) {
+      dailyNutrition = allDailyNutrition[allDailyNutrition.length - 1];
     }
 
     // Check if this data is for today
