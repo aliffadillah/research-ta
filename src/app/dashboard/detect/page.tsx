@@ -86,7 +86,8 @@ export default function DetectPage() {
   const [detectingMessage, setDetectingMessage] = useState(DETECTING_MESSAGES[0]);
   const [isDragging, setIsDragging] = useState(false);
   const [sppgMenus, setSppgMenus] = useState<SppgMenu[]>([]);
-  const [lstmNutritionTarget, setLstmNutritionTarget] = useState<NutritionTarget | null>(null);
+  const [lstmNutritionTargetBesar, setLstmNutritionTargetBesar] = useState<NutritionTarget | null>(null);
+  const [lstmNutritionTargetKecil, setLstmNutritionTargetKecil] = useState<NutritionTarget | null>(null);
   const [lstmDate, setLstmDate] = useState<string | null>(null);
 
   // Cycling text effect during detection
@@ -130,16 +131,29 @@ export default function DetectPage() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
-            // Use Porsi Besar full daily target for comparison
-            const besar = data.data.besar;
-            const dailyTarget: NutritionTarget = {
-              energi: Math.round(besar.energi),
-              protein: Math.round(besar.protein * 10) / 10,
-              karbohidrat: Math.round(besar.karbohidrat * 10) / 10,
-              lemak: Math.round(besar.lemak * 10) / 10,
-              serat: Math.round(besar.serat * 10) / 10,
+            const besar = data.data.besar || {};
+            const kecil = data.data.kecil || {};
+
+            // Porsi Besar full daily target
+            const besarTarget: NutritionTarget = {
+              energi: Math.round(besar.energi || 0),
+              protein: Math.round((besar.protein || 0) * 10) / 10,
+              karbohidrat: Math.round((besar.karbohidrat || 0) * 10) / 10,
+              lemak: Math.round((besar.lemak || 0) * 10) / 10,
+              serat: Math.round((besar.serat || 0) * 10) / 10,
             };
-            setLstmNutritionTarget(dailyTarget);
+
+            // Porsi Kecil full daily target
+            const kecilTarget: NutritionTarget = {
+              energi: Math.round(kecil.energi || 0),
+              protein: Math.round((kecil.protein || 0) * 10) / 10,
+              karbohidrat: Math.round((kecil.karbohidrat || 0) * 10) / 10,
+              lemak: Math.round((kecil.lemak || 0) * 10) / 10,
+              serat: Math.round((kecil.serat || 0) * 10) / 10,
+            };
+
+            setLstmNutritionTargetBesar(besarTarget);
+            setLstmNutritionTargetKecil(kecilTarget);
             setLstmDate(data.data.date);
           }
         }
@@ -649,7 +663,8 @@ export default function DetectPage() {
               imageHeight={imageDimensions.height}
               portionSize={portionSize}
               sppgMenus={sppgMenus}
-              nutritionTarget={lstmNutritionTarget}
+              nutritionTargetBesar={lstmNutritionTargetBesar}
+              nutritionTargetKecil={lstmNutritionTargetKecil}
               targetDate={lstmDate}
             />
 

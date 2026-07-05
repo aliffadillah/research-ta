@@ -63,14 +63,14 @@ export const SPPG_MENUS: SppgMenu[] = [
       lemak: "25 g",
       protein: "15 g",
       karbohidrat: "95 g",
-      serat: "0 g",
+      serat: "6 g",
     },
     kandungan_gizi_porsi_kecil: {
       energi: "525 kkal",
       lemak: "22 g",
       protein: "13 g",
       karbohidrat: "75 g",
-      serat: "0 g",
+      serat: "5 g",
     },
   },
   {
@@ -81,14 +81,14 @@ export const SPPG_MENUS: SppgMenu[] = [
       lemak: "19 g",
       protein: "21 g",
       karbohidrat: "90 g",
-      serat: "0 g",
+      serat: "8 g",
     },
     kandungan_gizi_porsi_kecil: {
       energi: "425 kkal",
       lemak: "19 g",
       protein: "19 g",
       karbohidrat: "70 g",
-      serat: "0 g",
+      serat: "6 g",
     },
   },
   {
@@ -135,14 +135,14 @@ export const SPPG_MENUS: SppgMenu[] = [
       lemak: "15 g",
       protein: "18 g",
       karbohidrat: "85 g",
-      serat: "0 g",
+      serat: "7 g",
     },
     kandungan_gizi_porsi_kecil: {
       energi: "445 kkal",
       lemak: "15 g",
       protein: "17 g",
       karbohidrat: "64 g",
-      serat: "0 g",
+      serat: "5 g",
     },
   },
   {
@@ -153,14 +153,14 @@ export const SPPG_MENUS: SppgMenu[] = [
       lemak: "26 g",
       protein: "19 g",
       karbohidrat: "60 g",
-      serat: "0 g",
+      serat: "4 g",
     },
     kandungan_gizi_porsi_kecil: {
       energi: "254 kkal",
       lemak: "26 g",
       protein: "16 g",
       karbohidrat: "40 g",
-      serat: "0 g",
+      serat: "3 g",
     },
   },
   {
@@ -171,14 +171,14 @@ export const SPPG_MENUS: SppgMenu[] = [
       lemak: "24 g",
       protein: "18 g",
       karbohidrat: "78 g",
-      serat: "0 g",
+      serat: "5 g",
     },
     kandungan_gizi_porsi_kecil: {
       energi: "474 kkal",
       lemak: "22 g",
       protein: "15 g",
       karbohidrat: "60 g",
-      serat: "0 g",
+      serat: "4 g",
     },
   },
   {
@@ -189,14 +189,14 @@ export const SPPG_MENUS: SppgMenu[] = [
       lemak: "30 g",
       protein: "20 g",
       karbohidrat: "65 g",
-      serat: "0 g",
+      serat: "4 g",
     },
     kandungan_gizi_porsi_kecil: {
       energi: "495 kkal",
       lemak: "25 g",
       protein: "17 g",
       karbohidrat: "55 g",
-      serat: "0 g",
+      serat: "3 g",
     },
   },
 ];
@@ -325,14 +325,12 @@ export const DEFAULT_NUTRITION_TARGET: NutritionTarget = {
 
 /**
  * Tolerance ranges for nutrition status
- * - Terpenuhi: 90-110% of target
- * - Hampir: 70-90% or 110-120% of target
- * - Kurang: <70% of target
- * - Berlebihan: >120% of target
+ * - Terpenuhi: actual >= target
+ * - Hampir: actual >= 70% of target
+ * - Kurang: actual < 70% of target
  */
 const TOLERANCE = {
-  terpenuhi: { min: 0.90, max: 1.10 },
-  hampir: { min: 0.70, max: 1.20 },
+  hampir: 0.70,
 };
 
 /**
@@ -357,7 +355,8 @@ export function checkSingleNutrition(
 
   const percentage = Math.round((actual / target) * 100);
 
-  if (percentage >= TOLERANCE.terpenuhi.min * 100 && percentage <= TOLERANCE.terpenuhi.max * 100) {
+  // Terpenuhi: actual >= target
+  if (actual >= target) {
     return {
       status: "terpenuhi",
       actual,
@@ -369,7 +368,8 @@ export function checkSingleNutrition(
     };
   }
 
-  if (percentage >= TOLERANCE.hampir.min * 100 && percentage <= TOLERANCE.hampir.max * 100) {
+  // Hampir: actual >= 70% of target
+  if (percentage >= TOLERANCE.hampir * 100) {
     return {
       status: "hampir",
       actual,
@@ -381,7 +381,8 @@ export function checkSingleNutrition(
     };
   }
 
-  if (percentage < TOLERANCE.hampir.min * 100) {
+  // Kurang: actual < 70% of target
+  if (percentage < TOLERANCE.hampir * 100) {
     return {
       status: "kurang",
       actual,
@@ -393,15 +394,15 @@ export function checkSingleNutrition(
     };
   }
 
-  // >120%
+  // Fallback
   return {
-    status: "berlebihan",
+    status: "kurang",
     actual,
     target,
     percentage,
-    label: "Berlebihan",
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
+    label: "Kurang",
+    color: "text-red-600",
+    bgColor: "bg-red-100",
   };
 }
 
@@ -418,7 +419,6 @@ export function getStatusBadge(status: NutritionStatus): {
     terpenuhi: { icon: "✅", label: "Terpenuhi", color: "text-green-600", bgColor: "bg-green-100" },
     hampir: { icon: "⚠️", label: "Hampir", color: "text-amber-600", bgColor: "bg-amber-100" },
     kurang: { icon: "❌", label: "Kurang", color: "text-red-600", bgColor: "bg-red-100" },
-    berlebihan: { icon: "⚡", label: "Berlebihan", color: "text-purple-600", bgColor: "bg-purple-100" },
     tidak_ada_data: { icon: "❓", label: "Data tidak ada", color: "text-gray-400", bgColor: "bg-gray-100" },
   };
   return badges[status];

@@ -36,7 +36,8 @@ interface DetectionResultProps {
   imageHeight?: number;
   portionSize?: number;
   sppgMenus?: SppgMenu[];
-  nutritionTarget?: NutritionTarget | null;
+  nutritionTargetBesar?: NutritionTarget | null;
+  nutritionTargetKecil?: NutritionTarget | null;
   targetDate?: string | null;
 }
 
@@ -57,7 +58,8 @@ export default function DetectionResult({
   onSelectPrediction,
   portionSize = 100,
   sppgMenus,
-  nutritionTarget,
+  nutritionTargetBesar,
+  nutritionTargetKecil,
   targetDate,
 }: DetectionResultProps) {
   const [activeTab, setActiveTab] = useState<TabType>("summary");
@@ -65,7 +67,29 @@ export default function DetectionResult({
   const [portionKecilPercent, setPortionKecilPercent] = useState(22);
   const [expandedPredIndex, setExpandedPredIndex] = useState<number | null>(null);
 
-  const activeTarget = nutritionTarget || DEFAULT_NUTRITION_TARGET;
+  // Helper to get non-zero target values
+  const getValidTarget = (target: NutritionTarget | null | undefined, fallback: NutritionTarget): NutritionTarget => {
+    if (!target) return fallback;
+    return {
+      energi: target.energi || fallback.energi,
+      protein: target.protein || fallback.protein,
+      karbohidrat: target.karbohidrat || fallback.karbohidrat,
+      lemak: target.lemak || fallback.lemak,
+      serat: target.serat || fallback.serat,
+    };
+  };
+
+  // Default target for full daily nutrition (used as fallback)
+  const defaultFullTarget: NutritionTarget = {
+    energi: 2100,
+    protein: 60,
+    karbohidrat: 300,
+    lemak: 70,
+    serat: 30,
+  };
+
+  const activeTargetBesar = getValidTarget(nutritionTargetBesar, defaultFullTarget);
+  const activeTargetKecil = getValidTarget(nutritionTargetKecil, defaultFullTarget);
 
   if (predictions.length === 0) {
     return null;
@@ -86,8 +110,8 @@ export default function DetectionResult({
   const bestMatch = sppgMatches.length > 0 ? sppgMatches[0] : null;
 
   // Check nutrition status
-  const nutritionBesar = bestMatch ? checkMenuNutrition(bestMatch.menu.kandungan_gizi_porsi_besar, activeTarget) : null;
-  const nutritionKecil = bestMatch ? checkMenuNutrition(bestMatch.menu.kandungan_gizi_porsi_kecil, activeTarget) : null;
+  const nutritionBesar = bestMatch ? checkMenuNutrition(bestMatch.menu.kandungan_gizi_porsi_besar, activeTargetBesar) : null;
+  const nutritionKecil = bestMatch ? checkMenuNutrition(bestMatch.menu.kandungan_gizi_porsi_kecil, activeTargetKecil) : null;
 
   // Color helper
   const getStatusColor = (status?: string) => {
@@ -95,7 +119,6 @@ export default function DetectionResult({
       case "terpenuhi": return "text-green-600 bg-green-100";
       case "hampir": return "text-amber-600 bg-amber-100";
       case "kurang": return "text-red-600 bg-red-100";
-      case "berlebihan": return "text-purple-600 bg-purple-100";
       default: return "text-gray-500 bg-gray-100";
     }
   };
@@ -364,7 +387,7 @@ export default function DetectionResult({
                   <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
                     <span className="text-sm font-medium">{item.label}</span>
                     <span className="text-sm font-semibold">
-                      {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit} (${item.result.percentage}%)` : "-"}
+                      {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit}` : "-"}
                     </span>
                   </div>
                 ))}
@@ -393,7 +416,7 @@ export default function DetectionResult({
                   <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
                     <span className="text-sm font-medium">{item.label}</span>
                     <span className="text-sm font-semibold">
-                      {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit} (${item.result.percentage}%)` : "-"}
+                      {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit}` : "-"}
                     </span>
                   </div>
                 ))}
@@ -407,10 +430,27 @@ export default function DetectionResult({
               <Info className="w-4 h-4 text-primary mt-0.5" />
               <div className="text-xs text-gray-700">
                 <strong>Target harian dari prediksi LSTM:</strong>
-                <div className="mt-1">
-                  {activeTarget.energi} kkal, {activeTarget.protein}g protein, {activeTarget.karbohidrat}g karbo, {activeTarget.lemak}g lemak, {activeTarget.serat}g serat
+                <div className="mt-2 grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      <strong>Porsi Besar:</strong>
+                    </span>
+                    <div className="ml-4 mt-1">
+                      {activeTargetBesar.energi} kkal, {activeTargetBesar.protein}g protein, {activeTargetBesar.karbohidrat}g karbo, {activeTargetBesar.lemak}g lemak, {activeTargetBesar.serat}g serat
+                    </div>
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      <strong>Porsi Kecil:</strong>
+                    </span>
+                    <div className="ml-4 mt-1">
+                      {activeTargetKecil.energi} kkal, {activeTargetKecil.protein}g protein, {activeTargetKecil.karbohidrat}g karbo, {activeTargetKecil.lemak}g lemak, {activeTargetKecil.serat}g serat
+                    </div>
+                  </div>
                 </div>
-                <div className="text-gray-500 mt-1">
+                <div className="text-gray-500 mt-2">
                   {new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}
                 </div>
               </div>
@@ -441,11 +481,28 @@ export default function DetectionResult({
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 flex items-start gap-2">
               <Info className="w-4 h-4 text-primary mt-0.5" />
               <div className="text-xs text-gray-700">
-                <strong>Target harian dari prediksi LSTM pada:</strong>
-                <div className="mt-1">
-                  {activeTarget.energi} kkal Energi, {activeTarget.protein}g Protein, {activeTarget.karbohidrat}g Karbo, {activeTarget.lemak}g Lemak, {activeTarget.serat}g Serat
+                <strong>Target harian dari prediksi LSTM:</strong>
+                <div className="mt-2 grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      <strong>Porsi Besar:</strong>
+                    </span>
+                    <div className="ml-4 mt-1">
+                      {activeTargetBesar.energi} kkal, {activeTargetBesar.protein}g protein, {activeTargetBesar.karbohidrat}g karbo, {activeTargetBesar.lemak}g lemak, {activeTargetBesar.serat}g serat
+                    </div>
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      <strong>Porsi Kecil:</strong>
+                    </span>
+                    <div className="ml-4 mt-1">
+                      {activeTargetKecil.energi} kkal, {activeTargetKecil.protein}g protein, {activeTargetKecil.karbohidrat}g karbo, {activeTargetKecil.lemak}g lemak, {activeTargetKecil.serat}g serat
+                    </div>
+                  </div>
                 </div>
-                <div className="text-gray-500 mt-1">
+                <div className="text-gray-500 mt-2">
                   {new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}
                 </div>
               </div>
@@ -466,23 +523,32 @@ export default function DetectionResult({
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="px-3 py-3 text-left font-semibold text-gray-700">Nutrisi</th>
-                    <th className="px-3 py-3 text-center font-semibold text-primary">Target</th>
+                    <th className="px-3 py-3 text-center font-semibold text-green-700">Target BG</th>
                     <th className="px-3 py-3 text-center font-semibold text-gray-500">Deteksi BG</th>
-                    <th className="px-3 py-3 text-center font-semibold text-green-700">SPPG BG</th>
-                    <th className="px-3 py-3 text-center font-semibold text-blue-700">SPPG KCL</th>
+                    <th className="px-3 py-3 text-center font-semibold text-green-600">SPPG BG</th>
+                    <th className="px-3 py-3 text-center font-semibold text-blue-700">Target KCL</th>
+                    <th className="px-3 py-3 text-center font-semibold text-gray-500">Deteksi KCL</th>
+                    <th className="px-3 py-3 text-center font-semibold text-blue-600">SPPG KCL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    { label: "Energi", key: "energi", unit: "kkal", det: totalNutrition.calories, target: activeTarget.energi },
-                    { label: "Protein", key: "protein", unit: "g", det: totalNutrition.protein, target: activeTarget.protein },
-                    { label: "Karbo", key: "karbohidrat", unit: "g", det: totalNutrition.carbs, target: activeTarget.karbohidrat },
-                    { label: "Lemak", key: "lemak", unit: "g", det: totalNutrition.fat, target: activeTarget.lemak },
-                    { label: "Serat", key: "serat", unit: "g", det: totalNutrition.fiber, target: activeTarget.serat },
+                    { label: "Energi", key: "energi", unit: "kkal", det: totalNutrition.calories },
+                    { label: "Protein", key: "protein", unit: "g", det: totalNutrition.protein },
+                    { label: "Karbo", key: "karbohidrat", unit: "g", det: totalNutrition.carbs },
+                    { label: "Lemak", key: "lemak", unit: "g", det: totalNutrition.fat },
+                    { label: "Serat", key: "serat", unit: "g", det: totalNutrition.fiber },
                   ].map((item) => {
-                    const detVal = Math.round(item.det * portionBesarPercent / 100);
-                    const diff = item.target > 0 ? ((detVal - item.target) / item.target * 100) : 0;
+                    // Porsi Besar
+                    const targetBG = activeTargetBesar[item.key as keyof typeof activeTargetBesar] as number;
+                    const detBG = Math.round(item.det * portionBesarPercent / 100);
+                    const diffBG = targetBG > 0 ? ((detBG - targetBG) / targetBG * 100) : 0;
                     const sppgBG = parseFloat(bestMatch.menu.kandungan_gizi_porsi_besar[item.key as keyof typeof bestMatch.menu.kandungan_gizi_porsi_besar] as string) || 0;
+
+                    // Porsi Kecil
+                    const targetKCL = activeTargetKecil[item.key as keyof typeof activeTargetKecil] as number;
+                    const detKCL = Math.round(item.det * portionKecilPercent / 100);
+                    const diffKCL = targetKCL > 0 ? ((detKCL - targetKCL) / targetKCL * 100) : 0;
                     const sppgKCL = parseFloat(bestMatch.menu.kandungan_gizi_porsi_kecil[item.key as keyof typeof bestMatch.menu.kandungan_gizi_porsi_kecil] as string) || 0;
 
                     return (
@@ -491,17 +557,28 @@ export default function DetectionResult({
                           {item.label}
                           <span className="text-xs text-gray-400 ml-1">({item.unit})</span>
                         </td>
-                        <td className="px-3 py-3 text-center bg-primary/5">
-                          <span className="font-semibold text-primary">{item.target}</span>
+                        {/* Porsi Besar */}
+                        <td className="px-3 py-3 text-center bg-green-50">
+                          <span className="font-semibold text-green-700">{targetBG}</span>
                         </td>
                         <td className="px-3 py-3 text-center">
-                          <span className="font-semibold text-gray-700">{detVal}</span>
-                          <span className={cn("ml-1 px-1 py-0.5 rounded text-xs font-medium", getDiffColor(diff))}>
-                            {diff > 0 ? "+" : ""}{diff.toFixed(0)}%
+                          <span className="font-semibold text-gray-700">{detBG}</span>
+                          <span className={cn("ml-1 px-1 py-0.5 rounded text-xs font-medium", getDiffColor(diffBG))}>
+                            {diffBG > 0 ? "+" : ""}{diffBG.toFixed(0)}%
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-center bg-green-50 font-semibold text-green-700">{sppgBG}</td>
-                        <td className="px-3 py-3 text-center bg-blue-50 font-semibold text-blue-700">{sppgKCL}</td>
+                        <td className="px-3 py-3 text-center bg-green-50/50 font-semibold text-green-600">{sppgBG}</td>
+                        {/* Porsi Kecil */}
+                        <td className="px-3 py-3 text-center bg-blue-50">
+                          <span className="font-semibold text-blue-700">{targetKCL}</span>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span className="font-semibold text-gray-700">{detKCL}</span>
+                          <span className={cn("ml-1 px-1 py-0.5 rounded text-xs font-medium", getDiffColor(diffKCL))}>
+                            {diffKCL > 0 ? "+" : ""}{diffKCL.toFixed(0)}%
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-center bg-blue-50/50 font-semibold text-blue-600">{sppgKCL}</td>
                       </tr>
                     );
                   })}
