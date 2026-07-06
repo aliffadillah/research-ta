@@ -419,6 +419,7 @@ export function getStatusBadge(status: NutritionStatus): {
     terpenuhi: { icon: "✅", label: "Terpenuhi", color: "text-green-600", bgColor: "bg-green-100" },
     hampir: { icon: "⚠️", label: "Hampir", color: "text-amber-600", bgColor: "bg-amber-100" },
     kurang: { icon: "❌", label: "Kurang", color: "text-red-600", bgColor: "bg-red-100" },
+    berlebihan: { icon: "⚠️", label: "Berlebih", color: "text-orange-600", bgColor: "bg-orange-100" },
     tidak_ada_data: { icon: "❓", label: "Data tidak ada", color: "text-gray-400", bgColor: "bg-gray-100" },
   };
   return badges[status];
