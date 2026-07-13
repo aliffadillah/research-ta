@@ -962,102 +962,102 @@ export default function NutrisiHarianPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-sans mb-2">Nutrisi Harian</h1>
-          <div className="flex items-center gap-2 text-sm text-text-muted">
-            <Clock className="w-4 h-4" />
-            <span>{currentTime} (WIB)</span>
+          <h1 className="text-2xl md:text-3xl font-sans mb-1 md:mb-2">Nutrisi Harian</h1>
+          <div className="flex items-center gap-2 text-xs md:text-sm text-text-muted">
+            <Clock className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="truncate">{currentTime} (WIB)</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={openImportModal}
             disabled={importing}
-            className="btn-secondary flex items-center gap-2"
+            className="btn-secondary flex items-center gap-2 text-sm py-2 px-3"
           >
             {importing ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4" />
             ) : (
-              <Upload className="w-5 h-5" />
+              <Upload className="w-4 h-4" />
             )}
-            Import File
+            <span className="hidden sm:inline">Import File</span>
           </button>
           <button
             onClick={openPredictPopup}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center gap-2 text-sm py-2 px-3"
           >
-            <Brain className="w-5 h-5" />
-            Prediksi
+            <Brain className="w-4 h-4" />
+            <span className="hidden sm:inline">Prediksi</span>
             <ChevronDown className="w-4 h-4" />
           </button>
-          <button onClick={openNewModal} className="btn-secondary flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            Tambah Manual
+          <button onClick={openNewModal} className="btn-secondary flex items-center gap-2 text-sm py-2 px-3">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Tambah</span>
           </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Brain className="w-5 h-5 text-purple-600" />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Brain className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
             </div>
-            <div>
-              <span className="text-text-muted text-sm">Total Data</span>
-              <p className="text-2xl font-semibold">{filteredStats.total}</p>
-            </div>
-          </div>
-        </div>
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <span className="text-text-muted text-sm">Rata-rata Energi BG</span>
-              <p className="text-2xl font-semibold">{filteredStats.avgEnergyBesar} kkal</p>
+            <div className="min-w-0">
+              <span className="text-text-muted text-xs md:text-sm block truncate">Total Data</span>
+              <p className="text-lg md:text-2xl font-semibold">{filteredStats.total}</p>
             </div>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-blue-600" />
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
             </div>
-            <div>
-              <span className="text-text-muted text-sm">Rata-rata Energi KCL</span>
-              <p className="text-2xl font-semibold">{filteredStats.avgEnergyKecil} kkal</p>
-            </div>
-          </div>
-        </div>
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-orange-600" />
-            </div>
-            <div>
-              <span className="text-text-muted text-sm">Rentang Tanggal</span>
-              <p className="text-sm font-medium truncate max-w-[180px]">{stats.dateRange}</p>
+            <div className="min-w-0">
+              <span className="text-text-muted text-xs md:text-sm block truncate">Rata-rata BG</span>
+              <p className="text-lg md:text-2xl font-semibold">{filteredStats.avgEnergyBesar} kkal</p>
             </div>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <TrendingDown className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-text-muted text-xs md:text-sm block truncate">Rata-rata KCL</span>
+              <p className="text-lg md:text-2xl font-semibold">{filteredStats.avgEnergyKecil} kkal</p>
+            </div>
+          </div>
+        </div>
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-text-muted text-xs md:text-sm block truncate">Rentang</span>
+              <p className="text-sm font-medium truncate max-w-[120px] md:max-w-[180px]">{stats.dateRange}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card p-3 md:p-4 col-span-2 md:col-span-1">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
               {syncStatus?.needsSync ? (
-                <Clock className="w-5 h-5 text-cyan-600" />
+                <Clock className="w-4 h-4 md:w-5 md:h-5 text-cyan-600" />
               ) : (
-                <CheckCircle className="w-5 h-5 text-cyan-600" />
+                <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-cyan-600" />
               )}
             </div>
-            <div>
-              <span className="text-text-muted text-sm">Terakhir Data</span>
-              <p className="text-sm font-medium truncate max-w-[180px]">{stats.lastSync}</p>
+            <div className="min-w-0">
+              <span className="text-text-muted text-xs md:text-sm block truncate">Terakhir</span>
+              <p className="text-sm font-medium truncate max-w-[120px] md:max-w-[180px]">{stats.lastSync}</p>
             </div>
           </div>
         </div>
@@ -1065,9 +1065,9 @@ export default function NutrisiHarianPage() {
 
       {/* Table */}
       <div className="card-static overflow-x-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
-            Daftar Data Nutrisi Harian
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+          <h3 className="text-base md:text-lg font-semibold">
+            Daftar Data Nutrisi
             {hasActiveFilters && (
               <span className="ml-2 text-sm font-normal text-text-muted">
                 ({filteredNutritions.length} dari {nutritions.length})
@@ -1076,7 +1076,7 @@ export default function NutrisiHarianPage() {
           </h3>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto justify-center ${
               showFilters || hasActiveFilters
                 ? "bg-primary text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -1085,7 +1085,7 @@ export default function NutrisiHarianPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            Filter
+            <span className="hidden sm:inline">Filter</span>
             {hasActiveFilters && (
               <span className="ml-1 w-5 h-5 bg-white/20 rounded-full text-xs flex items-center justify-center">
                 {(filterDateFrom ? 1 : 0) + (filterDateTo ? 1 : 0)}
@@ -1096,8 +1096,8 @@ export default function NutrisiHarianPage() {
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="flex flex-wrap gap-4 items-end">
+          <div className="mb-4 p-3 md:p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 items-end">
               {/* Filter by Date Range */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-gray-600">Dari Tanggal</label>
@@ -1133,116 +1133,118 @@ export default function NutrisiHarianPage() {
         {/* Stats badge for filtered predicted count */}
         {filteredStats.predicted > 0 && (
           <div className="mb-4">
-            <span className="text-sm text-text-muted bg-cyan-50 px-3 py-1 rounded-full">
+            <span className="text-xs md:text-sm text-text-muted bg-cyan-50 px-3 py-1 rounded-full">
               {filteredStats.predicted} data hasil prediksi LSTM
             </span>
           </div>
         )}
 
         {filteredNutritions.length === 0 ? (
-          <div className="text-center py-12">
-            <Brain className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
-            <p className="text-text-muted">
+          <div className="text-center py-8 md:py-12">
+            <Brain className="w-10 h-10 md:w-12 md:h-12 text-text-muted mx-auto mb-3 opacity-50" />
+            <p className="text-text-muted text-sm md:text-base">
               {hasActiveFilters ? "Tidak ada data yang sesuai filter." : "Tidak ada data. Import dari JSON atau tambah manual."}
             </p>
           </div>
         ) : (
-          <table className="w-full min-w-[1200px]">
-            <thead>
-              <tr className="border-b-2 border-border">
-                <th className="text-left py-3 px-3 text-sm font-semibold text-text-muted">No</th>
-                <th className="text-left py-3 px-3 text-sm font-semibold text-text-muted">Tanggal</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-green-600">Karbo BG</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-green-600">Protein BG</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-green-600">Lemak BG</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-green-600">Serat BG</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-green-600">Energi BG</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-blue-600">Karbo KCL</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-blue-600">Protein KCL</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-blue-600">Lemak KCL</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-blue-600">Serat KCL</th>
-                <th className="text-center py-3 px-2 text-sm font-semibold text-blue-600">Energi KCL</th>
-                <th className="text-center py-3 px-3 text-sm font-semibold text-text-muted">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredNutritions.map((nutrition, index) => (
-                <tr key={nutrition.id} className="border-b border-border hover:bg-bg">
-                  <td className="py-3 px-3 text-sm text-text-muted">{index + 1}</td>
-                  <td className="py-3 px-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-text-muted" />
-                      {formatDate(nutrition.date)}
-                    </div>
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-green-700">
-                    {nutrition.carbsBesar.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-green-700">
-                    {nutrition.proteinBesar.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-green-700">
-                    {nutrition.fatBesar.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-green-700">
-                    {nutrition.fiberBesar.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-green-700">
-                    {nutrition.energyBesar.toFixed(0)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-blue-700">
-                    {nutrition.carbsKecil.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-blue-700">
-                    {nutrition.proteinKecil.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-blue-700">
-                    {nutrition.fatKecil.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-blue-700">
-                    {nutrition.fiberKecil.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-2 text-center font-medium text-blue-700">
-                    {nutrition.energyKecil.toFixed(0)}
-                  </td>
-                  <td className="py-3 px-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(nutrition)}
-                        className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
-                      >
-                        <Pencil className="w-4 h-4 text-primary" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(nutrition.id)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+            <table className="w-full min-w-[900px] md:min-w-[1200px] text-xs md:text-sm">
+              <thead>
+                <tr className="border-b-2 border-border">
+                  <th className="text-left py-2 md:py-3 px-2 md:px-3 font-semibold text-text-muted">No</th>
+                  <th className="text-left py-2 md:py-3 px-2 md:px-3 font-semibold text-text-muted">Tanggal</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-green-600">Karbo BG</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-green-600">Protein BG</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-green-600 hidden sm:table-cell">Lemak BG</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-green-600 hidden md:table-cell">Serat BG</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-green-600">Energi BG</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-blue-600 hidden sm:table-cell">Karbo KCL</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-blue-600 hidden sm:table-cell">Protein KCL</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-blue-600 hidden lg:table-cell">Lemak KCL</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-blue-600 hidden lg:table-cell">Serat KCL</th>
+                  <th className="text-center py-2 md:py-3 px-1 md:px-2 font-semibold text-blue-600 hidden md:table-cell">Energi KCL</th>
+                  <th className="text-center py-2 md:py-3 px-2 md:px-3 font-semibold text-text-muted">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredNutritions.map((nutrition, index) => (
+                  <tr key={nutrition.id} className="border-b border-border hover:bg-bg">
+                    <td className="py-2 md:py-3 px-2 md:px-3 text-text-muted">{index + 1}</td>
+                    <td className="py-2 md:py-3 px-2 md:px-3">
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <Calendar className="w-3 h-3 md:w-4 md:h-4 text-text-muted flex-shrink-0" />
+                        <span className="text-xs md:text-sm truncate max-w-[80px] md:max-w-none">{formatDate(nutrition.date)}</span>
+                      </div>
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700">
+                      {nutrition.carbsBesar.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700">
+                      {nutrition.proteinBesar.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700 hidden sm:table-cell">
+                      {nutrition.fatBesar.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700 hidden md:table-cell">
+                      {nutrition.fiberBesar.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700 font-semibold">
+                      {nutrition.energyBesar.toFixed(0)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden sm:table-cell">
+                      {nutrition.carbsKecil.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden sm:table-cell">
+                      {nutrition.proteinKecil.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden lg:table-cell">
+                      {nutrition.fatKecil.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden lg:table-cell">
+                      {nutrition.fiberKecil.toFixed(1)}
+                    </td>
+                    <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden md:table-cell font-semibold">
+                      {nutrition.energyKecil.toFixed(0)}
+                    </td>
+                    <td className="py-2 md:py-3 px-2 md:px-3">
+                      <div className="flex items-center justify-center gap-1 md:gap-2">
+                        <button
+                          onClick={() => handleEdit(nutrition)}
+                          className="p-1.5 md:p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(nutrition.id)}
+                          className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Modal */}
       <div
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4"
         style={{ display: showModal ? "flex" : "none" }}
       >
         <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <div className="p-6 border-b border-border flex items-center justify-between">
-            <h2 className="text-xl font-semibold">
+          <div className="p-4 md:p-6 border-b border-border flex items-center justify-between">
+            <h2 className="text-lg md:text-xl font-semibold">
               {editingId ? "Edit Data Nutrisi" : "Tambah Data Nutrisi"}
             </h2>
             <button onClick={() => setShowModal(false)} className="p-2 hover:bg-bg rounded-lg">
               <X className="w-5 h-5" />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-6">
             <div>
               <label className="label">Tanggal</label>
               <input
@@ -1254,11 +1256,11 @@ export default function NutrisiHarianPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Porsi Besar */}
-              <div className="p-4 bg-green-50 rounded-xl">
-                <h4 className="font-semibold text-green-700 mb-4">Porsi Besar</h4>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 md:p-4 bg-green-50 rounded-xl">
+                <h4 className="font-semibold text-green-700 mb-3 md:mb-4">Porsi Besar</h4>
+                <div className="grid grid-cols-2 gap-2 md:gap-3">
                   <div>
                     <label className="label text-xs">Karbohidrat (g)</label>
                     <input
@@ -1266,7 +1268,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.carbsBesar}
                       onChange={(e) => setForm({ ...form, carbsBesar: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div>
@@ -1276,7 +1278,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.proteinBesar}
                       onChange={(e) => setForm({ ...form, proteinBesar: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div>
@@ -1286,7 +1288,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.fatBesar}
                       onChange={(e) => setForm({ ...form, fatBesar: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div>
@@ -1296,7 +1298,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.fiberBesar}
                       onChange={(e) => setForm({ ...form, fiberBesar: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div className="col-span-2">
@@ -1306,16 +1308,16 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.energyBesar}
                       onChange={(e) => setForm({ ...form, energyBesar: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Porsi Kecil */}
-              <div className="p-4 bg-blue-50 rounded-xl">
-                <h4 className="font-semibold text-blue-700 mb-4">Porsi Kecil</h4>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 md:p-4 bg-blue-50 rounded-xl">
+                <h4 className="font-semibold text-blue-700 mb-3 md:mb-4">Porsi Kecil</h4>
+                <div className="grid grid-cols-2 gap-2 md:gap-3">
                   <div>
                     <label className="label text-xs">Karbohidrat (g)</label>
                     <input
@@ -1323,7 +1325,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.carbsKecil}
                       onChange={(e) => setForm({ ...form, carbsKecil: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div>
@@ -1333,7 +1335,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.proteinKecil}
                       onChange={(e) => setForm({ ...form, proteinKecil: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div>
@@ -1343,7 +1345,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.fatKecil}
                       onChange={(e) => setForm({ ...form, fatKecil: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div>
@@ -1353,7 +1355,7 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.fiberKecil}
                       onChange={(e) => setForm({ ...form, fiberKecil: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                   <div className="col-span-2">
@@ -1363,19 +1365,19 @@ export default function NutrisiHarianPage() {
                       step="0.1"
                       value={form.energyKecil}
                       onChange={(e) => setForm({ ...form, energyKecil: Number(e.target.value) })}
-                      className="input-field"
+                      className="input-field text-sm py-2"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
-              <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+              <button type="button" onClick={() => setShowModal(false)} className="btn-secondary order-2 sm:order-1">
                 Batal
               </button>
-              <button type="submit" disabled={saving} className="btn-primary">
-                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Simpan"}
+              <button type="submit" disabled={saving} className="btn-primary order-1 sm:order-2">
+                {saving ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" /> : "Simpan"}
               </button>
             </div>
           </form>
