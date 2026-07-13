@@ -1188,7 +1188,7 @@ export default function NutrisiHarianPage() {
                     <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700 hidden md:table-cell">
                       {nutrition.fiberBesar.toFixed(1)}
                     </td>
-                    <td className="py-2 md:py-3 px-1 text-center font-medium text-green-700 font-semibold">
+                    <td className="py-2 md:py-3 px-1 text-center font-semibold text-green-700">
                       {nutrition.energyBesar.toFixed(0)}
                     </td>
                     <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden sm:table-cell">
@@ -1203,7 +1203,7 @@ export default function NutrisiHarianPage() {
                     <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden lg:table-cell">
                       {nutrition.fiberKecil.toFixed(1)}
                     </td>
-                    <td className="py-2 md:py-3 px-1 text-center font-medium text-blue-700 hidden md:table-cell font-semibold">
+                    <td className="py-2 md:py-3 px-1 text-center font-semibold text-blue-700 hidden md:table-cell">
                       {nutrition.energyKecil.toFixed(0)}
                     </td>
                     <td className="py-2 md:py-3 px-2 md:px-3">
