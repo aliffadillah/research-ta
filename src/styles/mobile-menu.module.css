@@ -1,0 +1,103 @@
+/* Mobile Menu Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.overlay.closing {
+  animation: fadeOut 0.2s ease-out;
+}
+
+/* Mobile Menu Drawer */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 256px;
+  background-color: white;
+  z-index: 50;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.drawer.closing {
+  animation: slideOutLeft 0.3s ease-out;
+}
+
+/* Logo section */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #E5E5DC;
+}
+
+.logoIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: #2D5A27;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+/* Navigation */
+.nav {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  color: #6B6B63;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.navItem:hover {
+  background-color: rgba(45, 90, 39, 0.05);
+  color: #2D5A27;
+}
+
+.navItemActive {
+  background-color: rgba(45, 90, 39, 0.1);
+  color: #2D5A27;
+}
+
+/* Bottom section */
+.bottomSection {
+  padding: 1rem;
+  border-top: 1px solid #E5E5DC;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOutLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
