@@ -62,13 +62,18 @@ export function Card({
   className,
   children,
   hover = false,
+  responsive = false,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { hover?: boolean }) {
+}: React.HTMLAttributes<HTMLDivElement> & {
+  hover?: boolean;
+  responsive?: boolean;
+}) {
   return (
     <div
       className={cn(
         "bg-white rounded-2xl shadow-card p-6",
         hover && "transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1",
+        responsive && "grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6",
         className
       )}
       {...props}
