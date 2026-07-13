@@ -1,3 +1,24 @@
+# Task 7: Refactor Header for Mobile
+
+**Files:**
+- Modify: `src/components/layout/Header.tsx`
+
+**Interfaces:**
+- Props: `user`, `onMenuClick?: () => void`
+- Desktop: Full search bar + user info
+- Tablet: Condensed search + user info
+- Mobile: Hamburger button + minimal user avatar
+
+## Steps
+
+- [ ] **Step 1: Read current Header.tsx**
+
+Read `src/components/layout/Header.tsx` first.
+
+- [ ] **Step 2: Replace Header.tsx content**
+
+Replace the content with responsive version:
+```typescript
 "use client";
 
 import { Bell, Search, Menu } from "lucide-react";
@@ -16,7 +37,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
   const { isMobile, isTablet } = useBreakpoint();
 
   return (
-    <header
+    <header 
       className={cn(
         "h-16 bg-white border-b border-border flex items-center",
         "px-4 md:px-6 lg:px-8"
@@ -28,10 +49,8 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
         {isMobile && (
           <button
             onClick={onMenuClick}
-            className="p-3 -ml-3 rounded-lg hover:bg-bg transition-colors"
+            className="p-2 -ml-2 rounded-lg hover:bg-bg transition-colors"
             aria-label="Buka menu"
-            aria-expanded={false}
-            aria-controls="mobile-menu"
           >
             <Menu className="w-6 h-6 text-text-muted" />
           </button>
@@ -56,8 +75,8 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
       {/* Right side - Notifications and user */}
       <div className="flex items-center gap-2 md:gap-4">
         {/* Notifications */}
-        <button
-          className="relative p-3 rounded-xl hover:bg-bg transition-colors"
+        <button 
+          className="relative p-2 rounded-xl hover:bg-bg transition-colors"
           aria-label="Notifikasi"
         >
           <Bell className="w-5 h-5 text-text-muted" />
@@ -72,7 +91,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
               {user.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
             </span>
           </div>
-
+          
           {/* User details - hide on mobile */}
           <div className={cn("hidden sm:block")}>
             <p className="font-medium text-sm leading-tight">
@@ -87,3 +106,16 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
     </header>
   );
 }
+```
+
+- [ ] **Step 3: Test compilation**
+
+Run: `npx tsc --noEmit`
+Expected: No errors
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/components/layout/Header.tsx
+git commit -m "refactor(Header): add responsive behavior with hamburger menu"
+```

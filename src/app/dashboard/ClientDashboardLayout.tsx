@@ -23,7 +23,7 @@ export default function ClientDashboardLayout({
   const { isMobile, isTablet } = useBreakpoint();
 
   // Calculate main content margin based on screen size
-  const mainMarginClass = isMobile || isTablet ? "ml-0" : "ml-64";
+  const mainMarginClass = isMobile ? "ml-0" : isTablet ? "ml-16" : "ml-64";
 
   return (
     <div className="min-h-screen flex">
