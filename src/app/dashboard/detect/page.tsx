@@ -571,17 +571,17 @@ export default function DetectPage() {
 
       {/* Success State - Has Detections */}
       {(state === "success" || saved) && predictions.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Left: Image with Bounding Boxes */}
           <div className="space-y-4">
             <div className="card-static">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Gambar dengan Bounding Box</h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+                <h3 className="font-semibold text-sm md:text-base">Gambar dengan Bounding Box</h3>
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 bg-primary text-white rounded-lg text-sm font-medium">
+                  <span className="px-2 md:px-3 py-1 bg-primary text-white rounded-lg text-xs md:text-sm font-medium">
                     {predictions.length} deteksi
                   </span>
-                  <button onClick={reset} className="btn-secondary text-sm py-1.5">
+                  <button onClick={reset} className="btn-secondary text-xs md:text-sm py-1.5 px-2 md:px-3">
                     Reset
                   </button>
                 </div>

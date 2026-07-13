@@ -135,18 +135,18 @@ export default function FoodsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-sans mb-2">Daftar Makanan</h1>
-          <p className="text-text-muted">
+          <h1 className="text-2xl md:text-3xl font-sans mb-1 md:mb-2">Daftar Makanan</h1>
+          <p className="text-text-muted text-sm md:text-base">
             {foods.length} jenis makanan dengan kandungan gizi
           </p>
         </div>
-        <button onClick={openNewModal} className="btn-primary flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          Tambah Makanan
+        <button onClick={openNewModal} className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center">
+          <Plus className="w-4 h-4 md:w-5 md:h-5" />
+          <span className="text-sm md:text-base">Tambah</span>
         </button>
       </div>
 
@@ -163,60 +163,60 @@ export default function FoodsPage() {
       </div>
 
       {/* Foods Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {filteredFoods.map((food) => (
-          <div key={food.id} className="card hover:shadow-card-hover transition-shadow">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Apple className="w-6 h-6 text-primary" />
+          <div key={food.id} className="card hover:shadow-card-hover transition-shadow p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Apple className="w-5 h-5 md:w-6 md:h-6 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold truncate">{food.name}</h3>
-                    <p className="text-sm text-text-muted">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-sm md:text-base truncate">{food.name}</h3>
+                    <p className="text-xs md:text-sm text-text-muted">
                       {food.portionSize}
                       {food.portionUnit}
                     </p>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-shrink-0">
                     <button
                       onClick={() => handleEdit(food)}
-                      className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                      className="p-1.5 md:p-2 hover:bg-primary/10 rounded-lg transition-colors"
                     >
-                      <Pencil className="w-4 h-4 text-primary" />
+                      <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
                     </button>
                     <button
                       onClick={() => setDeleteDialog({ open: true, id: food.id, name: food.name })}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-5 gap-2 text-center">
+            <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border">
+              <div className="grid grid-cols-5 gap-1 md:gap-2 text-center">
                 <div>
-                  <p className="nutrition-value text-primary">{Math.round(food.calories)}</p>
+                  <p className="nutrition-value text-primary text-sm md:text-base">{Math.round(food.calories)}</p>
                   <p className="text-xs text-text-muted">Kalori</p>
                 </div>
                 <div>
-                  <p className="nutrition-value">{food.protein.toFixed(1)}g</p>
+                  <p className="nutrition-value text-sm md:text-base">{food.protein.toFixed(1)}g</p>
                   <p className="text-xs text-text-muted">Protein</p>
                 </div>
                 <div>
-                  <p className="nutrition-value">{food.carbs.toFixed(1)}g</p>
+                  <p className="nutrition-value text-sm md:text-base">{food.carbs.toFixed(1)}g</p>
                   <p className="text-xs text-text-muted">Karbo</p>
                 </div>
                 <div>
-                  <p className="nutrition-value">{food.fat.toFixed(1)}g</p>
+                  <p className="nutrition-value text-sm md:text-base">{food.fat.toFixed(1)}g</p>
                   <p className="text-xs text-text-muted">Lemak</p>
                 </div>
                 <div>
-                  <p className="nutrition-value">{food.fiber.toFixed(1)}g</p>
+                  <p className="nutrition-value text-sm md:text-base">{food.fiber.toFixed(1)}g</p>
                   <p className="text-xs text-text-muted">Serat</p>
                 </div>
               </div>
@@ -238,16 +238,16 @@ export default function FoodsPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md">
-            <div className="p-6 border-b border-border flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-4 md:p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-semibold">
                 {editingId ? "Edit Makanan" : "Tambah Makanan Baru"}
               </h2>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-bg rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
               <div>
                 <label className="label">Nama Makanan</label>
                 <input
@@ -259,7 +259,7 @@ export default function FoodsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 <div>
                   <label className="label">Kalori (kkal)</label>
                   <input
@@ -332,12 +332,12 @@ export default function FoodsPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary order-2 sm:order-1">
                   Batal
                 </button>
-                <button type="submit" disabled={saving} className="btn-primary">
-                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Simpan"}
+                <button type="submit" disabled={saving} className="btn-primary order-1 sm:order-2">
+                  {saving ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" /> : "Simpan"}
                 </button>
               </div>
             </form>

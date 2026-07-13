@@ -295,23 +295,23 @@ export default function GenerateMenuPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-sans">Generate Menu Rekomendasi</h1>
-            <p className="text-text-muted">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-sans">Generate Menu Rekomendasi</h1>
+            <p className="text-text-muted text-sm">
               Hasilkan kombinasi menu makanan yang sesuai kebutuhan gizi harian
             </p>
           </div>
         </div>
 
         {/* Mode Toggle */}
-        <div className="flex items-center gap-1 p-1 bg-bg rounded-xl">
+        <div className="flex items-center gap-1 p-1 bg-bg rounded-xl self-start lg:self-auto">
           <button
             onClick={() => {
               setMode("1-hari");
@@ -320,14 +320,14 @@ export default function GenerateMenuPage() {
               setError(null);
             }}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+              "px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
               mode === "1-hari"
                 ? "bg-primary text-white shadow-sm"
                 : "text-text-muted hover:text-text"
             )}
           >
             <Calendar className="w-4 h-4" />
-            1 Hari
+            <span className="hidden sm:inline">1 Hari</span>
           </button>
           <button
             onClick={() => {
@@ -337,14 +337,14 @@ export default function GenerateMenuPage() {
               setError(null);
             }}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+              "px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
               mode === "7-hari"
                 ? "bg-primary text-white shadow-sm"
                 : "text-text-muted hover:text-text"
             )}
           >
             <CalendarDays className="w-4 h-4" />
-            7 Hari
+            <span className="hidden sm:inline">7 Hari</span>
           </button>
         </div>
       </div>

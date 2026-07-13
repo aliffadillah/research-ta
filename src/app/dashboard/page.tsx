@@ -201,45 +201,45 @@ export default function DashboardPage() {
   const dailyLogs = allData?.dailyLogs?.data || [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-sans mb-2">Dashboard</h1>
-        <p className="text-text-muted">{formatDate(new Date())}</p>
+        <h1 className="text-2xl md:text-3xl font-sans mb-2">Dashboard</h1>
+        <p className="text-text-muted text-sm md:text-base">{formatDate(new Date())}</p>
       </div>
 
       {/* Quick Action */}
       <Link
         href="/dashboard/detect"
-        className="card flex items-center justify-between group hover:border-primary"
+        className="card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-primary"
       >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center">
-            <Camera className="w-7 h-7 text-white" />
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-primary rounded-2xl flex items-center justify-center flex-shrink-0">
+            <Camera className="w-6 h-6 md:w-7 md:h-7 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Deteksi Makanan</h2>
-            <p className="text-text-muted">Pindai atau upload foto makanan</p>
+            <h2 className="text-lg md:text-xl font-semibold">Deteksi Makanan</h2>
+            <p className="text-text-muted text-sm">Pindai atau upload foto makanan</p>
           </div>
         </div>
-        <ChevronRight className="w-6 h-6 text-text-muted group-hover:translate-x-2 group-hover:text-primary transition-all" />
+        <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-text-muted group-hover:translate-x-2 group-hover:text-primary transition-all flex-shrink-0" />
       </Link>
 
       {/* Quick Action - Rekomendasi Makanan */}
       <Link
         href="/dashboard/rekomendasi-nutrisi"
-        className="card flex items-center justify-between group hover:border-accent"
+        className="card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-accent"
       >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center">
-            <ChefHat className="w-7 h-7 text-white" />
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-accent rounded-2xl flex items-center justify-center flex-shrink-0">
+            <ChefHat className="w-6 h-6 md:w-7 md:h-7 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Rekomendasi Makanan</h2>
-            <p className="text-text-muted">Lihat saran makanan sesuai kebutuhan gizi</p>
+            <h2 className="text-lg md:text-xl font-semibold">Rekomendasi Makanan</h2>
+            <p className="text-text-muted text-sm">Lihat saran makanan sesuai kebutuhan gizi</p>
           </div>
         </div>
-        <ChevronRight className="w-6 h-6 text-text-muted group-hover:translate-x-2 group-hover:text-accent transition-all" />
+        <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-text-muted group-hover:translate-x-2 group-hover:text-accent transition-all flex-shrink-0" />
       </Link>
 
       {/* Today's Nutrition Data */}
@@ -268,63 +268,63 @@ export default function DashboardPage() {
                 {" "}karena belum ada data untuk hari ini.
               </div>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {/* Porsi Besar */}
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <div className="text-sm font-medium text-green-700 mb-3 flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full" />
                   Porsi Besar
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                <div className="grid grid-cols-2 gap-2 md:gap-3">
+                  <div className="p-2 md:p-3 bg-green-50 rounded-lg border border-green-100">
                     <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
-                    <div className="text-xl font-bold text-green-800">{lstmNutrition.besar.karbohidrat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-green-800">{lstmNutrition.besar.karbohidrat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="p-2 md:p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="text-xs text-blue-600 mb-1">Protein</div>
-                    <div className="text-xl font-bold text-blue-800">{lstmNutrition.besar.protein.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-blue-800">{lstmNutrition.besar.protein.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
-                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                  <div className="p-2 md:p-3 bg-orange-50 rounded-lg border border-orange-100">
                     <div className="text-xs text-orange-600 mb-1">Lemak</div>
-                    <div className="text-xl font-bold text-orange-800">{lstmNutrition.besar.lemak.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-orange-800">{lstmNutrition.besar.lemak.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
-                  <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                  <div className="p-2 md:p-3 bg-rose-50 rounded-lg border border-rose-100">
                     <div className="text-xs text-rose-600 mb-1">Energi</div>
-                    <div className="text-xl font-bold text-rose-800">{lstmNutrition.besar.energi.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                    <div className="text-lg md:text-xl font-bold text-rose-800">{lstmNutrition.besar.energi.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
                   </div>
-                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                  <div className="p-2 md:p-3 bg-purple-50 rounded-lg border border-purple-100 col-span-2">
                     <div className="text-xs text-purple-600 mb-1">Serat</div>
-                    <div className="text-xl font-bold text-purple-800">{lstmNutrition.besar.serat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-purple-800">{lstmNutrition.besar.serat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                 </div>
               </div>
 
               {/* Porsi Kecil */}
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <div className="text-sm font-medium text-blue-700 mb-3 flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full" />
                   Porsi Kecil
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                <div className="grid grid-cols-2 gap-2 md:gap-3">
+                  <div className="p-2 md:p-3 bg-green-50 rounded-lg border border-green-100">
                     <div className="text-xs text-green-600 mb-1">Karbohidrat</div>
-                    <div className="text-xl font-bold text-green-800">{lstmNutrition.kecil.karbohidrat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-green-800">{lstmNutrition.kecil.karbohidrat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="p-2 md:p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="text-xs text-blue-600 mb-1">Protein</div>
-                    <div className="text-xl font-bold text-blue-800">{lstmNutrition.kecil.protein.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-blue-800">{lstmNutrition.kecil.protein.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
-                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                  <div className="p-2 md:p-3 bg-orange-50 rounded-lg border border-orange-100">
                     <div className="text-xs text-orange-600 mb-1">Lemak</div>
-                    <div className="text-xl font-bold text-orange-800">{lstmNutrition.kecil.lemak.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-orange-800">{lstmNutrition.kecil.lemak.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
-                  <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                  <div className="p-2 md:p-3 bg-rose-50 rounded-lg border border-rose-100">
                     <div className="text-xs text-rose-600 mb-1">Energi</div>
-                    <div className="text-xl font-bold text-rose-800">{lstmNutrition.kecil.energi.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
+                    <div className="text-lg md:text-xl font-bold text-rose-800">{lstmNutrition.kecil.energi.toFixed(0)}<span className="text-sm font-normal ml-1">kkal</span></div>
                   </div>
-                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                  <div className="p-2 md:p-3 bg-purple-50 rounded-lg border border-purple-100 col-span-2">
                     <div className="text-xs text-purple-600 mb-1">Serat</div>
-                    <div className="text-xl font-bold text-purple-800">{lstmNutrition.kecil.serat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
+                    <div className="text-lg md:text-xl font-bold text-purple-800">{lstmNutrition.kecil.serat.toFixed(1)}<span className="text-sm font-normal ml-1">g</span></div>
                   </div>
                 </div>
               </div>
@@ -393,112 +393,112 @@ export default function DashboardPage() {
       )}
 
       {/* Database Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Users className="w-5 h-5 text-blue-600" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Users className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
             </div>
-            <span className="text-text-muted text-sm">Users</span>
+            <span className="text-text-muted text-xs md:text-sm hidden sm:block">Users</span>
           </div>
-          <p className="text-2xl font-semibold">{summary?.totalUsers || 0}</p>
+          <p className="text-xl md:text-2xl font-semibold">{summary?.totalUsers || 0}</p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-              <Utensils className="w-5 h-5 text-green-600" />
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-xl flex items-center justify-center">
+              <Utensils className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
             </div>
-            <span className="text-text-muted text-sm">Foods</span>
+            <span className="text-text-muted text-xs md:text-sm hidden sm:block">Foods</span>
           </div>
-          <p className="text-2xl font-semibold">{summary?.totalFoods || 0}</p>
+          <p className="text-xl md:text-2xl font-semibold">{summary?.totalFoods || 0}</p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Camera className="w-5 h-5 text-purple-600" />
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+              <Camera className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
             </div>
-            <span className="text-text-muted text-sm">Detections</span>
+            <span className="text-text-muted text-xs md:text-sm hidden sm:block">Detections</span>
           </div>
-          <p className="text-2xl font-semibold">{summary?.totalDetections || 0}</p>
+          <p className="text-xl md:text-2xl font-semibold">{summary?.totalDetections || 0}</p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-              <ClipboardList className="w-5 h-5 text-orange-600" />
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+              <ClipboardList className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
             </div>
-            <span className="text-text-muted text-sm">Daily Logs</span>
+            <span className="text-text-muted text-xs md:text-sm hidden sm:block">Daily Logs</span>
           </div>
-          <p className="text-2xl font-semibold">{summary?.totalDailyLogs || 0}</p>
+          <p className="text-xl md:text-2xl font-semibold">{summary?.totalDailyLogs || 0}</p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
-              <Flame className="w-5 h-5 text-rose-600" />
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+              <Flame className="w-4 h-4 md:w-5 md:h-5 text-rose-600" />
             </div>
-            <span className="text-text-muted text-sm">Menus</span>
+            <span className="text-text-muted text-xs md:text-sm hidden sm:block">Menus</span>
           </div>
-          <p className="text-2xl font-semibold">{summary?.totalMenuRecommendations || 0}</p>
+          <p className="text-xl md:text-2xl font-semibold">{summary?.totalMenuRecommendations || 0}</p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-teal-600" />
+        <div className="card p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
             </div>
-            <span className="text-text-muted text-sm">Standards</span>
+            <span className="text-text-muted text-xs md:text-sm hidden sm:block">Standards</span>
           </div>
-          <p className="text-2xl font-semibold">{summary?.totalNutritionStandards || 0}</p>
+          <p className="text-xl md:text-2xl font-semibold">{summary?.totalNutritionStandards || 0}</p>
         </div>
       </div>
 
       {/* Recent Activity & Data Preview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Recent Detections */}
         <div className="card-static">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Detections Terbaru</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 md:mb-6">
+            <h3 className="text-base md:text-lg font-semibold">Detections Terbaru</h3>
             <Link href="/dashboard/history" className="text-primary text-sm font-medium hover:underline">
               Lihat semua ({summary?.totalDetections || 0})
             </Link>
           </div>
 
           {detections.length === 0 ? (
-            <div className="text-center py-8">
-              <Camera className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
+            <div className="text-center py-6 md:py-8">
+              <Camera className="w-10 h-10 md:w-12 md:h-12 text-text-muted mx-auto mb-3 opacity-50" />
               <p className="text-text-muted">Belum ada deteksi</p>
               <Link href="/dashboard/detect" className="text-primary text-sm font-medium hover:underline mt-2 inline-block">
                 Mulai deteksi sekarang
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {(detections as Detection[]).slice(0, 5).map((detection) => (
                 <div
                   key={detection.id}
-                  className="flex items-center justify-between p-3 bg-bg rounded-xl"
+                  className="flex items-center justify-between p-2 md:p-3 bg-bg rounded-xl"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                       {detection.imageUrl ? (
                         <img src={detection.imageUrl} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <Camera className="w-5 h-5 text-primary" />
+                        <Camera className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">
                         {detection.predictedClass || "Unknown Food"}
                       </p>
-                      <p className="text-xs text-text-muted">
+                      <p className="text-xs text-text-muted hidden sm:block">
                         {detection.user?.name || detection.user?.email || "Unknown"}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0 ml-2">
                     <p className="nutrition-value text-sm">
                       {detection.confidence ? `${(detection.confidence * 100).toFixed(0)}%` : "-"}
                     </p>
@@ -514,37 +514,37 @@ export default function DashboardPage() {
 
         {/* Users List */}
         <div className="card-static">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Users</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 md:mb-6">
+            <h3 className="text-base md:text-lg font-semibold">Users</h3>
             <span className="text-primary text-sm font-medium">
               Total: {summary?.totalUsers || 0}
             </span>
           </div>
 
           {users.length === 0 ? (
-            <div className="text-center py-8">
-              <Users className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
+            <div className="text-center py-6 md:py-8">
+              <Users className="w-10 h-10 md:w-12 md:h-12 text-text-muted mx-auto mb-3 opacity-50" />
               <p className="text-text-muted">Belum ada user</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {(users as User[]).slice(0, 5).map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between p-3 bg-bg rounded-xl"
+                  className="flex items-center justify-between p-2 md:p-3 bg-bg rounded-xl"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Users className="w-5 h-5 text-primary" />
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Users className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">
                         {user.name || "No Name"}
                       </p>
-                      <p className="text-xs text-text-muted">{user.email}</p>
+                      <p className="text-xs text-text-muted truncate">{user.email}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-text-muted">
+                  <p className="text-xs text-text-muted flex-shrink-0 ml-2">
                     {new Date(user.createdAt).toLocaleDateString("id-ID")}
                   </p>
                 </div>

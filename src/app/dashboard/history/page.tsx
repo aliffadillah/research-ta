@@ -259,38 +259,38 @@ export default function HistoryPage() {
           </div>
 
           {/* Predicted Values */}
-          <div className="grid grid-cols-5 gap-3 mb-4">
-            <div className="text-center p-3 bg-white/60 rounded-xl">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3 mb-4">
+            <div className="text-center p-2 md:p-3 bg-white/60 rounded-xl">
               <Flame className="w-4 h-4 text-orange-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-orange-600">
+              <p className="text-base md:text-lg font-bold text-orange-600">
                 {Math.round(predictedNeeds?.energi || 0)}
               </p>
               <p className="text-xs text-text-muted">kkal</p>
             </div>
-            <div className="text-center p-3 bg-white/60 rounded-xl">
+            <div className="text-center p-2 md:p-3 bg-white/60 rounded-xl">
               <Beef className="w-4 h-4 text-primary mx-auto mb-1" />
-              <p className="text-lg font-bold">
+              <p className="text-base md:text-lg font-bold">
                 {predictedNeeds ? predictedNeeds.protein.toFixed(1) : "0.0"}g
               </p>
               <p className="text-xs text-text-muted">Protein</p>
             </div>
-            <div className="text-center p-3 bg-white/60 rounded-xl">
+            <div className="text-center p-2 md:p-3 bg-white/60 rounded-xl">
               <Wheat className="w-4 h-4 text-amber-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-amber-600">
+              <p className="text-base md:text-lg font-bold text-amber-600">
                 {predictedNeeds ? predictedNeeds.karbohidrat.toFixed(1) : "0.0"}g
               </p>
               <p className="text-xs text-text-muted">Karbo</p>
             </div>
-            <div className="text-center p-3 bg-white/60 rounded-xl">
+            <div className="text-center p-2 md:p-3 bg-white/60 rounded-xl">
               <Apple className="w-4 h-4 text-red-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-red-600">
+              <p className="text-base md:text-lg font-bold text-red-600">
                 {predictedNeeds ? predictedNeeds.lemak.toFixed(1) : "0.0"}g
               </p>
               <p className="text-xs text-text-muted">Lemak</p>
             </div>
-            <div className="text-center p-3 bg-white/60 rounded-xl">
+            <div className="text-center p-2 md:p-3 bg-white/60 rounded-xl col-span-3 sm:col-span-1">
               <Scale className="w-4 h-4 text-green-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-green-600">
+              <p className="text-base md:text-lg font-bold text-green-600">
                 {predictedNeeds ? predictedNeeds.serat.toFixed(1) : "0.0"}g
               </p>
               <p className="text-xs text-text-muted">Serat</p>
@@ -327,15 +327,15 @@ export default function HistoryPage() {
       ) : null}
 
       {/* Month Navigation */}
-      <div className="card-static">
-        <div className="flex items-center justify-between mb-6">
+      <div className="card-static overflow-x-auto">
+        <div className="flex items-center justify-between mb-4 md:mb-6 min-w-max">
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className="p-2 hover:bg-bg rounded-lg transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-lg md:text-xl font-semibold px-2">
             {format(currentMonth, "MMMM yyyy", { locale: id })}
           </h2>
           <button
@@ -417,16 +417,16 @@ export default function HistoryPage() {
       </div>
 
       {/* Selected Day Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Day Summary */}
         <div className="card-static">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
               <Calendar className="w-5 h-5 text-primary" />
             </div>
-            <div>
-              <h3 className="font-semibold">{formatDate(selectedDate)}</h3>
-              <p className="text-sm text-text-muted">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm md:text-base truncate">{formatDate(selectedDate)}</h3>
+              <p className="text-xs md:text-sm text-text-muted">
                 {selectedDayInfo.mealCount} kali makan
               </p>
             </div>
@@ -603,43 +603,43 @@ export default function HistoryPage() {
         </div>
 
         {/* Detections List */}
-        <div className="lg:col-span-1 card-static">
+        <div className="md:col-span-1 card-static">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Detail Makanan</h3>
-            <Camera className="w-5 h-5 text-text-muted" />
+            <h3 className="font-semibold text-sm md:text-base">Detail Makanan</h3>
+            <Camera className="w-4 h-4 md:w-5 md:h-5 text-text-muted" />
           </div>
 
           {selectedDayData.length === 0 ? (
-            <div className="text-center py-8">
-              <Camera className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
-              <p className="text-text-muted">Tidak ada data untuk hari ini</p>
+            <div className="text-center py-6 md:py-8">
+              <Camera className="w-10 h-10 md:w-12 md:h-12 text-text-muted mx-auto mb-3 opacity-50" />
+              <p className="text-text-muted text-sm">Tidak ada data untuk hari ini</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-2 md:space-y-3 max-h-64 md:max-h-96 overflow-y-auto">
               {selectedDayData.map((detection: unknown) => (
                 <div
                   key={(detection as { id: string }).id}
-                  className="flex items-center gap-4 p-3 bg-bg rounded-xl"
+                  className="flex items-center gap-2 md:gap-4 p-2 md:p-3 bg-bg rounded-xl"
                 >
                   {(detection as { imageUrl: string }).imageUrl && (
                     <img
                       src={(detection as { imageUrl: string }).imageUrl}
                       alt="Food"
-                      className="w-16 h-16 rounded-lg object-cover"
+                      className="w-12 h-12 md:w-16 md:h-16 rounded-lg object-cover flex-shrink-0"
                     />
                   )}
-                  <div className="flex-1">
-                    <p className="font-medium">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">
                       {(detection as { predictedClass?: string }).predictedClass || "Makanan"}
                     </p>
-                    <p className="text-sm text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {(detection as { portionSize: number }).portionSize}g •{" "}
                       {((detection as { confidence: number }).confidence * 100).toFixed(0)}% confidence
                     </p>
                   </div>
-                  <div className="text-right">
-                    <Flame className="w-4 h-4 text-accent mx-auto mb-1" />
-                    <span className="nutrition-value text-sm">
+                  <div className="text-right flex-shrink-0">
+                    <Flame className="w-3 h-3 md:w-4 md:h-4 text-accent mx-auto mb-0.5 md:mb-1" />
+                    <span className="nutrition-value text-xs md:text-sm">
                       {(detection as { mlPrediction?: { nutrition?: { calories: number } } }).mlPrediction?.nutrition?.calories || 0}
                     </span>
                   </div>
