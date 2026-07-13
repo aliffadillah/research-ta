@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils/helpers";
+import { useBreakpoint } from "@/hooks";
 
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
@@ -31,21 +32,45 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isDesktop, isTablet } = useBreakpoint();
+
+  // On mobile, sidebar is hidden (mobile menu handles navigation)
+  if (!isDesktop && !isTablet) {
+    return null;
+  }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-border flex flex-col">
+    <aside
+      className={cn(
+        "fixed left-0 top-0 h-screen bg-white border-r border-border flex flex-col",
+        "transition-all duration-300 ease-in-out",
+        // Desktop: Full width with labels
+        isDesktop && "w-64",
+        // Tablet: Collapsed with icons only
+        isTablet && "w-16"
+      )}
+    >
       {/* Logo */}
-      <div className="p-6 border-b border-border">
+      <div className={cn(
+        "border-b border-border",
+        isDesktop ? "p-6" : "p-3 justify-center flex"
+      )}>
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
             <Leaf className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-sans">Makan Bergizi</span>
+          {/* Hide label on tablet */}
+          <span className={cn("text-xl font-sans", isTablet && "hidden")}>
+            Makan Bergizi
+          </span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav className={cn(
+        "flex-1 py-4 overflow-y-auto",
+        isDesktop ? "px-4 space-y-1" : "px-2 space-y-1"
+      )}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -54,33 +79,45 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              title={isTablet ? item.label : undefined}
               className={cn(
                 "nav-item",
-                isActive && "nav-item-active"
+                isActive && "nav-item-active",
+                isTablet && "justify-center px-2"
               )}
             >
-              <Icon className="w-5 h-5" />
-              <span>{item.label}</span>
+              <Icon className="w-5 h-5 flex-shrink-0" />
+              <span className={isTablet ? "hidden" : undefined}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t border-border space-y-1">
+      <div className={cn(
+        "border-t border-border py-4 space-y-1",
+        isDesktop ? "px-4" : "px-2"
+      )}>
         <Link
           href="/dashboard/settings"
-          className="nav-item"
+          title={isTablet ? "Pengaturan" : undefined}
+          className={cn("nav-item", isTablet && "justify-center px-2")}
         >
-          <Settings className="w-5 h-5" />
-          <span>Pengaturan</span>
+          <Settings className="w-5 h-5 flex-shrink-0" />
+          <span className={isTablet ? "hidden" : undefined}>Pengaturan</span>
         </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="nav-item w-full text-red-600 hover:bg-red-50"
+          title={isTablet ? "Keluar" : undefined}
+          className={cn(
+            "nav-item w-full text-red-600 hover:bg-red-50",
+            isTablet && "justify-center px-2"
+          )}
         >
-          <LogOut className="w-5 h-5" />
-          <span>Keluar</span>
+          <LogOut className="w-5 h-5 flex-shrink-0" />
+          <span className={isTablet ? "hidden" : undefined}>Keluar</span>
         </button>
       </div>
     </aside>
