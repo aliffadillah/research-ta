@@ -185,7 +185,7 @@ export default function DashboardPage() {
     return (
       <div className="animate-pulse space-y-8">
         <div className="h-8 w-48 bg-border rounded" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-32 bg-border rounded-2xl" />
           ))}
@@ -268,7 +268,7 @@ export default function DashboardPage() {
                 {" "}karena belum ada data untuk hari ini.
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {/* Porsi Besar */}
               <div>
                 <div className="text-sm font-medium text-green-700 mb-3 flex items-center gap-2">
@@ -350,7 +350,7 @@ export default function DashboardPage() {
 
       {/* Nutrition Charts */}
       {chartData.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Line Chart - Energi Trend */}
           <div className="card-static">
             <h3 className="text-lg font-semibold mb-4">Tren Energi 14 Hari Terakhir</h3>
@@ -456,7 +456,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity & Data Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* Recent Detections */}
         <div className="card-static">
           <div className="flex items-center justify-between mb-6">
@@ -569,7 +569,7 @@ export default function DashboardPage() {
             <p className="text-text-muted">Belum ada data makanan</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {(foods as Food[]).slice(0, 8).map((food) => (
               <div key={food.id} className="p-4 bg-bg rounded-xl">
                 <div className="flex items-center gap-3 mb-3">
