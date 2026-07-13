@@ -28,7 +28,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
         {isMobile && (
           <button
             onClick={onMenuClick}
-            className="p-2 -ml-2 rounded-lg hover:bg-bg transition-colors"
+            className="p-3 -ml-3 rounded-lg hover:bg-bg transition-colors"
             aria-label="Buka menu"
           >
             <Menu className="w-6 h-6 text-text-muted" />
@@ -55,7 +55,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
       <div className="flex items-center gap-2 md:gap-4">
         {/* Notifications */}
         <button
-          className="relative p-2 rounded-xl hover:bg-bg transition-colors"
+          className="relative p-3 rounded-xl hover:bg-bg transition-colors"
           aria-label="Notifikasi"
         >
           <Bell className="w-5 h-5 text-text-muted" />
