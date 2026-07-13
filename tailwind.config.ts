@@ -35,6 +35,14 @@ const config: Config = {
         xl: "16px",
         "2xl": "24px",
       },
+      width: {
+        sidebar: "16rem",
+        "sidebar-collapsed": "4rem",
+      },
+      maxWidth: {
+        container: "1280px",
+        content: "896px",
+      },
       boxShadow: {
         card: "0 2px 8px rgba(0, 0, 0, 0.06)",
         "card-hover": "0 8px 24px rgba(0, 0, 0, 0.1)",
@@ -44,7 +52,9 @@ const config: Config = {
         "fade-in": "fadeIn 0.3s ease-out",
         "slide-up": "slideUp 0.3s ease-out",
         "scan": "scan 1.5s ease-in-out infinite",
-        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "slide-in-left": "slideInLeft 0.3s ease-out",
+        "slide-out-left": "slideOutLeft 0.3s ease-out",
       },
       keyframes: {
         fadeIn: {
@@ -58,6 +68,14 @@ const config: Config = {
         scan: {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
+        },
+        slideInLeft: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        slideOutLeft: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-100%)" },
         },
       },
     },
