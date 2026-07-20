@@ -386,7 +386,7 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <UtensilsCrossed className="w-5 h-5 text-white" />
             </div>
-            <span className="font-sans text-xl">Makan Bergizi</span>
+            <span className="font-sans text-xl">Nutrima</span>
           </motion.div>
 
           <motion.div
@@ -707,7 +707,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                 <UtensilsCrossed className="w-5 h-5 text-white" />
               </div>
-              <span className="font-sans text-xl">Makan Bergizi</span>
+              <span className="font-sans text-xl">Nutrima</span>
             </motion.div>
 
             <motion.div

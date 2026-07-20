@@ -303,7 +303,7 @@ export default function GenerateMenuPage() {
             <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-sans">Generate Menu Rekomendasi</h1>
+            <h1 className="text-lg md:text-xl lg:text-2xl font-sans">Generate Menu Rekomendasi</h1>
             <p className="text-text-muted text-sm">
               Hasilkan kombinasi menu makanan yang sesuai kebutuhan gizi harian
             </p>
@@ -320,13 +320,13 @@ export default function GenerateMenuPage() {
               setError(null);
             }}
             className={cn(
-              "px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+              "px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1.5 md:gap-2",
               mode === "1-hari"
                 ? "bg-primary text-white shadow-sm"
                 : "text-text-muted hover:text-text"
             )}
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
             <span className="hidden sm:inline">1 Hari</span>
           </button>
           <button
@@ -337,13 +337,13 @@ export default function GenerateMenuPage() {
               setError(null);
             }}
             className={cn(
-              "px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+              "px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1.5 md:gap-2",
               mode === "7-hari"
                 ? "bg-primary text-white shadow-sm"
                 : "text-text-muted hover:text-text"
             )}
           >
-            <CalendarDays className="w-4 h-4" />
+            <CalendarDays className="w-3.5 h-3.5 md:w-4 md:h-4" />
             <span className="hidden sm:inline">7 Hari</span>
           </button>
         </div>
@@ -351,10 +351,10 @@ export default function GenerateMenuPage() {
 
       {/* Date Picker Section */}
       <div className="card">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
           {/* Week Navigation (only for 7-day mode) */}
           {mode === "7-hari" && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center sm:justify-start gap-2 order-1">
               <button
                 onClick={() => {
                   const date = new Date(selectedDate);
@@ -367,10 +367,10 @@ export default function GenerateMenuPage() {
               </button>
               <button
                 onClick={() => setSelectedDate(today.toISOString().split("T")[0])}
-                className="px-3 py-1.5 text-sm hover:bg-bg rounded-lg transition-colors flex items-center gap-1"
+                className="px-2.5 py-1.5 text-xs md:text-sm hover:bg-bg rounded-lg transition-colors flex items-center gap-1"
               >
-                <RotateCcw className="w-4 h-4" />
-                Minggu Ini
+                <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Minggu Ini</span>
               </button>
               <button
                 onClick={() => {
@@ -385,42 +385,44 @@ export default function GenerateMenuPage() {
             </div>
           )}
 
-          {/* Date Display */}
-          <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-primary" />
-            <label className="text-sm font-medium text-text-muted">
-              {mode === "7-hari" ? "Mulai:" : "Tanggal Target:"}
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-4 py-2 border border-border rounded-lg bg-bg focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
+          {/* Date Display and Generate Button */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 order-2 sm:order-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Calendar className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
+              <label className="text-xs md:text-sm font-medium text-text-muted whitespace-nowrap">
+                {mode === "7-hari" ? "Mulai:" : "Tanggal Target:"}
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="px-2 md:px-4 py-1.5 md:py-2 border border-border rounded-lg bg-bg focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+              />
+            </div>
 
-          {/* Generate Button */}
-          <button
-            onClick={handleGenerate}
-            disabled={loading}
-            className={cn(
-              "px-6 py-2 bg-primary text-white rounded-lg font-medium transition-all",
-              "hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed",
-              "flex items-center gap-2"
-            )}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Memuat...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                <span>Generate Menu</span>
-              </>
-            )}
-          </button>
+            {/* Generate Button */}
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className={cn(
+                "px-4 md:px-6 py-2 md:py-2.5 bg-primary text-white rounded-lg font-medium transition-all text-sm md:text-base",
+                "hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed",
+                "flex items-center justify-center gap-2 w-full sm:w-auto"
+              )}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Memuat...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>Generate Menu</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -474,17 +476,17 @@ export default function GenerateMenuPage() {
         <div className="space-y-6">
           {/* Porsi Besar Section */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Utensils className="w-5 h-5 text-green-600" />
-              <h2 className="text-xl font-semibold">Porsi Besar</h2>
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <Utensils className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <h2 className="text-lg md:text-xl font-semibold">Porsi Besar</h2>
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 self-start sm:self-auto">
                 Target: {Math.round(data.dailyNeeds.besar.energi)} kkal
               </span>
             </div>
 
             <NutritionSummaryBox target={data.dailyNeeds.besar} portionType="besar" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
               {data.recommendations.besar.map((combo, idx) => (
                 <div key={idx} className="flex flex-col">
                   <MenuCombinationCard
@@ -516,9 +518,9 @@ export default function GenerateMenuPage() {
       {weekData && mode === "7-hari" && (
         <div className="space-y-6">
           {/* Action Bar */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-base md:text-lg font-semibold">
                 Menu Minggu {weekData.startDate}
               </h2>
               <p className="text-sm text-text-muted">
@@ -530,14 +532,14 @@ export default function GenerateMenuPage() {
                 onClick={handleSaveAll}
                 disabled={savingAll}
                 className={cn(
-                  "btn-primary flex items-center gap-2",
+                  "btn-primary flex items-center gap-2 w-full sm:w-auto justify-center",
                   savingAll && "opacity-50 cursor-not-allowed"
                 )}
               >
                 {savingAll ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Menyimpan... ({savedCount}/{weekData.weekMenus.filter((d) => d.hasData).length})</span>
+                    <span className="text-sm">{savedCount}/{weekData.weekMenus.filter((d) => d.hasData).length}</span>
                   </>
                 ) : (
                   <>
@@ -550,7 +552,7 @@ export default function GenerateMenuPage() {
           </div>
 
           {/* Week Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {weekData.weekMenus.map((day, dayIndex) => (
               <WeekDayCard
                 key={day.date}
@@ -584,58 +586,58 @@ export default function GenerateMenuPage() {
       {/* Save Menu Modal */}
       {showSaveModal && selectedCombo && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white p-6 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                  <Save className="w-6 h-6 text-green-600" />
+            <div className="sticky top-0 bg-white p-4 md:p-6 border-b border-border flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Save className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold">Simpan Menu Rekomendasi</h2>
-                  <p className="text-sm text-text-muted">Menu akan disimpan ke daftar Menu Harian</p>
+                  <h2 className="text-base md:text-xl font-semibold">Simpan Menu Rekomendasi</h2>
+                  <p className="text-xs md:text-sm text-text-muted hidden sm:block">Menu akan disimpan ke daftar Menu Harian</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowSaveModal(false)}
-                className="p-2 hover:bg-bg rounded-lg transition-colors"
+                className="p-2 hover:bg-bg rounded-lg transition-colors flex-shrink-0"
               >
-                <X className="w-6 h-6 text-text-muted" />
+                <X className="w-5 h-5 md:w-6 md:h-6 text-text-muted" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 md:p-6 space-y-4 md:space-y-6">
               {/* Menu Name Input */}
               <div>
-                <label className="label text-base">Nama Menu</label>
+                <label className="label text-sm md:text-base">Nama Menu</label>
                 <input
                   type="text"
                   value={menuName}
                   onChange={(e) => setMenuName(e.target.value)}
                   placeholder="Contoh: Menu MBG Senin"
-                  className="input-field text-base py-3"
+                  className="input-field text-sm md:text-base py-2 md:py-3"
                   autoFocus
                 />
               </div>
 
               {/* Date Info */}
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                <Calendar className="w-5 h-5 text-text-muted" />
-                <span className="text-sm text-text-muted">Tanggal:</span>
-                <span className="font-semibold text-lg">{selectedDate}</span>
+              <div className="flex items-center gap-2 md:gap-3 p-3 md:p-4 bg-gray-50 rounded-xl">
+                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-text-muted flex-shrink-0" />
+                <span className="text-xs md:text-sm text-text-muted">Tanggal:</span>
+                <span className="font-semibold text-sm md:text-lg">{selectedDate}</span>
               </div>
 
               {/* Food List Preview */}
               <div>
-                <label className="label text-base font-semibold mb-3 block">Daftar Menu</label>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="grid grid-cols-5 gap-3">
+                <label className="label text-sm md:text-base font-semibold mb-2 md:mb-3 block">Daftar Menu</label>
+                <div className="bg-gray-50 rounded-xl p-3 md:p-4 overflow-x-auto">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 min-w-[400px]">
                     {selectedCombo.components.map((component, idx) => (
-                      <div key={idx} className="bg-white rounded-lg p-3 text-center shadow-sm">
-                        <span className="text-xs text-text-muted block mb-1">{component.categoryLabel}</span>
-                        <p className="font-semibold text-sm mb-1 line-clamp-2">{component.food.name}</p>
-                        <span className="text-xs text-text-muted">
+                      <div key={idx} className="bg-white rounded-lg p-2 md:p-3 text-center shadow-sm">
+                        <span className="text-[10px] md:text-xs text-text-muted block mb-1">{component.categoryLabel}</span>
+                        <p className="font-semibold text-xs md:text-sm mb-1 line-clamp-2">{component.food.name}</p>
+                        <span className="text-[10px] md:text-xs text-text-muted">
                           {component.food.portionSize}{component.food.portionUnit}
                         </span>
                       </div>
@@ -645,11 +647,11 @@ export default function GenerateMenuPage() {
               </div>
 
               {/* Nutrition Preview */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Porsi Besar */}
-                <div className="p-5 bg-green-50 rounded-xl border border-green-200">
-                  <h4 className="font-semibold text-green-700 mb-4 text-base">Porsi Besar</h4>
-                  <div className="space-y-2 text-sm">
+                <div className="p-4 md:p-5 bg-green-50 rounded-xl border border-green-200">
+                  <h4 className="font-semibold text-green-700 mb-3 md:mb-4 text-sm md:text-base">Porsi Besar</h4>
+                  <div className="space-y-1.5 md:space-y-2 text-xs md:text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-muted">Energi:</span>
                       <span className="font-bold text-green-700">{Math.round(selectedCombo.totalNutrition.energi)} kkal</span>
@@ -674,9 +676,9 @@ export default function GenerateMenuPage() {
                 </div>
 
                 {/* Porsi Kecil */}
-                <div className="p-5 bg-blue-50 rounded-xl border border-blue-200">
-                  <h4 className="font-semibold text-blue-700 mb-4 text-base">Porsi Kecil (50%)</h4>
-                  <div className="space-y-2 text-sm">
+                <div className="p-4 md:p-5 bg-blue-50 rounded-xl border border-blue-200">
+                  <h4 className="font-semibold text-blue-700 mb-3 md:mb-4 text-sm md:text-base">Porsi Kecil (50%)</h4>
+                  <div className="space-y-1.5 md:space-y-2 text-xs md:text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-muted">Energi:</span>
                       <span className="font-bold text-blue-700">{Math.round(selectedCombo.totalNutrition.energi * 0.5)} kkal</span>
@@ -703,18 +705,18 @@ export default function GenerateMenuPage() {
 
               {/* Success Message */}
               {saveSuccess && (
-                <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl text-green-700 border border-green-200">
-                  <CheckCircle className="w-6 h-6" />
-                  <span className="font-semibold">{saveSuccess}</span>
+                <div className="flex items-center gap-3 p-3 md:p-4 bg-green-50 rounded-xl text-green-700 border border-green-200">
+                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
+                  <span className="font-semibold text-sm md:text-base">{saveSuccess}</span>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-white p-6 border-t border-border flex justify-end gap-4">
+            <div className="sticky bottom-0 bg-white p-4 md:p-6 border-t border-border flex flex-col sm:flex-row justify-end gap-2 md:gap-3">
               <button
                 onClick={() => setShowSaveModal(false)}
-                className="btn-secondary px-6 py-3"
+                className="btn-secondary px-4 md:px-6 py-2 md:py-2.5 w-full sm:w-auto"
                 disabled={saving}
               >
                 Batal
@@ -723,7 +725,7 @@ export default function GenerateMenuPage() {
                 onClick={handleSaveMenu}
                 disabled={saving || !menuName.trim()}
                 className={cn(
-                  "px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2",
+                  "px-6 md:px-8 py-2 md:py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 w-full sm:w-auto",
                   "bg-green-600 text-white hover:bg-green-700",
                   saving && "opacity-50 cursor-not-allowed",
                   !menuName.trim() && "opacity-50 cursor-not-allowed"
@@ -731,12 +733,12 @@ export default function GenerateMenuPage() {
               >
                 {saving ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Menyimpan...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="w-5 h-5" />
+                    <Save className="w-4 h-4" />
                     <span>Simpan Menu</span>
                   </>
                 )}
@@ -782,19 +784,19 @@ function WeekDayCard({ day, dayIndex, selectedComboIndex, onSelectCombo, onSave 
   if (!day.hasData) {
     return (
       <div className="card bg-gray-50 border-dashed border-2 border-gray-300 opacity-75">
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-3 md:gap-4">
           {/* Date Badge */}
-          <div className="w-14 h-14 bg-gray-200 rounded-xl flex flex-col items-center justify-center">
-            <span className="text-xs text-gray-500 font-medium">
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-200 rounded-xl flex flex-col items-center justify-center flex-shrink-0">
+            <span className="text-[10px] md:text-xs text-gray-500 font-medium">
               {getDayName(day.date).substring(0, 3)}
             </span>
-            <span className="text-xl font-bold text-gray-500">
+            <span className="text-lg md:text-xl font-bold text-gray-500">
               {getDateNumber(day.date)}
             </span>
           </div>
 
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-400">{getDayName(day.date)}</h3>
+            <h3 className="font-semibold text-gray-400 text-sm md:text-base">{getDayName(day.date)}</h3>
             <p className="text-xs text-gray-400">
               {getDateNumber(day.date)} {getMonthShort(day.date)}
             </p>
@@ -813,22 +815,22 @@ function WeekDayCard({ day, dayIndex, selectedComboIndex, onSelectCombo, onSave 
   return (
     <div className="card">
       {/* Date Header */}
-      <div className="flex items-start gap-4 mb-4">
+      <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
         {/* Date Badge */}
         <div
           className={cn(
-            "w-14 h-14 rounded-xl flex flex-col items-center justify-center",
+            "w-12 h-12 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center flex-shrink-0",
             dayIndex === 0 ? "bg-primary text-white" : "bg-green-100 text-green-700"
           )}
         >
-          <span className="text-xs font-medium opacity-80">
+          <span className="text-[10px] md:text-xs font-medium opacity-80">
             {getDayName(day.date).substring(0, 3)}
           </span>
-          <span className="text-xl font-bold">{getDateNumber(day.date)}</span>
+          <span className="text-lg md:text-xl font-bold">{getDateNumber(day.date)}</span>
         </div>
 
-        <div className="flex-1">
-          <h3 className="font-semibold">{getDayName(day.date)}</h3>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm md:text-base">{getDayName(day.date)}</h3>
           <p className="text-xs text-text-muted">
             {getDateNumber(day.date)} {getMonthShort(day.date)}
           </p>
@@ -844,13 +846,13 @@ function WeekDayCard({ day, dayIndex, selectedComboIndex, onSelectCombo, onSave 
       {combos.length > 1 && (
         <div className="mb-3">
           <label className="text-xs text-text-muted mb-1 block">Pilih Kombinasi:</label>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
             {combos.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => onSelectCombo(idx)}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-xs font-medium transition-colors",
+                  "px-2.5 md:px-3 py-1 rounded-lg text-xs font-medium transition-colors",
                   selectedComboIndex === idx
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -865,19 +867,18 @@ function WeekDayCard({ day, dayIndex, selectedComboIndex, onSelectCombo, onSave 
 
       {/* Menu Items */}
       {currentCombo && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-1.5 md:space-y-2 mb-3 md:mb-4">
           {currentCombo.components.map((component, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between py-2 px-3 bg-bg rounded-lg"
+              className="flex items-center justify-between py-1.5 md:py-2 px-2 md:px-3 bg-bg rounded-lg"
             >
-              <div>
-                <span className="text-xs text-text-muted">{component.categoryLabel}</span>
-                <p className="font-medium text-sm">{component.food.name}</p>
+              <div className="min-w-0 flex-1 mr-2">
+                <span className="text-[10px] md:text-xs text-text-muted">{component.categoryLabel}</span>
+                <p className="font-medium text-xs md:text-sm truncate">{component.food.name}</p>
               </div>
-              <span className="text-xs text-text-muted">
-                {component.food.portionSize}
-                {component.food.portionUnit}
+              <span className="text-[10px] md:text-xs text-text-muted flex-shrink-0">
+                {component.food.portionSize}{component.food.portionUnit}
               </span>
             </div>
           ))}
@@ -886,46 +887,46 @@ function WeekDayCard({ day, dayIndex, selectedComboIndex, onSelectCombo, onSave 
 
       {/* Nutrition Summary */}
       {currentCombo && (
-        <div className="grid grid-cols-5 gap-2 p-3 bg-bg rounded-xl mb-4">
+        <div className="grid grid-cols-5 gap-1 md:gap-2 p-2 md:p-3 bg-bg rounded-xl mb-3 md:mb-4">
           <div className="text-center">
-            <p className="text-xs font-bold text-orange-600">
+            <p className="text-xs md:text-sm font-bold text-orange-600">
               {Math.round(currentCombo.totalNutrition.energi)}
             </p>
-            <p className="text-xs text-text-muted">kkal</p>
+            <p className="text-[9px] md:text-xs text-text-muted">kkal</p>
           </div>
           <div className="text-center">
-            <p className="text-xs font-bold">
+            <p className="text-xs md:text-sm font-bold">
               {currentCombo.totalNutrition.protein.toFixed(0)}g
             </p>
-            <p className="text-xs text-text-muted">Prot</p>
+            <p className="text-[9px] md:text-xs text-text-muted">Prot</p>
           </div>
           <div className="text-center">
-            <p className="text-xs font-bold text-amber-600">
+            <p className="text-xs md:text-sm font-bold text-amber-600">
               {currentCombo.totalNutrition.karbohidrat.toFixed(0)}g
             </p>
-            <p className="text-xs text-text-muted">Karbo</p>
+            <p className="text-[9px] md:text-xs text-text-muted">Karbo</p>
           </div>
           <div className="text-center">
-            <p className="text-xs font-bold text-red-600">
+            <p className="text-xs md:text-sm font-bold text-red-600">
               {currentCombo.totalNutrition.lemak.toFixed(0)}g
             </p>
-            <p className="text-xs text-text-muted">Lemak</p>
+            <p className="text-[9px] md:text-xs text-text-muted">Lemak</p>
           </div>
           <div className="text-center">
-            <p className="text-xs font-bold text-green-600">
+            <p className="text-xs md:text-sm font-bold text-green-600">
               {currentCombo.totalNutrition.serat.toFixed(0)}g
             </p>
-            <p className="text-xs text-text-muted">Serat</p>
+            <p className="text-[9px] md:text-xs text-text-muted">Serat</p>
           </div>
         </div>
       )}
 
       {/* Score & Save */}
-      <div className="flex items-center justify-between pt-2 border-t border-border/50">
+      <div className="flex items-center justify-between pt-2 border-t border-border/50 gap-2">
         {currentCombo && (
           <span
             className={cn(
-              "px-3 py-1 rounded-full text-xs font-bold",
+              "px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold",
               currentCombo.score >= 85
                 ? "bg-green-500 text-white"
                 : currentCombo.score >= 70
@@ -940,12 +941,12 @@ function WeekDayCard({ day, dayIndex, selectedComboIndex, onSelectCombo, onSave 
           onClick={onSave}
           disabled={!currentCombo}
           className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+            "px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1.5 md:gap-2",
             "bg-green-600 text-white hover:bg-green-700",
             !currentCombo && "opacity-50 cursor-not-allowed"
           )}
         >
-          <Save className="w-4 h-4" />
+          <Save className="w-3.5 h-3.5 md:w-4 md:h-4" />
           Simpan
         </button>
       </div>

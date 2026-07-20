@@ -22,66 +22,72 @@ export default function NutritionSummaryBox({
 }: NutritionSummaryBoxProps) {
   return (
     <div className="card bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-            <Brain className="w-5 h-5 text-primary" />
+      {/* Header - Mobile Optimized */}
+      <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+            <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <div>
-            <h3 className="font-semibold">Target Nutrisi Porsi {portionType === "besar" ? "Besar" : "Kecil"}</h3>
-            <p className="text-xs text-text-muted">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-sm sm:text-base truncate">Target Nutrisi {portionType === "besar" ? "Porsi Besar" : "Porsi Kecil"}</h3>
+            <p className="text-[10px] sm:text-xs text-text-muted hidden sm:block">
               Kebutuhan gizi per porsi makan
             </p>
           </div>
         </div>
         <span
           className={cn(
-            "px-3 py-1 rounded-full text-xs font-medium",
+            "px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium flex-shrink-0",
             portionType === "besar"
               ? "bg-green-100 text-green-700"
               : "bg-blue-100 text-blue-700"
           )}
         >
-          Porsi {portionType === "besar" ? "Besar" : "Kecil"}
+          {portionType === "besar" ? "Porsi Besar" : "Porsi Kecil"}
         </span>
       </div>
 
-      {/* Nutrition Grid */}
-      <div className="grid grid-cols-5 gap-3">
-        <div className="text-center p-3 bg-white/60 rounded-xl">
-          <Flame className="w-5 h-5 text-orange-600 mx-auto mb-1" />
-          <p className="nutrition-value text-xl text-orange-600 font-bold">
+      {/* Nutrition Grid - 5 columns compact */}
+      <div className="grid grid-cols-5 gap-1 sm:gap-2">
+        {/* Energi */}
+        <div className="text-center py-1.5 px-0.5 sm:py-2 sm:px-1 bg-white/60 rounded-lg sm:rounded-xl">
+          <Flame className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-orange-600 mx-auto mb-0.5" />
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-lg font-bold text-orange-600 leading-tight">
             {Math.round(target.energi)}
-</p>
-          <p className="text-xs text-text-muted">kkal</p>
-        </div>
-        <div className="text-center p-3 bg-white/60 rounded-xl">
-          <Drumstick className="w-5 h-5 text-primary mx-auto mb-1" />
-          <p className="nutrition-value text-xl font-bold">
-            {target.protein.toFixed(1)}g
           </p>
-          <p className="text-xs text-text-muted">Protein</p>
+          <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-text-muted leading-tight">kkal</p>
         </div>
-        <div className="text-center p-3 bg-white/60 rounded-xl">
-          <Wheat className="w-5 h-5 text-amber-600 mx-auto mb-1" />
-          <p className="nutrition-value text-xl text-amber-600 font-bold">
-            {target.karbohidrat.toFixed(1)}g
+        {/* Protein */}
+        <div className="text-center py-1.5 px-0.5 sm:py-2 sm:px-1 bg-white/60 rounded-lg sm:rounded-xl">
+          <Drumstick className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-primary mx-auto mb-0.5" />
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-lg font-bold leading-tight">
+            {target.protein.toFixed(1)}
           </p>
-          <p className="text-xs text-text-muted">Karbo</p>
+          <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-text-muted leading-tight">Prot</p>
         </div>
-        <div className="text-center p-3 bg-white/60 rounded-xl">
-          <Apple className="w-5 h-5 text-red-600 mx-auto mb-1" />
-          <p className="nutrition-value text-xl text-red-600 font-bold">
-            {target.lemak.toFixed(1)}g
+        {/* Karbo */}
+        <div className="text-center py-1.5 px-0.5 sm:py-2 sm:px-1 bg-white/60 rounded-lg sm:rounded-xl">
+          <Wheat className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-amber-600 mx-auto mb-0.5" />
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-lg font-bold text-amber-600 leading-tight">
+            {target.karbohidrat.toFixed(1)}
           </p>
-          <p className="text-xs text-text-muted">Lemak</p>
+          <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-text-muted leading-tight">Karbo</p>
         </div>
-        <div className="text-center p-3 bg-white/60 rounded-xl">
-          <Scale className="w-5 h-5 text-green-600 mx-auto mb-1" />
-          <p className="nutrition-value text-xl text-green-600 font-bold">
-            {target.serat.toFixed(1)}g
+        {/* Lemak */}
+        <div className="text-center py-1.5 px-0.5 sm:py-2 sm:px-1 bg-white/60 rounded-lg sm:rounded-xl">
+          <Apple className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-red-600 mx-auto mb-0.5" />
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-lg font-bold text-red-600 leading-tight">
+            {target.lemak.toFixed(1)}
           </p>
-          <p className="text-xs text-text-muted">Serat</p>
+          <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-text-muted leading-tight">Lemak</p>
+        </div>
+        {/* Serat */}
+        <div className="text-center py-1.5 px-0.5 sm:py-2 sm:px-1 bg-white/60 rounded-lg sm:rounded-xl">
+          <Scale className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-green-600 mx-auto mb-0.5" />
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-lg font-bold text-green-600 leading-tight">
+            {target.serat.toFixed(1)}
+          </p>
+          <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-text-muted leading-tight">Serat</p>
         </div>
       </div>
     </div>

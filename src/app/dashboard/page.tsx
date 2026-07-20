@@ -268,9 +268,9 @@ export default function DashboardPage() {
                 {" "}karena belum ada data untuk hari ini.
               </div>
             )}
-            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               {/* Porsi Besar */}
-              <div className="col-span-2 md:col-span-1">
+              <div>
                 <div className="text-sm font-medium text-green-700 mb-3 flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full" />
                   Porsi Besar
@@ -300,7 +300,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Porsi Kecil */}
-              <div className="col-span-2 md:col-span-1">
+              <div>
                 <div className="text-sm font-medium text-blue-700 mb-3 flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full" />
                   Porsi Kecil
@@ -350,50 +350,54 @@ export default function DashboardPage() {
 
       {/* Nutrition Charts */}
       {chartData.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {/* Line Chart - Energi Trend */}
-          <div className="card-static">
+          <div className="card-static overflow-hidden">
             <h3 className="text-lg font-semibold mb-4">Tren Energi 14 Hari Terakhir</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#6b7280" />
-                <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
-                  formatter={(value: number) => [`${value.toFixed(0)} kkal`]}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="energiBG" stroke="#22c55e" strokeWidth={2} name="Energi BG" dot={{ fill: "#22c55e", r: 3 }} />
-                <Line type="monotone" dataKey="energiKCL" stroke="#3b82f6" strokeWidth={2} name="Energi KCL" dot={{ fill: "#3b82f6", r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="w-full overflow-x-auto">
+              <ResponsiveContainer width="100%" minWidth={280} height={200}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#6b7280" interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
+                    formatter={(value: number) => [`${value.toFixed(0)} kkal`]}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line type="monotone" dataKey="energiBG" stroke="#22c55e" strokeWidth={2} name="Energi BG" dot={{ fill: "#22c55e", r: 3 }} />
+                  <Line type="monotone" dataKey="energiKCL" stroke="#3b82f6" strokeWidth={2} name="Energi KCL" dot={{ fill: "#3b82f6", r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Bar Chart - Makro Nutrients */}
-          <div className="card-static">
+          <div className="card-static overflow-hidden">
             <h3 className="text-lg font-semibold mb-4">Makro Nutrients Porsi Besar</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#6b7280" />
-                <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
-                  formatter={(value: number) => [`${value.toFixed(1)} g`]}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="karboBG" fill="#22c55e" name="Karbo" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="proteinBG" fill="#3b82f6" name="Protein" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="lemakBG" fill="#f59e0b" name="Lemak" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="w-full overflow-x-auto">
+              <ResponsiveContainer width="100%" minWidth={280} height={200}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#6b7280" interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
+                    formatter={(value: number) => [`${value.toFixed(1)} g`]}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="karboBG" fill="#22c55e" name="Karbo" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="proteinBG" fill="#3b82f6" name="Protein" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="lemakBG" fill="#f59e0b" name="Lemak" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}
 
       {/* Database Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         <div className="card p-3 md:p-4">
           <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -569,7 +573,7 @@ export default function DashboardPage() {
             <p className="text-text-muted">Belum ada data makanan</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {(foods as Food[]).slice(0, 8).map((food) => (
               <div key={food.id} className="p-4 bg-bg rounded-xl">
                 <div className="flex items-center gap-3 mb-3">
@@ -620,31 +624,31 @@ export default function DashboardPage() {
             <p className="text-text-muted">Belum ada log harian</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">User</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">Detections</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">Created</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted whitespace-nowrap">Date</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted whitespace-nowrap hidden sm:table-cell">User</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted whitespace-nowrap">Detections</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-text-muted whitespace-nowrap hidden md:table-cell">Created</th>
                 </tr>
               </thead>
               <tbody>
                 {(dailyLogs as { id: string; date: string; user: { name: string | null; email: string }; detections: unknown[]; createdAt: string }[]).slice(0, 10).map((log) => (
                   <tr key={log.id} className="border-b border-border hover:bg-bg">
-                    <td className="py-3 px-4 text-sm">
+                    <td className="py-3 px-4 text-sm whitespace-nowrap">
                       {new Date(log.date).toLocaleDateString("id-ID", { weekday: "short", year: "numeric", month: "short", day: "numeric" })}
                     </td>
-                    <td className="py-3 px-4 text-sm">
+                    <td className="py-3 px-4 text-sm whitespace-nowrap hidden sm:table-cell">
                       {log.user?.name || log.user?.email || "Unknown"}
                     </td>
-                    <td className="py-3 px-4 text-sm">
+                    <td className="py-3 px-4 text-sm whitespace-nowrap">
                       <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                         {log.detections?.length || 0} detections
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-sm text-text-muted">
+                    <td className="py-3 px-4 text-sm text-text-muted whitespace-nowrap hidden md:table-cell">
                       {new Date(log.createdAt).toLocaleString("id-ID")}
                     </td>
                   </tr>

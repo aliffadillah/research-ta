@@ -385,8 +385,8 @@ export default function DetectPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-sans mb-2">Deteksi Makanan</h1>
-        <p className="text-text-muted">
+        <h1 className="text-2xl md:text-3xl font-sans mb-2">Deteksi Makanan</h1>
+        <p className="text-text-muted text-sm md:text-base">
           Upload atau pindai foto makanan untuk mengetahui kandungan nutrisinya
         </p>
       </div>
@@ -415,22 +415,22 @@ export default function DetectPage() {
             </div>
           )}
 
-          <div className="text-center py-12">
+          <div className="text-center py-8 md:py-12">
             <div className={cn(
-              "w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-all",
+              "w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 transition-all",
               isDragging ? "bg-primary/20 scale-110" : "bg-primary/10"
             )}>
               {isDragging ? (
-                <Upload className="w-10 h-10 text-primary" />
+                <Upload className="w-8 h-8 md:w-10 md:h-10 text-primary" />
               ) : (
-                <Camera className="w-10 h-10 text-primary" />
+                <Camera className="w-8 h-8 md:w-10 md:h-10 text-primary" />
               )}
             </div>
 
-            <h2 className="text-xl font-semibold mb-2">
+            <h2 className="text-lg md:text-xl font-semibold mb-2">
               {showCamera ? "Ambil Foto" : isDragging ? "Lepaskan file di sini" : "Unggah Foto Makanan"}
             </h2>
-            <p className="text-text-muted mb-6">
+            <p className="text-text-muted mb-6 text-sm md:text-base">
               {showCamera ? "Arahkan kamera ke makanan" : "Drag & drop atau pilih dari galeri (Maks. 5MB)"}
             </p>
 
@@ -453,14 +453,14 @@ export default function DetectPage() {
               />
             )}
 
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               {showCamera ? (
                 <>
-                  <button onClick={captureFromCamera} className="btn-primary flex items-center gap-2">
+                  <button onClick={captureFromCamera} className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
                     <Camera className="w-5 h-5" />
                     Ambil Foto
                   </button>
-                  <button onClick={stopCamera} className="btn-secondary">
+                  <button onClick={stopCamera} className="btn-secondary w-full sm:w-auto">
                     Batal
                   </button>
                 </>
@@ -468,14 +468,14 @@ export default function DetectPage() {
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                    className="btn-primary flex items-center gap-2"
+                    className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
                     <Upload className="w-5 h-5" />
                     Pilih File
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); startCamera(); }}
-                    className="btn-secondary flex items-center gap-2"
+                    className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
                     <Camera className="w-5 h-5" />
                     Buka Kamera
@@ -498,8 +498,8 @@ export default function DetectPage() {
           )}
 
           <div className="text-center mb-6">
-            <h2 className="text-xl font-semibold mb-2">Pratinjau Gambar</h2>
-            <p className="text-text-muted">Pastikan gambar sudah benar sebelum mendeteksi</p>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">Pratinjau Gambar</h2>
+            <p className="text-text-muted text-sm">Pastikan gambar sudah benar sebelum mendeteksi</p>
           </div>
 
           <div className="relative max-w-md mx-auto mb-6 rounded-2xl overflow-hidden bg-gray-100">
@@ -514,15 +514,15 @@ export default function DetectPage() {
             )}
           </div>
 
-          <div className="flex items-center justify-center gap-4">
-            <button onClick={reset} className="btn-secondary flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onClick={reset} className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto">
               <X className="w-5 h-5" />
               Batal
             </button>
             <button
               onClick={handleStartDetect}
               disabled={!imageBase64}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <Sparkles className="w-5 h-5" />
               Deteksi Makanan
@@ -533,8 +533,8 @@ export default function DetectPage() {
 
       {/* Detecting State */}
       {state === "detecting" && (
-        <div className="card text-center py-16">
-          <div className="w-24 h-24 mx-auto mb-6 relative">
+        <div className="card text-center py-12 md:py-16">
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 relative">
             {imagePreview && (
               <img
                 src={imagePreview}
@@ -543,10 +543,10 @@ export default function DetectPage() {
               />
             )}
             <div className="absolute inset-0 bg-primary/40 rounded-xl flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
+              <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-white animate-spin" />
             </div>
           </div>
-          <h2 className="text-lg font-medium mb-2 text-gray-700">
+          <h2 className="text-base md:text-lg font-medium mb-2 text-gray-700">
             {detectingMessage}
           </h2>
           <p className="text-sm text-gray-500">Mohon tunggu...</p>
@@ -555,12 +555,12 @@ export default function DetectPage() {
 
       {/* Success State - No Detections */}
       {(state === "success" || saved) && predictions.length === 0 && (
-        <div className="card text-center py-16">
-          <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center">
-            <SearchX className="w-12 h-12 text-gray-400" />
+        <div className="card text-center py-12 md:py-16">
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center">
+            <SearchX className="w-10 h-10 md:w-12 md:h-12 text-gray-400" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">Tidak Ada yang Terdeteksi</h2>
-          <p className="text-text-muted mb-6">
+          <h2 className="text-lg md:text-xl font-semibold mb-2">Tidak Ada yang Terdeteksi</h2>
+          <p className="text-text-muted mb-6 text-sm md:text-base px-2">
             Tidak ada objek makanan yang terdeteksi dalam gambar ini. Coba gunakan gambar lain dengan makanan yang lebih jelas.
           </p>
           <button onClick={reset} className="btn-primary">
@@ -571,24 +571,24 @@ export default function DetectPage() {
 
       {/* Success State - Has Detections */}
       {(state === "success" || saved) && predictions.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {/* Left: Image with Bounding Boxes */}
           <div className="space-y-4">
             <div className="card-static">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
                 <h3 className="font-semibold text-sm md:text-base">Gambar dengan Bounding Box</h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <span className="px-2 md:px-3 py-1 bg-primary text-white rounded-lg text-xs md:text-sm font-medium">
                     {predictions.length} deteksi
                   </span>
-                  <button onClick={reset} className="btn-secondary text-xs md:text-sm py-1.5 px-2 md:px-3">
+                  <button onClick={reset} className="btn-secondary text-xs md:text-sm py-1.5 px-2 md:px-3 flex-shrink-0">
                     Reset
                   </button>
                 </div>
               </div>
 
               {/* Image with Bounding Boxes Overlay */}
-              <div className="relative rounded-xl overflow-hidden bg-gray-100">
+              <div className="relative rounded-lg sm:rounded-xl overflow-hidden bg-gray-100 touch-none">
                 {imagePreview && (
                   <img
                     ref={imageRef}
@@ -599,7 +599,7 @@ export default function DetectPage() {
                   />
                 )}
 
-                {/* Bounding Boxes */}
+                {/* Bounding Boxes with food name labels */}
                 {predictions.map((pred, index) => {
                   const bbox = extractBbox(pred);
                   if (!bbox || imageDimensions.width === 0) return null;
@@ -636,17 +636,15 @@ export default function DetectPage() {
                           "absolute left-0 px-2 py-1 text-xs font-medium text-white rounded-br shadow",
                           getDetectionColor(index)
                         )}
-                        style={{ maxWidth: "90%" }}
+                        style={{ maxWidth: "100%" }}
                       >
-                        <span className="truncate block">{pred.class}</span>
+                        <span className="block whitespace-normal break-words">{pred.class}</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
             </div>
-
-
           </div>
 
           {/* Right: Full Detection Results */}
@@ -667,7 +665,6 @@ export default function DetectPage() {
               nutritionTargetKecil={lstmNutritionTargetKecil}
               targetDate={lstmDate}
             />
-
           </div>
         </div>
       )}

@@ -139,35 +139,37 @@ export default function DetectionResult({
 
   return (
     <div className="space-y-4">
-      {/* Tab Navigation */}
-      <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl w-fit">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-              activeTab === tab.id
-                ? "bg-white text-primary shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-            {tab.id === "sppg" && bestMatch && (
-              <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
-                {bestMatch.matchPercentage}%
-              </span>
-            )}
-          </button>
-        ))}
+      {/* Tab Navigation - Scrollable on mobile */}
+      <div className="overflow-x-auto -mx-2 px-2">
+        <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl w-fit min-w-max">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap",
+                activeTab === tab.id
+                  ? "bg-white text-primary shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              )}
+            >
+              {tab.icon}
+              <span className="hidden sm:inline">{tab.label}</span>
+              {tab.id === "sppg" && bestMatch && (
+                <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
+                  {bestMatch.matchPercentage}%
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
       {activeTab === "summary" && (
         <div className="space-y-4">
-          {/* Quick Stats - 5 Column Grid */}
-          <div className="grid grid-cols-5 gap-2">
+          {/* Quick Stats - Responsive Grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {[
               { label: "Kalori", value: Math.round(totalNutrition.calories), unit: "kkal", bg: "bg-orange-50", text: "text-orange-700" },
               { label: "Protein", value: totalNutrition.protein.toFixed(1), unit: "g", bg: "bg-blue-50", text: "text-blue-700" },
@@ -175,18 +177,18 @@ export default function DetectionResult({
               { label: "Lemak", value: totalNutrition.fat.toFixed(1), unit: "g", bg: "bg-red-50", text: "text-red-600" },
               { label: "Serat", value: totalNutrition.fiber.toFixed(1), unit: "g", bg: "bg-green-50", text: "text-green-700" },
             ].map((item) => (
-              <div key={item.label} className={cn("card text-center", item.bg)}>
-                <p className="text-xl font-semibold mb-0.5">{item.value}</p>
-                <p className={cn("text-xs", item.text)}>{item.label} <span className="opacity-60">({item.unit})</span></p>
+              <div key={item.label} className={cn("card text-center py-2 px-1", item.bg)}>
+                <p className="text-lg md:text-xl font-semibold mb-0.5">{item.value}</p>
+                <p className={cn("text-[10px] md:text-xs", item.text)}>{item.label} <span className="opacity-60">({item.unit})</span></p>
               </div>
             ))}
           </div>
 
           {/* Portion Calculator */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Porsi Besar */}
             <div className="card">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
                 <span className="text-sm font-semibold text-gray-700">
                   <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
                   Porsi Besar ({portionBesarPercent}%)
@@ -198,13 +200,13 @@ export default function DetectionResult({
                   step="1"
                   value={portionBesarPercent}
                   onChange={(e) => setPortionBesarPercent(Number(e.target.value))}
-                  className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600"
+                  className="w-full sm:w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600"
                 />
               </div>
               <p className="text-xs text-gray-500 mb-3">
                 {Math.round(portionSize * portionBesarPercent / 100)}g dari {portionSize}g total
               </p>
-              <div className="grid grid-cols-5 gap-2 text-center">
+              <div className="grid grid-cols-5 gap-1 md:gap-2 text-center">
                 {[
                   { v: Math.round(totalNutrition.calories * portionBesarPercent / 100), l: "Kal" },
                   { v: (totalNutrition.protein * portionBesarPercent / 100).toFixed(1), l: "Prot" },
@@ -212,9 +214,9 @@ export default function DetectionResult({
                   { v: (totalNutrition.fat * portionBesarPercent / 100).toFixed(1), l: "Lemak" },
                   { v: (totalNutrition.fiber * portionBesarPercent / 100).toFixed(1), l: "Serat" },
                 ].map((item) => (
-                  <div key={item.l} className="bg-gray-100 rounded-lg py-2">
-                    <p className="font-semibold text-gray-700">{item.v}</p>
-                    <p className="text-[10px] text-gray-500">{item.l}</p>
+                  <div key={item.l} className="bg-gray-100 rounded-lg py-1.5 md:py-2">
+                    <p className="font-semibold text-gray-700 text-xs md:text-sm">{item.v}</p>
+                    <p className="text-[9px] md:text-[10px] text-gray-500">{item.l}</p>
                   </div>
                 ))}
               </div>
@@ -222,7 +224,7 @@ export default function DetectionResult({
 
             {/* Porsi Kecil */}
             <div className="card">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
                 <span className="text-sm font-semibold text-gray-700">
                   <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
                   Porsi Kecil ({portionKecilPercent}%)
@@ -234,13 +236,13 @@ export default function DetectionResult({
                   step="1"
                   value={portionKecilPercent}
                   onChange={(e) => setPortionKecilPercent(Number(e.target.value))}
-                  className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600"
+                  className="w-full sm:w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600"
                 />
               </div>
               <p className="text-xs text-gray-500 mb-3">
                 {Math.round(portionSize * portionKecilPercent / 100)}g dari {portionSize}g total
               </p>
-              <div className="grid grid-cols-5 gap-2 text-center">
+              <div className="grid grid-cols-5 gap-1 md:gap-2 text-center">
                 {[
                   { v: Math.round(totalNutrition.calories * portionKecilPercent / 100), l: "Kal" },
                   { v: (totalNutrition.protein * portionKecilPercent / 100).toFixed(1), l: "Prot" },
@@ -248,9 +250,9 @@ export default function DetectionResult({
                   { v: (totalNutrition.fat * portionKecilPercent / 100).toFixed(1), l: "Lemak" },
                   { v: (totalNutrition.fiber * portionKecilPercent / 100).toFixed(1), l: "Serat" },
                 ].map((item) => (
-                  <div key={item.l} className="bg-gray-100 rounded-lg py-2">
-                    <p className="font-semibold text-gray-700">{item.v}</p>
-                    <p className="text-[10px] text-gray-500">{item.l}</p>
+                  <div key={item.l} className="bg-gray-100 rounded-lg py-1.5 md:py-2">
+                    <p className="font-semibold text-gray-700 text-xs md:text-sm">{item.v}</p>
+                    <p className="text-[9px] md:text-[10px] text-gray-500">{item.l}</p>
                   </div>
                 ))}
               </div>
@@ -290,8 +292,8 @@ export default function DetectionResult({
           {/* Selected Food Detail */}
           {selectedPrediction?.nutrition && (
             <div className="card">
-              <h5 className="font-medium text-gray-700 mb-3">Detail: {selectedPrediction.class}</h5>
-              <div className="grid grid-cols-5 gap-3">
+              <h5 className="font-medium text-gray-700 mb-3 text-sm md:text-base">Detail: {selectedPrediction.class}</h5>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
                 {[
                   { label: "Kalori", value: Math.round(selectedPrediction.nutrition.calories), unit: "kkal" },
                   { label: "Protein", value: selectedPrediction.nutrition.protein.toFixed(1), unit: "g" },
@@ -299,9 +301,9 @@ export default function DetectionResult({
                   { label: "Lemak", value: selectedPrediction.nutrition.fat.toFixed(1), unit: "g" },
                   { label: "Serat", value: selectedPrediction.nutrition.fiber.toFixed(1), unit: "g" },
                 ].map((item) => (
-                  <div key={item.label} className="bg-gray-100 rounded-lg p-3 text-center">
-                    <p className="text-lg font-semibold text-gray-800">{item.value}</p>
-                    <p className="text-xs text-gray-500">{item.label} ({item.unit})</p>
+                  <div key={item.label} className="bg-gray-100 rounded-lg p-2 md:p-3 text-center">
+                    <p className="text-base md:text-lg font-semibold text-gray-800">{item.value}</p>
+                    <p className="text-[10px] md:text-xs text-gray-500">{item.label} ({item.unit})</p>
                   </div>
                 ))}
               </div>
@@ -364,15 +366,15 @@ export default function DetectionResult({
           </div>
 
           {/* Nutrition Status - Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Porsi Besar */}
             <div className="card">
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-gray-700">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+                <span className="font-semibold text-gray-700 text-sm">
                   <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
                   Porsi Besar
                 </span>
-                <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", getStatusColor(nutritionBesar?.overallStatus))}>
+                <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0", getStatusColor(nutritionBesar?.overallStatus))}>
                   {nutritionBesar?.terpenuhiCount}/{nutritionBesar?.totalCount} nutrisi
                 </span>
               </div>
@@ -384,9 +386,9 @@ export default function DetectionResult({
                   { label: "Lemak", result: nutritionBesar?.lemak, unit: "g" },
                   { label: "Serat", result: nutritionBesar?.serat, unit: "g" },
                 ].map((item) => (
-                  <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
-                    <span className="text-sm font-medium">{item.label}</span>
-                    <span className="text-sm font-semibold">
+                  <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg text-xs md:text-sm", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
+                    <span className="font-medium">{item.label}</span>
+                    <span className="font-semibold">
                       {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit}` : "-"}
                     </span>
                   </div>
@@ -396,12 +398,12 @@ export default function DetectionResult({
 
             {/* Porsi Kecil */}
             <div className="card">
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-gray-700">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+                <span className="font-semibold text-gray-700 text-sm">
                   <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
                   Porsi Kecil
                 </span>
-                <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", getStatusColor(nutritionKecil?.overallStatus))}>
+                <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0", getStatusColor(nutritionKecil?.overallStatus))}>
                   {nutritionKecil?.terpenuhiCount}/{nutritionKecil?.totalCount} nutrisi
                 </span>
               </div>
@@ -413,9 +415,9 @@ export default function DetectionResult({
                   { label: "Lemak", result: nutritionKecil?.lemak, unit: "g" },
                   { label: "Serat", result: nutritionKecil?.serat, unit: "g" },
                 ].map((item) => (
-                  <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
-                    <span className="text-sm font-medium">{item.label}</span>
-                    <span className="text-sm font-semibold">
+                  <div key={item.label} className={cn("flex justify-between items-center p-2 rounded-lg text-xs md:text-sm", item.result ? getStatusColor(item.result.status) : "bg-gray-100")}>
+                    <span className="font-medium">{item.label}</span>
+                    <span className="font-semibold">
                       {item.result ? `${item.result.actual} / ${item.result.target} ${item.unit}` : "-"}
                     </span>
                   </div>
@@ -427,16 +429,16 @@ export default function DetectionResult({
           {/* Target Info */}
           {targetDate ? (
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 flex items-start gap-2">
-              <Info className="w-4 h-4 text-primary mt-0.5" />
-              <div className="text-xs text-gray-700">
+              <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-gray-700 min-w-0">
                 <strong>Target harian dari prediksi LSTM:</strong>
-                <div className="mt-2 grid grid-cols-2 gap-4">
+                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <span className="inline-flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-green-500"></span>
                       <strong>Porsi Besar:</strong>
                     </span>
-                    <div className="ml-4 mt-1">
+                    <div className="ml-0 md:ml-4 mt-1 text-[11px] md:text-xs break-words">
                       {activeTargetBesar.energi} kkal, {activeTargetBesar.protein}g protein, {activeTargetBesar.karbohidrat}g karbo, {activeTargetBesar.lemak}g lemak, {activeTargetBesar.serat}g serat
                     </div>
                   </div>
@@ -445,19 +447,19 @@ export default function DetectionResult({
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                       <strong>Porsi Kecil:</strong>
                     </span>
-                    <div className="ml-4 mt-1">
+                    <div className="ml-0 md:ml-4 mt-1 text-[11px] md:text-xs break-words">
                       {activeTargetKecil.energi} kkal, {activeTargetKecil.protein}g protein, {activeTargetKecil.karbohidrat}g karbo, {activeTargetKecil.lemak}g lemak, {activeTargetKecil.serat}g serat
                     </div>
                   </div>
                 </div>
-                <div className="text-gray-500 mt-2">
+                <div className="text-gray-500 mt-2 text-[10px] md:text-xs">
                   {new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}
                 </div>
               </div>
             </div>
           ) : (
             <div className="p-3 bg-gray-100 rounded-lg flex items-start gap-2">
-              <Info className="w-4 h-4 text-gray-500 mt-0.5" />
+              <Info className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-gray-500">
                 Target harian default. Prediksi LSTM belum tersedia.
               </div>
@@ -479,16 +481,16 @@ export default function DetectionResult({
           {/* Target Info */}
           {targetDate ? (
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 flex items-start gap-2">
-              <Info className="w-4 h-4 text-primary mt-0.5" />
-              <div className="text-xs text-gray-700">
+              <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-gray-700 min-w-0">
                 <strong>Target harian dari prediksi LSTM:</strong>
-                <div className="mt-2 grid grid-cols-2 gap-4">
+                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <span className="inline-flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-green-500"></span>
                       <strong>Porsi Besar:</strong>
                     </span>
-                    <div className="ml-4 mt-1">
+                    <div className="ml-0 md:ml-4 mt-1 text-[11px] md:text-xs break-words">
                       {activeTargetBesar.energi} kkal, {activeTargetBesar.protein}g protein, {activeTargetBesar.karbohidrat}g karbo, {activeTargetBesar.lemak}g lemak, {activeTargetBesar.serat}g serat
                     </div>
                   </div>
@@ -497,19 +499,19 @@ export default function DetectionResult({
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                       <strong>Porsi Kecil:</strong>
                     </span>
-                    <div className="ml-4 mt-1">
+                    <div className="ml-0 md:ml-4 mt-1 text-[11px] md:text-xs break-words">
                       {activeTargetKecil.energi} kkal, {activeTargetKecil.protein}g protein, {activeTargetKecil.karbohidrat}g karbo, {activeTargetKecil.lemak}g lemak, {activeTargetKecil.serat}g serat
                     </div>
                   </div>
                 </div>
-                <div className="text-gray-500 mt-2">
+                <div className="text-gray-500 mt-2 text-[10px] md:text-xs">
                   {new Date(targetDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}
                 </div>
               </div>
             </div>
           ) : (
             <div className="p-3 bg-gray-100 rounded-lg flex items-start gap-2">
-              <Info className="w-4 h-4 text-gray-500 mt-0.5" />
+              <Info className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-gray-500">
                 Target harian default. Prediksi LSTM belum tersedia.
               </div>

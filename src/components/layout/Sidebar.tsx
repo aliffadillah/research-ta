@@ -61,7 +61,7 @@ export default function Sidebar() {
           </div>
           {/* Hide label on tablet */}
           <span className={cn("text-xl font-sans", isTablet && "hidden")}>
-            Makan Bergizi
+            Nutrima
           </span>
         </Link>
       </div>
